@@ -122,7 +122,7 @@ export default async function SchoolDashboard() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Recent History</CardTitle>
-          <Link href="/school/requests">
+          <Link href="/school/history">
             <Button variant="ghost" size="sm">View All</Button>
           </Link>
         </CardHeader>

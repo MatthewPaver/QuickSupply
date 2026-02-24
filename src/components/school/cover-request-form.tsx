@@ -59,8 +59,8 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
   const [endTime, setEndTime] = useState("15:30");
   const [notes, setNotes] = useState("");
   const [preferredTeacherId, setPreferredTeacherId] = useState<string>("");
-
-  const isEmergency = date ? isToday(date) : false;
+  // Explicit emergency flag: schools can mark any request as emergency (e.g. urgent future date)
+  const [isEmergency, setIsEmergency] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -106,14 +106,33 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
             <Calendar
               mode="single"
               selected={date}
-              onSelect={setDate}
+              onSelect={(d) => {
+                setDate(d);
+                // Default emergency to true for same-day, false for future
+                if (d) setIsEmergency(isToday(d));
+              }}
               disabled={(d) => isBefore(d, startOfDay(new Date())) || d.getDay() === 0 || d.getDay() === 6}
               className="rounded-md border"
             />
+            <div className="mt-3 flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="emergency"
+                checked={isEmergency}
+                onChange={(e) => setIsEmergency(e.target.checked)}
+                className="h-4 w-4 rounded border-input"
+              />
+              <label
+                htmlFor="emergency"
+                className="text-sm font-medium leading-none cursor-pointer"
+              >
+                Emergency request (shorter response window)
+              </label>
+            </div>
             {isEmergency && (
               <div className="mt-3 flex items-center gap-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
-                <AlertTriangle className="h-4 w-4" />
-                Same-day emergency request - shorter response window applies
+                <AlertTriangle className="h-4 w-4 shrink-0" />
+                Same-day or urgent — shorter response window applies
               </div>
             )}
           </CardContent>

@@ -1,7 +1,7 @@
 import { requireSession } from "@/lib/auth";
 import Link from "next/link";
 import Image from "next/image";
-import { School, FileText, Clock, LogOut } from "lucide-react";
+import { School, FileText, Clock, History, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default async function SchoolLayout({
@@ -36,6 +36,12 @@ export default async function SchoolLayout({
               <Button variant="ghost" size="sm" className="gap-1.5 text-xs sm:text-sm">
                 <Clock className="h-4 w-4" />
                 All Requests
+              </Button>
+            </Link>
+            <Link href="/school/history">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-xs sm:text-sm">
+                <History className="h-4 w-4" />
+                History
               </Button>
             </Link>
           </nav>
