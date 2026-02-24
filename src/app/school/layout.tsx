@@ -16,7 +16,7 @@ export default async function SchoolLayout({
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto flex h-14 max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:h-16 sm:flex-nowrap sm:py-0">
           <Link href="/school/dashboard" className="flex shrink-0 items-center gap-2">
-            <Image src="/desian-logo.svg" alt="Desian" width={100} height={28} className="brightness-0" />
+            <Image src="/desian-logo.svg" alt="Desian" width={80} height={22} className="brightness-0 h-6 w-auto" />
             <span className="hidden text-sm font-semibold text-primary sm:inline">QuickSupply</span>
           </Link>
           <nav className="flex flex-wrap items-center gap-1">

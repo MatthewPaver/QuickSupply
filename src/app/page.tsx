@@ -34,9 +34,9 @@ export default function HomePage() {
         <Image
           src="/desian-logo.svg"
           alt="Desian Education"
-          width={160}
-          height={42}
-          className="brightness-0 sm:h-12 sm:w-[180px]"
+          width={112}
+          height={30}
+          className="brightness-0 h-8 w-auto max-w-[112px] sm:h-9 sm:max-w-[128px]"
           priority
         />
         <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">

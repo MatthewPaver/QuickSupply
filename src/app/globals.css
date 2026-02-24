@@ -45,25 +45,28 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Desian Education branded theme */
+/*
+ * Desian Education branded theme — aligned with desian.co.uk
+ * Palette: purple (#4c0673) primary, blue (#1863DC) secondary, light purple (#c879f1) accent.
+ * Clean, professional look: light backgrounds, purple/blue for headings and CTAs.
+ */
 :root {
-  --background: oklch(0.985 0.002 247.858);
+  --background: oklch(0.99 0.002 247.858);
   --foreground: oklch(0.145 0.005 247.858);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0.005 247.858);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0.005 247.858);
-  /* Desian Education brand (desian.co.uk): purple, blue, light purple */
-  /* Desian purple #4c0673 */
+  /* Desian purple #4c0673 — primary CTAs, headings, links */
   --primary: oklch(0.321 0.156 303.438);
   --primary-foreground: oklch(0.985 0.002 247.858);
-  /* Desian blue #1863DC - secondary brand colour */
+  /* Desian blue #1863DC — secondary (e.g. Teacher portal, supporting elements) */
   --desian-blue: oklch(0.547 0.215 262.881);
-  --secondary: oklch(0.955 0.005 247.858);
+  --secondary: oklch(0.96 0.005 247.858);
   --secondary-foreground: oklch(0.235 0.006 247.858);
-  --muted: oklch(0.955 0.005 247.858);
-  --muted-foreground: oklch(0.556 0.005 247.858);
-  /* Desian light purple #c879f1 */
+  --muted: oklch(0.96 0.005 247.858);
+  --muted-foreground: oklch(0.5 0.01 247.858);
+  /* Desian light purple #c879f1 — accents, highlights */
   --accent: oklch(0.912 0.082 303.438);
   --accent-foreground: oklch(0.235 0.006 247.858);
   --destructive: oklch(0.577 0.245 27.325);

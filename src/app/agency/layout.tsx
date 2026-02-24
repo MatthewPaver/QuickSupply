@@ -20,7 +20,7 @@ export default async function AgencyLayout({
       {/* Desktop: sidebar */}
       <aside className="hidden w-60 shrink-0 flex-col border-r bg-background md:flex">
         <div className="flex h-16 items-center gap-2 border-b px-4">
-          <Image src="/desian-logo.svg" alt="Desian" width={100} height={28} className="brightness-0" />
+          <Image src="/desian-logo.svg" alt="Desian" width={80} height={22} className="brightness-0 h-6 w-auto" />
           <span className="text-sm font-semibold text-primary">QuickSupply</span>
         </div>
         <nav className="flex flex-1 flex-col gap-1 p-3">

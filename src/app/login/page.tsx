@@ -83,9 +83,9 @@ export default function LoginPage() {
         <Image
           src="/desian-logo.svg"
           alt="Desian Education"
-          width={120}
-          height={32}
-          className="brightness-0 sm:h-9 sm:w-[140px]"
+          width={100}
+          height={27}
+          className="brightness-0 h-7 w-auto max-w-[100px] sm:h-8 sm:max-w-[112px]"
           priority
         />
         <h1 className="text-xl font-bold text-primary sm:text-2xl">QuickSupply Demo</h1>

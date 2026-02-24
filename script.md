@@ -2,6 +2,8 @@
 
 Use this script to narrate a complete demo of QuickSupply by Desian Education. Run the app with `pnpm dev` and open [http://localhost:3000](http://localhost:3000). Demo data is pre-seeded: 5 schools, 12 teachers/TAs, 3 agency staff, and 7 cover requests in various states.
 
+The script walks through **every screen** (landing, login, all three portals and their pages) and includes an **optional end-to-end flow** (Section 5) so you can run one full cycle live: school submits → agency assigns → teacher accepts → visible everywhere.
+
 ---
 
 ## 1. Introduction
@@ -194,10 +196,24 @@ Use this script to narrate a complete demo of QuickSupply by Desian Education. R
 
 ---
 
-## 5. Closing
+## 5. End-to-end flow (optional live run)
+
+To **show everything off in one go**, run this sequence so the audience sees the full loop:
+
+1. **School:** Sign in as **St. Mary's**. Go to **New Request**, fill date, role, subject, key stage, times; optionally pick a preferred teacher. **Submit**. Point out the new request on the **Dashboard** and **All Requests**.
+2. **Agency:** Sign in as **Sarah Mitchell**. On the **Dashboard** the new request appears in Active Requests (or open **Requests** and click it). Open the **request detail**. In **Assignment**, click **Start Sequential Offering** — the system offers to the first ranked teacher. (Or click **Assign** on a specific teacher to manually assign.) A toast confirms. Optionally show **Bookings** to see it once filled.
+3. **Teacher:** Sign in as the **teacher who received the offer** (e.g. Sarah Johnson if she’s in the ranking). On the **Dashboard** the active offer appears; go to **Jobs**. Show the **countdown** and click **Accept**. A toast confirms; the request is now filled.
+4. **Back to Agency:** Refresh or reopen the request — status is **Filled**, **Booking** shows the teacher. **Bookings** list shows the new row.
+5. **Back to School:** Sign in as St. Mary's again. **Dashboard** shows the request in **Recent History** (or **Active** if it was already there and now filled). **All Requests** shows status Filled and who was assigned. **History** shows the completed request.
+
+That’s the full cycle: **request → assign → accept → visible everywhere**. Toasts, countdown, ranking, and status badges all support the story.
+
+---
+
+## 6. Closing
 
 - "That’s **every screen** in QuickSupply: **School** — dashboard, new request, all requests, history; **Agency** — dashboard, requests list, request detail with assignment, teachers list and teacher detail, schools, bookings, agents, and settings; **Teacher** — dashboard, jobs, availability, and profile."
-- "The flow is: **school** submits a request → **agency** sees it on the dashboard and Requests, opens the request, and either starts sequential offering or manually assigns a **teacher** → the **teacher** sees the offer on Jobs and accepts or declines with a countdown. QuickSupply keeps it all in sync and is built with **Next.js**, **SQLite**, and **server-sent events**, branded for **Desian Education**."
+- "We’ve seen the full loop: **school** submits a request → **agency** sees it, opens the request, and either starts sequential offering or manually assigns a **teacher** → the **teacher** sees the offer on Jobs and accepts or declines with a countdown. QuickSupply keeps it all in sync. It’s built with **Next.js**, **SQLite**, and **server-sent events**, and is branded for **Desian Education**."
 - "Thank you. Any questions?"
 
 ---
