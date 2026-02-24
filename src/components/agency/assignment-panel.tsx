@@ -84,8 +84,21 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "rank_teachers", requestId }),
       });
-      const data = await res.json();
-      setRanked(data);
+      const text = await res.text();
+      if (!text) {
+        setRanked([]);
+        return;
+      }
+      try {
+        const data = JSON.parse(text);
+        setRanked(Array.isArray(data) ? data : []);
+      } catch {
+        setRanked([]);
+        if (!res.ok) toast.error("Failed to load eligible teachers.");
+      }
+    } catch {
+      setRanked([]);
+      toast.error("Failed to load eligible teachers.");
     } finally {
       setLoading(false);
     }
@@ -99,9 +112,13 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "start_offering", requestId }),
       });
-      const data = await res.json();
-      toast.success(data.message);
+      const text = await res.text();
+      const data = text ? (() => { try { return JSON.parse(text); } catch { return {}; } })() : {};
+      if (data.message) toast.success(data.message);
+      if (data.error) toast.error(data.error);
       router.refresh();
+    } catch {
+      toast.error("Failed to start offering.");
     } finally {
       setActionLoading(null);
     }
@@ -115,13 +132,18 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "manual_assign", requestId, teacherId }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      const data = text ? (() => { try { return JSON.parse(text); } catch { return {}; } })() : {};
       if (data.success) {
         toast.success(data.message);
         router.refresh();
-      } else {
+      } else if (data.message) {
         toast.error(data.message);
+      } else if (!res.ok) {
+        toast.error("Failed to assign teacher.");
       }
+    } catch {
+      toast.error("Failed to assign teacher.");
     } finally {
       setActionLoading(null);
     }
@@ -136,12 +158,17 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "cancel_booking", bookingId, reason: cancelReason }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      const data = text ? (() => { try { return JSON.parse(text); } catch { return {}; } })() : {};
       if (data.success) {
         toast.success(data.message);
         setCancelDialogOpen(false);
         router.refresh();
+      } else if (data.message) {
+        toast.error(data.message);
       }
+    } catch {
+      toast.error("Failed to cancel booking.");
     } finally {
       setActionLoading(null);
     }

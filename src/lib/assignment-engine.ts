@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import {
   teachers,
+  schools,
   coverRequests,
   assignmentOffers,
   bookings,
@@ -26,12 +27,10 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
 
   // Get school info for distance calc
   const school = db
-    .select()
-    .from(
-      sql`schools`
-    )
-    .where(sql`id = ${request.schoolId}`)
-    .get() as { lat: number; lng: number } | undefined;
+    .select({ lat: schools.lat, lng: schools.lng })
+    .from(schools)
+    .where(eq(schools.id, request.schoolId))
+    .get();
 
   if (!school) return [];
 
