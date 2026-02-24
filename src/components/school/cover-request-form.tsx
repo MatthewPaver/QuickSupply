@@ -214,16 +214,20 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
           </CardContent>
         </Card>
 
-        {/* Previous Teachers */}
-        {previousTeachers.length > 0 && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Request Previous Teacher</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-xs text-muted-foreground mb-3">
-                Select a teacher who has previously worked at your school
+        {/* Previous Teachers — always shown so the option is visible in the demo; empty state when none yet */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Request Previous Teacher</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <p className="text-xs text-muted-foreground mb-3">
+              Optionally select a teacher who has previously worked at your school. The agency can try to assign them first.
+            </p>
+            {previousTeachers.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 rounded-lg border border-dashed bg-muted/30 text-center">
+                No previous teachers yet. When you&apos;ve had cover arranged through QuickSupply, those teachers will appear here so you can request them again.
               </p>
+            ) : (
               <div className="grid gap-2">
                 {preferredTeacherId && (
                   <Button
@@ -259,9 +263,9 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
                   </button>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </CardContent>
+        </Card>
 
         {/* Notes */}
         <Card>

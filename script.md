@@ -9,7 +9,9 @@ Use this script to narrate a complete demo of **QuickSupply** by Desian Educatio
    ```bash
    pnpm db:clear-requests
    ```
-   That clears all cover requests, offers, and bookings but keeps schools, teachers, and agents. To use pre-seeded data (7 sample requests) instead, run `pnpm db:migrate` then `pnpm db:seed` and skip the “create a request” steps.
+   That clears all cover requests, offers, and bookings but keeps schools, teachers, and agents.
+3. **Optional — show "Request Previous Teacher" with data:** After `pnpm db:clear-requests`, run `pnpm db:seed-demo`. That adds one past filled request and booking so St. Mary's has one previous teacher on the form. If you skip this, the **Request Previous Teacher** section still appears with an empty-state message.
+4. To use pre-seeded data (7 sample requests) instead, run `pnpm db:migrate` then `pnpm db:seed` and skip the "create a request" steps.
 
 ---
 
@@ -46,7 +48,7 @@ Use this script to narrate a complete demo of **QuickSupply** by Desian Educatio
 - **Role:** "Choose **Role Needed** — **Teacher** or **Teaching Assistant** (e.g. Teacher)."
 - **Key Stage:** "Pick a **Key Stage** (e.g. KS2). **Subject** appears if you chose Teacher — pick one (e.g. Maths)."
 - **Times:** "Set **Start time** and **End time** (e.g. 08:30–15:30)."
-- **Optional:** "**Request Previous Teacher** lists teachers who’ve worked at this school; we can pick one or leave blank. **Additional Notes** is for anything the agency or teacher should know."
+- **Optional:** "**Request Previous Teacher** is always shown. If the school has had cover through QuickSupply before, those teachers appear here; otherwise we see a short message that they’ll appear after cover is arranged. We can leave it blank or, if you ran **pnpm db:seed-demo**, pick the one teacher shown. **Additional Notes** is for anything the agency or teacher should know."
 - "Click **Submit Cover Request**. The app takes us to **All Requests**; our new request appears at the top with status **Pending**."
 
 **Confirm on School**

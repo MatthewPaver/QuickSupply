@@ -12,6 +12,7 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:reset": "tsx scripts/reset-db.ts",
     "db:clear-requests": "tsx scripts/clear-requests.ts",
+    "db:seed-demo": "tsx scripts/seed-demo-previous-teacher.ts",
     "db:studio": "drizzle-kit studio",
     "setup": "pnpm db:migrate && pnpm db:seed",
     "e2e:routes": "node scripts/e2e-check-routes.mjs"
