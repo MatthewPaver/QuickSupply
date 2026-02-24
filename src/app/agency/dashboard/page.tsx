@@ -1,12 +1,12 @@
 import { db } from "@/lib/db";
-import { coverRequests, bookings, teachers, schools, assignmentOffers } from "@/lib/db/schema";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { coverRequests, teachers, schools, assignmentOffers } from "@/lib/db/schema";
+import { eq, desc } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Users, CheckCircle, AlertTriangle, Clock, ArrowRight } from "lucide-react";
+import { CheckCircle, AlertTriangle, Clock, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { EmptyState } from "@/components/shared/empty-state";

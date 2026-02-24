@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import { coverRequests, schools, assignmentOffers, teachers } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";

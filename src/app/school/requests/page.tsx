@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
 import { coverRequests, bookings, teachers } from "@/lib/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Plus } from "lucide-react";

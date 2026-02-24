@@ -14,7 +14,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { ulid } from "ulid";
 import { haversineDistance } from "@/lib/distance";
 import { sseManager } from "@/lib/sse-manager";
-import type { RankedTeacher, Teacher } from "@/types";
+import type { RankedTeacher } from "@/types";
 
 function getConfigValue(key: string, fallback: number): number {
   const row = db.select().from(appConfig).where(eq(appConfig.key, key)).get();
@@ -185,6 +185,40 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
   // Sort by score descending
   ranked.sort((a, b) => b.score - a.score);
 
+  // If the school requested a preferred teacher and they're not in the list (e.g. filtered by
+  // availability), add them at the top so the agency can see and assign them. We only require
+  // hard filters: role, compliance, not already booked, not blacklisted, not declined/expired.
+  const rankedIds = new Set(ranked.map((r) => r.teacher.id));
+  if (request.preferredTeacherId && !rankedIds.has(request.preferredTeacherId)) {
+    const preferred = allTeachers.find((t) => t.id === request.preferredTeacherId);
+    if (preferred) {
+      const isBlacklisted = blacklisted.includes(preferred.id);
+      const roleOk =
+        (request.roleNeeded === "teacher" && (preferred.roleType === "teacher" || preferred.roleType === "both")) ||
+        (request.roleNeeded === "ta" && (preferred.roleType === "ta" || preferred.roleType === "both"));
+      if (
+        roleOk &&
+        preferred.complianceStatus === "compliant" &&
+        !existingBookings.includes(preferred.id) &&
+        !isBlacklisted &&
+        !declinedOrExpired.has(preferred.id)
+      ) {
+        const distanceMiles = haversineDistance(preferred.lat, preferred.lng, school.lat, school.lng);
+        const schoolReviewAvg = reviewAvgMap.get(preferred.id) || null;
+        const previouslyWorked = previousSet.has(preferred.id);
+        ranked.unshift({
+          teacher: preferred,
+          score: 200,
+          distanceMiles,
+          schoolReviewAvg,
+          previouslyWorkedAtSchool: previouslyWorked,
+          isPreferred: true,
+          isBlacklisted: false,
+        });
+      }
+    }
+  }
+
   return ranked;
 }
 
@@ -344,30 +378,54 @@ export function manualAssign(requestId: string, teacherId: string): { success: b
     });
   }
 
-  // Create booking directly
-  const bookingId = ulid();
-  db.insert(bookings)
+  // Next offer order (so decline can advance correctly if we ever add more)
+  const existingOffers = db
+    .select({ offerOrder: assignmentOffers.offerOrder })
+    .from(assignmentOffers)
+    .where(eq(assignmentOffers.coverRequestId, requestId))
+    .all();
+  const nextOrder = existingOffers.length === 0 ? 1 : Math.max(...existingOffers.map((o) => o.offerOrder)) + 1;
+
+  const windowMinutes = request.isEmergency
+    ? getConfigValue("morning_response_window_minutes", 7)
+    : getConfigValue("next_day_response_window_minutes", 60);
+  const offeredAt = new Date();
+  const expiresAt = new Date(offeredAt.getTime() + windowMinutes * 60 * 1000);
+
+  const offerId = ulid();
+  db.insert(assignmentOffers)
     .values({
-      id: bookingId,
+      id: offerId,
       coverRequestId: requestId,
-      teacherId,
-      confirmedAt: new Date(),
+      teacherId: teacher.id,
+      offeredAt,
+      expiresAt,
+      status: "pending",
+      offerOrder: nextOrder,
       createdAt: new Date(),
     })
     .run();
 
-  db.update(coverRequests).set({ status: "filled" }).where(eq(coverRequests.id, requestId)).run();
+  db.update(coverRequests).set({ status: "offering" }).where(eq(coverRequests.id, requestId)).run();
 
+  sseManager.emit(`teacher:${teacher.id}`, {
+    type: "new_offer",
+    data: { offerId, requestId },
+  });
   sseManager.emit("agency", {
-    type: "request_filled",
-    data: { requestId, teacherId, teacherName: `${teacher.firstName} ${teacher.lastName}` },
-  });
-  sseManager.emit(`school:${request.schoolId}`, {
-    type: "request_filled",
-    data: { requestId },
+    type: "offer_sent",
+    data: {
+      requestId,
+      teacherId: teacher.id,
+      teacherName: `${teacher.firstName} ${teacher.lastName}`,
+      expiresAt: expiresAt.toISOString(),
+    },
   });
 
-  return { success: true, message: `${teacher.firstName} ${teacher.lastName} manually assigned.` };
+  return {
+    success: true,
+    message: `Offer sent to ${teacher.firstName} ${teacher.lastName}. They can accept or decline on their Jobs page.`,
+  };
 }
 
 export function cancelBooking(

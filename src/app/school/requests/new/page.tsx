@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { bookings, teachers, coverRequests, teacherAvailability } from "@/lib/db/schema";
-import { eq, and, sql } from "drizzle-orm";
+import { bookings, teachers, coverRequests } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { CoverRequestForm } from "@/components/school/cover-request-form";
 

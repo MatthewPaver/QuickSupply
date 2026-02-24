@@ -1,10 +1,9 @@
 import { db } from "@/lib/db";
-import { coverRequests, bookings, teachers, schoolTeacherReviews } from "@/lib/db/schema";
+import { coverRequests, bookings, teachers } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { Star } from "lucide-react";
 import { format } from "date-fns";
 
 export default async function SchoolHistoryPage() {
@@ -31,15 +30,6 @@ export default async function SchoolHistoryPage() {
     .all();
 
   const bookingMap = new Map(allBookings.map((b) => [b.coverRequestId, b]));
-
-  // Get existing reviews
-  const reviews = db
-    .select()
-    .from(schoolTeacherReviews)
-    .where(eq(schoolTeacherReviews.schoolId, session.userId))
-    .all();
-
-  const reviewMap = new Map(reviews.map((r) => [r.bookingId, r]));
 
   return (
     <div className="space-y-6">

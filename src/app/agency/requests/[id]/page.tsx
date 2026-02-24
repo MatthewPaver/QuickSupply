@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { coverRequests, schools, assignmentOffers, teachers, bookings } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -90,7 +90,7 @@ export default async function AgencyRequestDetailPage({
               )}
               {request.keyStage && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Key Stage</span>
+                  <span className="text-muted-foreground">Year group</span>
                   <span className="font-medium">{request.keyStage}</span>
                 </div>
               )}

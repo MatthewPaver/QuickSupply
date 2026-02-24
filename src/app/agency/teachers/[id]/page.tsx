@@ -5,7 +5,7 @@ import { requireSession } from "@/lib/auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { Star, Car, MapPin, Phone, Mail, Shield, Clock, Ban } from "lucide-react";
+import { Star, Car, MapPin, Phone, Mail, Ban } from "lucide-react";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 

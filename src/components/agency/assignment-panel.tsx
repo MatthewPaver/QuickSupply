@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,24 +27,16 @@ import {
   XCircle,
   Heart,
 } from "lucide-react";
+import type { RankedTeacher } from "@/types";
 
-interface RankedTeacher {
-  teacher: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    phone: string;
-    roleType: string;
-    canDrive: boolean;
-    agencyRating: number;
-    complianceStatus: string;
-    emergencyAvailable: boolean;
-  };
-  score: number;
-  distanceMiles: number;
-  schoolReviewAvg: number | null;
-  previouslyWorkedAtSchool: boolean;
-  isPreferred: boolean;
+/** Parse JSON from fetch response text; returns undefined on parse error. */
+function parseJsonResponse<T>(text: string): T | undefined {
+  if (!text) return undefined;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return undefined;
+  }
 }
 
 interface Props {
@@ -62,21 +54,7 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
 
-  useEffect(() => {
-    if (requestStatus === "pending" || requestStatus === "offering") {
-      loadRankedTeachers();
-    }
-  }, [requestId, requestStatus]);
-
-  // Poll for expiry
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetch("/api/cron").then(() => router.refresh());
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [router]);
-
-  async function loadRankedTeachers() {
+  const loadRankedTeachers = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/assignments", {
@@ -85,16 +63,15 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
         body: JSON.stringify({ action: "rank_teachers", requestId }),
       });
       const text = await res.text();
-      if (!text) {
+      const data = parseJsonResponse<RankedTeacher[]>(text);
+      if (data && Array.isArray(data)) {
+        setRanked(data);
+      } else {
         setRanked([]);
-        return;
-      }
-      try {
-        const data = JSON.parse(text);
-        setRanked(Array.isArray(data) ? data : []);
-      } catch {
-        setRanked([]);
-        if (!res.ok) toast.error("Failed to load eligible teachers.");
+        if (!res.ok) {
+          const err = parseJsonResponse<{ error?: string }>(text);
+          toast.error(err?.error ?? "Failed to load eligible teachers.");
+        }
       }
     } catch {
       setRanked([]);
@@ -102,7 +79,21 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
     } finally {
       setLoading(false);
     }
-  }
+  }, [requestId]);
+
+  useEffect(() => {
+    if (requestStatus === "pending" || requestStatus === "offering") {
+      loadRankedTeachers();
+    }
+  }, [loadRankedTeachers, requestStatus]);
+
+  // Poll for expiry
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch("/api/cron").then(() => router.refresh());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [router]);
 
   async function handleStartOffering() {
     setActionLoading("offering");
@@ -113,9 +104,9 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
         body: JSON.stringify({ action: "start_offering", requestId }),
       });
       const text = await res.text();
-      const data = text ? (() => { try { return JSON.parse(text); } catch { return {}; } })() : {};
-      if (data.message) toast.success(data.message);
-      if (data.error) toast.error(data.error);
+      const data = parseJsonResponse<{ message?: string; error?: string }>(text);
+      if (data?.message) toast.success(data.message);
+      if (data?.error) toast.error(data.error);
       router.refresh();
     } catch {
       toast.error("Failed to start offering.");
@@ -124,7 +115,7 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
     }
   }
 
-  async function handleManualAssign(teacherId: string, teacherName: string) {
+  async function handleManualAssign(teacherId: string) {
     setActionLoading(teacherId);
     try {
       const res = await fetch("/api/assignments", {
@@ -133,11 +124,11 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
         body: JSON.stringify({ action: "manual_assign", requestId, teacherId }),
       });
       const text = await res.text();
-      const data = text ? (() => { try { return JSON.parse(text); } catch { return {}; } })() : {};
-      if (data.success) {
+      const data = parseJsonResponse<{ success?: boolean; message?: string }>(text);
+      if (data?.success) {
         toast.success(data.message);
         router.refresh();
-      } else if (data.message) {
+      } else if (data?.message) {
         toast.error(data.message);
       } else if (!res.ok) {
         toast.error("Failed to assign teacher.");
@@ -159,12 +150,12 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
         body: JSON.stringify({ action: "cancel_booking", bookingId, reason: cancelReason }),
       });
       const text = await res.text();
-      const data = text ? (() => { try { return JSON.parse(text); } catch { return {}; } })() : {};
-      if (data.success) {
+      const data = parseJsonResponse<{ success?: boolean; message?: string }>(text);
+      if (data?.success) {
         toast.success(data.message);
         setCancelDialogOpen(false);
         router.refresh();
-      } else if (data.message) {
+      } else if (data?.message) {
         toast.error(data.message);
       }
     } catch {
@@ -331,7 +322,7 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleManualAssign(r.teacher.id, `${r.teacher.firstName} ${r.teacher.lastName}`)}
+                    onClick={() => handleManualAssign(r.teacher.id)}
                     disabled={actionLoading !== null}
                   >
                     {actionLoading === r.teacher.id ? (

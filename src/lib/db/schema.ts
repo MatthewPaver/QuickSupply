@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real, primaryKey, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, real, primaryKey } from "drizzle-orm/sqlite-core";
 
 // ============================================================
 // CORE ENTITIES
@@ -96,7 +96,8 @@ export const coverRequests = sqliteTable("cover_requests", {
   date: text("date").notNull(), // ISO date 'YYYY-MM-DD'
   roleNeeded: text("role_needed", { enum: ["teacher", "ta"] }).notNull(),
   subject: text("subject"),
-  keyStage: text("key_stage", { enum: ["EYFS", "KS1", "KS2", "KS3", "KS4", "KS5"] }),
+  // Primary focus: EYFS or Year 1–6 (stored as text for flexibility)
+  keyStage: text("key_stage"),
   startTime: text("start_time").notNull(), // 'HH:MM'
   endTime: text("end_time").notNull().default("15:30"),
   notes: text("notes"),

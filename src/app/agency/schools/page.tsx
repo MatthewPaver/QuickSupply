@@ -1,10 +1,8 @@
 import { db } from "@/lib/db";
 import { schools, coverRequests } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Phone } from "lucide-react";
-import Link from "next/link";
 
 export default async function AgencySchoolsPage() {
   await requireSession("agent");

@@ -48,17 +48,6 @@ export default function TeacherAvailabilityPage() {
     setRecurringDays(updated);
   }
 
-  function toggleDate(date: Date | undefined) {
-    if (!date) return;
-    const dateStr = date.toISOString().split("T")[0];
-    const exists = unavailableDates.find((d) => d.toISOString().split("T")[0] === dateStr);
-    if (exists) {
-      setUnavailableDates(unavailableDates.filter((d) => d.toISOString().split("T")[0] !== dateStr));
-    } else {
-      setUnavailableDates([...unavailableDates, date]);
-    }
-  }
-
   async function handleSave() {
     setSaving(true);
     try {
