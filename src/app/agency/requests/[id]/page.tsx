@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { format } from "date-fns";
 import { notFound } from "next/navigation";
 import { AssignmentPanel } from "@/components/agency/assignment-panel";
+import { AgencyLiveRefresh } from "@/components/agency/agency-live-refresh";
 
 export default async function AgencyRequestDetailPage({
   params,
@@ -60,6 +61,7 @@ export default async function AgencyRequestDetailPage({
 
   return (
     <div className="space-y-6">
+      <AgencyLiveRefresh />
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold">{school?.name || "Unknown School"}</h1>
         <StatusBadge status={request.status} />
@@ -114,7 +116,7 @@ export default async function AgencyRequestDetailPage({
             </CardHeader>
             <CardContent>
               {offers.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No offers made yet.</p>
+                <p className="text-sm text-muted-foreground py-4">No offers made yet. Use the panel to the right to start offering or assign a teacher.</p>
               ) : (
                 <div className="space-y-3">
                   {offers.map((offer) => (

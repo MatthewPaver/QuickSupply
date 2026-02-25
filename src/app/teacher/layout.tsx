@@ -1,17 +1,41 @@
 import { requireSession } from "@/lib/auth";
 import Link from "next/link";
 import Image from "next/image";
+import { Suspense } from "react";
 import { Home, Calendar, Briefcase, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TeacherMobileBottomNav } from "@/components/teacher/mobile-bottom-nav";
+import { PageSkeleton } from "@/components/shared/page-skeleton";
+import { NotificationBell } from "@/components/shared/notification-bell";
 
-export default async function TeacherLayout({
+/** Async: resolves session then renders header right (name + logout). */
+async function TeacherAuthHeader() {
+  const session = await requireSession("teacher");
+  return (
+    <div className="flex items-center gap-2">
+      <span className="hidden max-w-[120px] truncate text-sm text-muted-foreground sm:max-w-none md:inline">
+        {session.name}
+      </span>
+      <Link href="/login">
+        <Button variant="ghost" size="sm" className="shrink-0">
+          <LogOut className="h-4 w-4" />
+        </Button>
+      </Link>
+    </div>
+  );
+}
+
+/** Async: resolves session then renders children (keeps main in sync layout to avoid hydration mismatch). */
+async function TeacherAuthContent({ children }: { children: React.ReactNode }) {
+  await requireSession("teacher");
+  return <>{children}</>;
+}
+
+export default function TeacherLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await requireSession("teacher");
-
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -48,19 +72,17 @@ export default async function TeacherLayout({
             </Link>
           </nav>
           <div className="flex items-center gap-2">
-            <span className="hidden max-w-[120px] truncate text-sm text-muted-foreground sm:max-w-none md:inline">
-              {session.name}
-            </span>
-            <Link href="/login">
-              <Button variant="ghost" size="sm" className="shrink-0">
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </Link>
+            <NotificationBell />
+            <Suspense fallback={<span className="text-muted-foreground">...</span>}>
+              <TeacherAuthHeader />
+            </Suspense>
           </div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-4 pb-20 md:py-6 md:pb-6">
-        {children}
+        <Suspense fallback={<PageSkeleton />}>
+          <TeacherAuthContent>{children}</TeacherAuthContent>
+        </Suspense>
       </main>
       <TeacherMobileBottomNav />
     </div>

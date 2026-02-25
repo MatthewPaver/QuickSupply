@@ -1,9 +1,11 @@
 import { db } from "@/lib/db";
-import { coverRequests, bookings, teachers } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { coverRequests, bookings, teachers, schoolTeacherReviews } from "@/lib/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { EmptyState } from "@/components/shared/empty-state";
+import { ReviewForm } from "@/components/school/review-form";
 import { format } from "date-fns";
 
 export default async function SchoolHistoryPage() {
@@ -17,9 +19,9 @@ export default async function SchoolHistoryPage() {
     .all()
     .filter((r) => r.status === "filled" || r.status === "cancelled");
 
-  // Get bookings with teacher info
   const allBookings = db
     .select({
+      id: bookings.id,
       coverRequestId: bookings.coverRequestId,
       teacherId: bookings.teacherId,
       teacherFirstName: teachers.firstName,
@@ -27,9 +29,17 @@ export default async function SchoolHistoryPage() {
     })
     .from(bookings)
     .innerJoin(teachers, eq(bookings.teacherId, teachers.id))
+    .where(sql`${bookings.cancelledAt} IS NULL`)
     .all();
 
   const bookingMap = new Map(allBookings.map((b) => [b.coverRequestId, b]));
+
+  const reviews = db
+    .select()
+    .from(schoolTeacherReviews)
+    .where(eq(schoolTeacherReviews.schoolId, session.userId))
+    .all();
+  const reviewByBookingId = new Map(reviews.map((r) => [r.bookingId, r]));
 
   return (
     <div className="space-y-6">
@@ -42,12 +52,18 @@ export default async function SchoolHistoryPage() {
         <CardContent className="p-0">
           <div className="divide-y">
             {pastRequests.length === 0 ? (
-              <p className="py-12 text-center text-muted-foreground">
-                No history yet.
-              </p>
+              <EmptyState
+                icon="file-text"
+                title="No history yet"
+                description="Completed and cancelled requests will appear here."
+                actionLabel="New Cover Request"
+                actionHref="/school/requests/new"
+                className="m-6"
+              />
             ) : (
               pastRequests.map((req) => {
                 const booking = bookingMap.get(req.id);
+                const review = booking ? reviewByBookingId.get(booking.id) : null;
                 return (
                   <div key={req.id} className="px-6 py-4">
                     <div className="flex items-center justify-between">
@@ -63,9 +79,17 @@ export default async function SchoolHistoryPage() {
                           {format(new Date(req.date), "EEEE, d MMMM yyyy")} &middot; {req.startTime} - {req.endTime}
                         </div>
                         {booking && (
-                          <div className="text-sm">
-                            Covered by: <span className="font-medium">{booking.teacherFirstName} {booking.teacherLastName}</span>
-                          </div>
+                          <>
+                            <div className="text-sm">
+                              Covered by: <span className="font-medium">{booking.teacherFirstName} {booking.teacherLastName}</span>
+                            </div>
+                            <ReviewForm
+                              bookingId={booking.id}
+                              teacherName={`${booking.teacherFirstName} ${booking.teacherLastName}`}
+                              existingRating={review?.rating ?? null}
+                              existingComment={review?.comment ?? null}
+                            />
+                          </>
                         )}
                       </div>
                       <StatusBadge status={req.status} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { Check, X, Loader2, Clock, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/shared/empty-state";
+import { useSSE } from "@/hooks/use-sse";
+import type { SSEEvent } from "@/types";
 
 interface Offer {
   offerId: string;
@@ -24,15 +26,66 @@ interface Offer {
   isEmergency: boolean;
 }
 
+const OFFER_EVENTS = ["new_offer", "offer_expired", "offer_accepted", "offer_declined", "offer_withdrawn"];
+
 export default function TeacherJobsPage() {
   const router = useRouter();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [countdown, setCountdown] = useState<Record<string, string>>({});
+  const [teacherId, setTeacherId] = useState<string | null>(null);
+
+  const loadOffers = useCallback(async () => {
+    try {
+      const res = await fetch("/api/teacher/offers", { credentials: "include" });
+      const data = await res.json();
+      if (res.ok && Array.isArray(data)) {
+        setOffers(data);
+      } else {
+        setOffers([]);
+        if (!res.ok) {
+          toast.error(data?.error ?? "Could not load job offers. Try refreshing.");
+        }
+      }
+    } catch {
+      setOffers([]);
+      toast.error("Could not load job offers. Check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/me", { credentials: "include" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((me) => me?.role === "teacher" && me?.userId && setTeacherId(me.userId))
+      .catch(() => {});
+  }, []);
+
+  useSSE(teacherId ? `/api/sse/teacher/${teacherId}` : null, (event: SSEEvent) => {
+    if (OFFER_EVENTS.includes(event.type)) {
+      loadOffers();
+      router.refresh();
+      if (event.type === "new_offer" && typeof document !== "undefined" && document.hidden) {
+        if (Notification.permission === "granted") {
+          new Notification("QuickSupply: New job offer", {
+            body: "You have a new cover request to accept or decline.",
+            icon: "/desian-logo.svg",
+          });
+        }
+      }
+    }
+  });
 
   useEffect(() => {
     loadOffers();
+  }, [loadOffers]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().catch(() => {});
+    }
   }, []);
 
   // Countdown timer
@@ -56,16 +109,6 @@ export default function TeacherJobsPage() {
     }, 1000);
     return () => clearInterval(interval);
   }, [offers]);
-
-  async function loadOffers() {
-    try {
-      const res = await fetch("/api/teacher/offers");
-      const data = await res.json();
-      setOffers(data);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleResponse(offerId: string, response: "accepted" | "declined") {
     setActionLoading(offerId);
@@ -99,6 +142,12 @@ export default function TeacherJobsPage() {
           {pendingOffers.length} active {pendingOffers.length === 1 ? "offer" : "offers"}
         </p>
       </div>
+
+      {!loading && pendingOffers.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          No active offers right now. If the agency has just sent you an offer, refresh the page.
+        </p>
+      )}
 
       {/* Active Offers */}
       {pendingOffers.length > 0 && (
@@ -138,7 +187,7 @@ export default function TeacherJobsPage() {
                     )}
                     {offer.keyStage && (
                       <div>
-                        <span className="text-muted-foreground">Key Stage: </span>
+                        <span className="text-muted-foreground">Year group: </span>
                         <span className="font-medium">{offer.keyStage}</span>
                       </div>
                     )}

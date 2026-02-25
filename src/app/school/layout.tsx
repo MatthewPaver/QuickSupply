@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { School, FileText, Clock, History, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/shared/notification-bell";
 
 export default async function SchoolLayout({
   children,
@@ -46,6 +47,7 @@ export default async function SchoolLayout({
             </Link>
           </nav>
           <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
+            <NotificationBell />
             <span className="max-w-[140px] truncate text-xs text-muted-foreground sm:max-w-none sm:text-sm">
               {session.name}
             </span>

@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Star, Car, Phone, MapPin } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
 
-/** Teacher row for agency list: allows phone link click without navigating to profile. */
+/** Teacher row for agency list: row navigates to profile; phone link is separate to avoid nested <a>. */
 type Teacher = {
   id: string;
   firstName: string;
@@ -19,60 +19,70 @@ type Teacher = {
 };
 
 export function TeacherRow({ t }: { t: Teacher }) {
+  const router = useRouter();
+
   return (
-    <Link href={`/agency/teachers/${t.id}`}>
-      <div className="flex items-center justify-between px-6 py-4 hover:bg-muted/50 transition-colors">
-        <div className="flex items-center gap-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-            {t.firstName[0]}
-            {t.lastName[0]}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">
-                {t.firstName} {t.lastName}
-              </span>
-              <span className="text-xs capitalize text-muted-foreground rounded bg-muted px-2 py-0.5">
-                {t.roleType}
-              </span>
-            </div>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Star className="h-3 w-3 text-amber-500" /> {t.agencyRating.toFixed(1)}
-              </span>
-              <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" /> {t.postcode}
-              </span>
-              {t.canDrive && (
-                <span className="flex items-center gap-1">
-                  <Car className="h-3 w-3" /> Drives
-                </span>
-              )}
-              {t.emergencyAvailable && (
-                <span className="text-red-500">Emergency OK</span>
-              )}
-            </div>
-          </div>
+    <div
+      role="button"
+      tabIndex={0}
+      className="flex items-center justify-between px-6 py-4 hover:bg-muted/50 transition-colors cursor-pointer"
+      onClick={() => router.push(`/agency/teachers/${t.id}`)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          router.push(`/agency/teachers/${t.id}`);
+        }
+      }}
+    >
+      <div className="flex items-center gap-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+          {t.firstName[0]}
+          {t.lastName[0]}
         </div>
-        <div className="flex items-center gap-3">
-          <a
-            href={`tel:${t.phone}`}
-            className="text-primary hover:underline text-sm"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Phone className="h-4 w-4" />
-          </a>
-          <StatusBadge
-            status={
-              t.complianceStatus === "compliant"
-                ? "compliant"
-                : t.complianceStatus === "pending"
-                  ? "pending-compliance"
-                  : "expired-compliance"
-            }
-          />
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">
+              {t.firstName} {t.lastName}
+            </span>
+            <span className="text-xs capitalize text-muted-foreground rounded bg-muted px-2 py-0.5">
+              {t.roleType}
+            </span>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Star className="h-3 w-3 text-amber-500" /> {t.agencyRating.toFixed(1)}
+            </span>
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3 w-3" /> {t.postcode}
+            </span>
+            {t.canDrive && (
+              <span className="flex items-center gap-1">
+                <Car className="h-3 w-3" /> Drives
+              </span>
+            )}
+            {t.emergencyAvailable && (
+              <span className="text-red-500">Emergency OK</span>
+            )}
+          </div>
         </div>
       </div>
-    </Link>
+      <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+        <a
+          href={`tel:${t.phone}`}
+          className="text-primary hover:underline text-sm"
+        >
+          <Phone className="h-4 w-4" />
+        </a>
+        <StatusBadge
+          status={
+            t.complianceStatus === "compliant"
+              ? "compliant"
+              : t.complianceStatus === "pending"
+                ? "pending-compliance"
+                : "expired-compliance"
+          }
+        />
+      </div>
+    </div>
   );
 }

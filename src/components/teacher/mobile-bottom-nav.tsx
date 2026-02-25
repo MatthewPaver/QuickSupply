@@ -29,7 +29,7 @@ export function TeacherMobileBottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex min-w-0 flex-col items-center gap-1 px-3 py-2 text-xs transition-colors ${
+            className={`flex min-h-[44px] min-w-0 flex-col items-center justify-center gap-1 px-3 py-2 text-xs transition-colors touch-manipulation ${
               isActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
             }`}
           >

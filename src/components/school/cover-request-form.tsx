@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,30 +30,14 @@ interface Props {
   previousTeachers: PreviousTeacher[];
 }
 
-const KEY_STAGES = ["EYFS", "KS1", "KS2", "KS3", "KS4", "KS5"];
-const SUBJECTS = [
-  "English",
-  "Maths",
-  "Science",
-  "History",
-  "Geography",
-  "Art",
-  "Music",
-  "PE",
-  "Computing",
-  "PSHE",
-  "RE",
-  "MFL",
-  "DT",
-  "General Primary",
-];
+// Primary years only (EYFS + Year 1–6) per product focus
+const YEAR_GROUPS = ["EYFS", "Year 1", "Year 2", "Year 3", "Year 4", "Year 5", "Year 6"];
 
 export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [roleNeeded, setRoleNeeded] = useState<string>("");
-  const [subject, setSubject] = useState<string>("");
   const [keyStage, setKeyStage] = useState<string>("");
   const [startTime, setStartTime] = useState("08:30");
   const [endTime, setEndTime] = useState("15:30");
@@ -61,6 +45,48 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
   const [preferredTeacherId, setPreferredTeacherId] = useState<string>("");
   // Explicit emergency flag: schools can mark any request as emergency (e.g. urgent future date)
   const [isEmergency, setIsEmergency] = useState(false);
+  // Teacher IDs that are unavailable on the selected date (for previous-teacher list)
+  const [unavailableOnDate, setUnavailableOnDate] = useState<Set<string>>(new Set());
+
+  // Only show previous teachers who match the selected role (teacher/TA/both)
+  const eligiblePreviousTeachers = useMemo(() => {
+    if (!roleNeeded) return previousTeachers;
+    if (roleNeeded === "teacher") {
+      return previousTeachers.filter((t) => t.roleType === "teacher" || t.roleType === "both");
+    }
+    if (roleNeeded === "ta") {
+      return previousTeachers.filter((t) => t.roleType === "ta" || t.roleType === "both");
+    }
+    return previousTeachers;
+  }, [previousTeachers, roleNeeded]);
+
+  // Clear preferred teacher if they're no longer in the filtered list (e.g. role changed)
+  useEffect(() => {
+    if (preferredTeacherId && !eligiblePreviousTeachers.some((t) => t.id === preferredTeacherId)) {
+      setPreferredTeacherId("");
+    }
+  }, [eligiblePreviousTeachers, preferredTeacherId]);
+
+  // Fetch availability for previous teachers when date changes so we can grey out unavailable
+  useEffect(() => {
+    if (!date || eligiblePreviousTeachers.length === 0) {
+      setUnavailableOnDate(new Set());
+      return;
+    }
+    const dateStr = format(date, "yyyy-MM-dd");
+    Promise.all(
+      eligiblePreviousTeachers.map((t) =>
+        fetch(`/api/teacher/availability/check?teacherId=${encodeURIComponent(t.id)}&date=${dateStr}`, {
+          credentials: "include",
+        })
+          .then((r) => r.json())
+          .then((data) => (data.available === false ? t.id : null))
+          .catch(() => null)
+      )
+    ).then((results) => {
+      setUnavailableOnDate(new Set(results.filter((id): id is string => id != null)));
+    });
+  }, [date, eligiblePreviousTeachers]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -75,7 +101,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
           schoolId,
           date: format(date, "yyyy-MM-dd"),
           roleNeeded,
-          subject: subject || null,
+          subject: null,
           keyStage: keyStage || null,
           startTime,
           endTime,
@@ -158,34 +184,19 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
             </div>
 
             <div className="space-y-2">
-              <Label>Key Stage</Label>
+              <Label>Year Group</Label>
               <Select value={keyStage} onValueChange={setKeyStage}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select key stage..." />
+                  <SelectValue placeholder="Select year group..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {KEY_STAGES.map((ks) => (
-                    <SelectItem key={ks} value={ks}>{ks}</SelectItem>
+                  {YEAR_GROUPS.map((yg) => (
+                    <SelectItem key={yg} value={yg}>{yg}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">EYFS and Years 1–6 (primary)</p>
             </div>
-
-            {roleNeeded === "teacher" && (
-              <div className="space-y-2">
-                <Label>Subject</Label>
-                <Select value={subject} onValueChange={setSubject}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select subject..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SUBJECTS.map((s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
           </CardContent>
         </Card>
 
@@ -221,11 +232,13 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
           </CardHeader>
           <CardContent className="space-y-2">
             <p className="text-xs text-muted-foreground mb-3">
-              Optionally select a teacher who has previously worked at your school. The agency can try to assign them first.
+              Optionally select a teacher who has previously worked at your school (only those who match the role above are shown). The agency can try to offer them first.
             </p>
-            {previousTeachers.length === 0 ? (
+            {eligiblePreviousTeachers.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 rounded-lg border border-dashed bg-muted/30 text-center">
-                No previous teachers yet. When you&apos;ve had cover arranged through QuickSupply, those teachers will appear here so you can request them again.
+                {previousTeachers.length === 0
+                  ? "No previous teachers yet. When you've had cover arranged through QuickSupply, those teachers will appear here so you can request them again."
+                  : "No previous teachers match the selected role. Choose a different role above or leave this blank."}
               </p>
             ) : (
               <div className="grid gap-2">
@@ -240,28 +253,37 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
                     Clear selection
                   </Button>
                 )}
-                {previousTeachers.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setPreferredTeacherId(t.id === preferredTeacherId ? "" : t.id)}
-                    className={`flex items-center gap-3 rounded-lg border p-3 text-left transition-colors ${
-                      t.id === preferredTeacherId
-                        ? "border-primary bg-primary/5"
-                        : "hover:bg-muted/50"
-                    }`}
-                  >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-                      <User className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium">
-                        {t.firstName} {t.lastName}
+                {eligiblePreviousTeachers.map((t) => {
+                  const unavailable = unavailableOnDate.has(t.id);
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      disabled={unavailable}
+                      onClick={() => !unavailable && setPreferredTeacherId(t.id === preferredTeacherId ? "" : t.id)}
+                      className={`flex items-center gap-3 rounded-lg border p-3 text-left transition-colors ${
+                        unavailable
+                          ? "cursor-not-allowed border-muted bg-muted/30 opacity-75"
+                          : t.id === preferredTeacherId
+                            ? "border-primary bg-primary/5"
+                            : "hover:bg-muted/50"
+                      }`}
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                        <User className="h-4 w-4 text-primary" />
                       </div>
-                      <div className="text-xs text-muted-foreground capitalize">{t.roleType}</div>
-                    </div>
-                  </button>
-                ))}
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium">
+                          {t.firstName} {t.lastName}
+                        </div>
+                        <div className="text-xs text-muted-foreground capitalize">{t.roleType}</div>
+                        {unavailable && (
+                          <div className="mt-1 text-xs text-amber-600">Unavailable on this date</div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </CardContent>

@@ -428,6 +428,37 @@ export function manualAssign(requestId: string, teacherId: string): { success: b
   };
 }
 
+/** Withdraw the current pending offer(s) for a request and set request back to pending. */
+export function withdrawCurrentOffer(requestId: string): { success: boolean; message: string } {
+  const request = db.select().from(coverRequests).where(eq(coverRequests.id, requestId)).get();
+  if (!request) return { success: false, message: "Request not found." };
+
+  const activeOffers = db
+    .select()
+    .from(assignmentOffers)
+    .where(and(eq(assignmentOffers.coverRequestId, requestId), eq(assignmentOffers.status, "pending")))
+    .all();
+
+  for (const offer of activeOffers) {
+    db.update(assignmentOffers)
+      .set({ status: "withdrawn" })
+      .where(eq(assignmentOffers.id, offer.id))
+      .run();
+    sseManager.emit(`teacher:${offer.teacherId}`, {
+      type: "offer_withdrawn",
+      data: { offerId: offer.id },
+    });
+  }
+
+  db.update(coverRequests).set({ status: "pending" }).where(eq(coverRequests.id, requestId)).run();
+  sseManager.emit("agency", {
+    type: "offer_withdrawn",
+    data: { requestId },
+  });
+
+  return { success: true, message: "Offer withdrawn. Request is back to pending." };
+}
+
 export function cancelBooking(
   bookingId: string,
   reason: string

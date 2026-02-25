@@ -28,6 +28,7 @@ import {
   Heart,
 } from "lucide-react";
 import type { RankedTeacher } from "@/types";
+import { CallModal } from "@/components/agency/call-modal";
 
 /** Parse JSON from fetch response text; returns undefined on parse error. */
 function parseJsonResponse<T>(text: string): T | undefined {
@@ -53,6 +54,7 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [callModal, setCallModal] = useState<{ name: string; phone: string } | null>(null);
 
   const loadRankedTeachers = useCallback(async () => {
     setLoading(true);
@@ -231,22 +233,62 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
     );
   }
 
+  async function handleWithdrawOffer() {
+    setActionLoading("withdraw");
+    try {
+      const res = await fetch("/api/assignments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "withdraw_offer", requestId }),
+      });
+      const text = await res.text();
+      const data = parseJsonResponse<{ success?: boolean; message?: string }>(text);
+      if (data?.success) {
+        toast.success(data.message);
+        router.refresh();
+      } else {
+        toast.error(data?.message ?? "Failed to withdraw offer.");
+      }
+    } catch {
+      toast.error("Failed to withdraw offer.");
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-base">
           {hasActiveOffer ? "Active Offer" : "Eligible Teachers"}
         </CardTitle>
-        {!hasActiveOffer && ranked.length > 0 && requestStatus === "pending" && (
-          <Button onClick={handleStartOffering} disabled={actionLoading === "offering"} size="sm">
-            {actionLoading === "offering" ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Play className="mr-2 h-4 w-4" />
-            )}
-            Start Sequential Offering
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {hasActiveOffer && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleWithdrawOffer}
+              disabled={actionLoading === "withdraw"}
+            >
+              {actionLoading === "withdraw" ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <XCircle className="mr-2 h-4 w-4" />
+              )}
+              Withdraw offer
+            </Button>
+          )}
+          {!hasActiveOffer && ranked.length > 0 && requestStatus === "pending" && (
+            <Button onClick={handleStartOffering} disabled={actionLoading === "offering"} size="sm">
+              {actionLoading === "offering" ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Play className="mr-2 h-4 w-4" />
+              )}
+              Start Sequential Offering
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         {loading ? (
@@ -314,11 +356,13 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
                   <span className="text-xs text-muted-foreground">
                     {r.score.toFixed(0)} pts
                   </span>
-                  <a href={`tel:${r.teacher.phone}`}>
-                    <Button variant="ghost" size="sm">
-                      <Phone className="h-4 w-4" />
-                    </Button>
-                  </a>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCallModal({ name: `${r.teacher.firstName} ${r.teacher.lastName}`, phone: r.teacher.phone })}
+                  >
+                    <Phone className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"
@@ -340,6 +384,14 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
           </div>
         )}
       </CardContent>
+      {callModal && (
+        <CallModal
+          open={!!callModal}
+          onOpenChange={(open) => !open && setCallModal(null)}
+          teacherName={callModal.name}
+          phone={callModal.phone}
+        />
+      )}
     </Card>
   );
 }

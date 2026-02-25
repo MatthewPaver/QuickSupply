@@ -10,6 +10,8 @@ import { CheckCircle, AlertTriangle, Clock, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { EmptyState } from "@/components/shared/empty-state";
+import { AgencyLiveRefresh } from "@/components/agency/agency-live-refresh";
+import { SmsLogDrawer } from "@/components/agency/sms-log-drawer";
 
 export default async function AgencyDashboard() {
   await requireSession("agent");
@@ -45,9 +47,13 @@ export default async function AgencyDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Agency Dashboard</h1>
-        <p className="text-muted-foreground">Real-time overview of all operations</p>
+      <AgencyLiveRefresh />
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Agency Dashboard</h1>
+          <p className="text-muted-foreground">Real-time overview of all operations</p>
+        </div>
+        <SmsLogDrawer />
       </div>
 
       {/* Stats Row */}

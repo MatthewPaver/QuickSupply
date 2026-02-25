@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { startOfferingSequence, manualAssign, cancelBooking, rankTeachersForRequest } from "@/lib/assignment-engine";
+import { startOfferingSequence, manualAssign, cancelBooking, rankTeachersForRequest, withdrawCurrentOffer } from "@/lib/assignment-engine";
 
 export async function POST(request: NextRequest) {
   const session = await getSession();
@@ -22,6 +22,10 @@ export async function POST(request: NextRequest) {
     }
     case "cancel_booking": {
       const result = cancelBooking(bookingId, reason || "Cancelled by agency");
+      return NextResponse.json(result);
+    }
+    case "withdraw_offer": {
+      const result = withdrawCurrentOffer(requestId);
       return NextResponse.json(result);
     }
     case "rank_teachers": {

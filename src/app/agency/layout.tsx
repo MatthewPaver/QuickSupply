@@ -5,6 +5,7 @@ import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { agencyNavItems } from "@/app/agency/nav-config";
 import { AgencyMobileNav } from "@/components/agency/agency-mobile-nav";
+import { NotificationBell } from "@/components/shared/notification-bell";
 
 export default async function AgencyLayout({
   children,
@@ -34,7 +35,10 @@ export default async function AgencyLayout({
           ))}
         </nav>
         <div className="border-t p-3">
-          <div className="mb-2 px-2 text-xs text-muted-foreground">{session.name}</div>
+          <div className="mb-2 flex items-center justify-between gap-2 px-2">
+            <span className="text-xs text-muted-foreground truncate">{session.name}</span>
+            <NotificationBell />
+          </div>
           <Link href="/login">
             <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
               <LogOut className="h-4 w-4" />

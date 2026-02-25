@@ -683,6 +683,7 @@ async function seed() {
     filled1: ulid(),
     filled2: ulid(),
     offering: ulid(),
+    offeringSarah: ulid(), // Second "offering" request so Sarah Johnson has a pending offer to see on Jobs
     pending1: ulid(),
     pending2: ulid(),
     pending3: ulid(),
@@ -697,7 +698,7 @@ async function seed() {
       date: isoDate(daysAgo(5)),
       roleNeeded: "teacher",
       subject: "Maths",
-      keyStage: "KS2",
+      keyStage: "Year 4",
       startTime: "08:30",
       endTime: "15:30",
       status: "filled",
@@ -716,14 +717,14 @@ async function seed() {
       isEmergency: false,
       createdAt: daysAgo(5),
     },
-    // 1 currently being offered
+    // 1 currently being offered (to Emma)
     {
       id: requestIds.offering,
       schoolId: schoolIds.broadgreen,
       date: isoDate(daysFromNow(1)),
       roleNeeded: "teacher",
       subject: "English",
-      keyStage: "KS3",
+      keyStage: "Year 6",
       startTime: "08:30",
       endTime: "15:30",
       notes: "Year 9 class - curriculum pack in staffroom",
@@ -731,13 +732,28 @@ async function seed() {
       isEmergency: false,
       createdAt: daysAgo(1),
     },
+    // 1 currently being offered to Sarah Johnson (so teacher Jobs page shows an active offer when logged in as Sarah)
+    {
+      id: requestIds.offeringSarah,
+      schoolId: schoolIds.stMarys,
+      date: isoDate(daysFromNow(1)),
+      roleNeeded: "teacher",
+      subject: "Maths",
+      keyStage: "Year 5",
+      startTime: "08:30",
+      endTime: "15:30",
+      notes: "Year 5 cover",
+      status: "offering",
+      isEmergency: false,
+      createdAt: daysAgo(0),
+    },
     // 3 pending
     {
       id: requestIds.pending1,
       schoolId: schoolIds.allSaints,
       date: isoDate(daysFromNow(0)),
       roleNeeded: "ta",
-      keyStage: "KS1",
+      keyStage: "Year 1",
       startTime: "08:30",
       endTime: "15:30",
       notes: "SEN support needed",
@@ -751,7 +767,7 @@ async function seed() {
       date: isoDate(daysFromNow(2)),
       roleNeeded: "teacher",
       subject: "Science",
-      keyStage: "KS2",
+      keyStage: "Year 4",
       startTime: "09:00",
       endTime: "15:30",
       preferredTeacherId: teacherIds.sarahJ,
@@ -764,7 +780,7 @@ async function seed() {
       schoolId: schoolIds.stMarys,
       date: isoDate(daysFromNow(1)),
       roleNeeded: "ta",
-      keyStage: "EYFS",
+      keyStage: "Year 2",
       startTime: "08:30",
       endTime: "12:30",
       notes: "Morning only cover",
@@ -779,7 +795,7 @@ async function seed() {
       date: isoDate(daysAgo(1)),
       roleNeeded: "teacher",
       subject: "PE",
-      keyStage: "KS2",
+      keyStage: "Year 3",
       startTime: "08:30",
       endTime: "15:30",
       status: "cancelled",
@@ -856,7 +872,7 @@ async function seed() {
       offerOrder: 2,
       createdAt: daysAgo(5),
     },
-    // Active offer on "offering" request
+    // Active offer on "offering" request (Emma)
     {
       id: ulid(),
       coverRequestId: requestIds.offering,
@@ -867,9 +883,20 @@ async function seed() {
       offerOrder: 1,
       createdAt: now(),
     },
+    // Active offer to Sarah Johnson (offeringSarah request) so Jobs page shows data when logged in as Sarah
+    {
+      id: ulid(),
+      coverRequestId: requestIds.offeringSarah,
+      teacherId: teacherIds.sarahJ,
+      offeredAt: now(),
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      status: "pending",
+      offerOrder: 1,
+      createdAt: now(),
+    },
   ]).run();
 
-  console.log("  4 assignment offers created");
+  console.log("  5 assignment offers created");
 
   // ============================================================
   // SCHOOL-TEACHER REVIEWS

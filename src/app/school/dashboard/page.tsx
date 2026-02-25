@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { coverRequests, bookings, teachers } from "@/lib/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { coverRequests, assignmentOffers, bookings, teachers } from "@/lib/db/schema";
+import { eq, desc, and, sql } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { FileText, Plus, CheckCircle, Clock } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { EmptyState } from "@/components/shared/empty-state";
+import { SchoolLiveRefresh } from "@/components/school/school-live-refresh";
 
 export default async function SchoolDashboard() {
   const session = await requireSession("school");
@@ -21,13 +22,54 @@ export default async function SchoolDashboard() {
     .all();
 
   const activeRequests = requests.filter((r) => r.status === "pending" || r.status === "offering");
+  const activeRequestIds = activeRequests.map((r) => r.id);
+
+  // Who is each "offering" request currently offered to? (pending offer → teacher name)
+  const offeringToMap = new Map<string, string>();
+  if (activeRequestIds.length > 0) {
+    const pendingOffers = db
+      .select({
+        coverRequestId: assignmentOffers.coverRequestId,
+        firstName: teachers.firstName,
+        lastName: teachers.lastName,
+      })
+      .from(assignmentOffers)
+      .innerJoin(teachers, eq(assignmentOffers.teacherId, teachers.id))
+      .where(and(eq(assignmentOffers.status, "pending")))
+      .all();
+    pendingOffers.forEach((o) => {
+      if (activeRequestIds.includes(o.coverRequestId)) {
+        offeringToMap.set(o.coverRequestId, `${o.firstName} ${o.lastName}`);
+      }
+    });
+  }
+
   const filledToday = requests.filter(
     (r) => r.status === "filled" && r.date === new Date().toISOString().split("T")[0]
   );
   const totalFilled = requests.filter((r) => r.status === "filled").length;
 
+  // For Recent History: who covered each filled request?
+  const filledRequestIds = requests.filter((r) => r.status === "filled").map((r) => r.id);
+  const coveredByMap = new Map<string, string>();
+  if (filledRequestIds.length > 0) {
+    const covered = db
+      .select({
+        coverRequestId: bookings.coverRequestId,
+        firstName: teachers.firstName,
+        lastName: teachers.lastName,
+      })
+      .from(bookings)
+      .innerJoin(teachers, eq(bookings.teacherId, teachers.id))
+      .where(sql`${bookings.cancelledAt} IS NULL`)
+      .all()
+      .filter((b) => filledRequestIds.includes(b.coverRequestId));
+    covered.forEach((b) => coveredByMap.set(b.coverRequestId, `${b.firstName} ${b.lastName}`));
+  }
+
   return (
     <div className="space-y-6">
+      <SchoolLiveRefresh schoolId={session.userId} />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{session.name}</h1>
@@ -109,6 +151,11 @@ export default async function SchoolDashboard() {
                         <span className="ml-2 text-xs font-semibold text-red-600">EMERGENCY</span>
                       )}
                     </div>
+                    {req.status === "offering" && offeringToMap.get(req.id) && (
+                      <div className="text-sm text-primary font-medium">
+                        Offering to: {offeringToMap.get(req.id)}
+                      </div>
+                    )}
                   </div>
                   <StatusBadge status={req.status} />
                 </div>
@@ -143,6 +190,11 @@ export default async function SchoolDashboard() {
                       <span className="font-medium capitalize">{req.roleNeeded}</span>
                       {req.subject && <span> - {req.subject}</span>}
                       <span className="text-muted-foreground"> &middot; {format(new Date(req.date), "d MMM")}</span>
+                      {req.status === "filled" && coveredByMap.get(req.id) && (
+                        <span className="block text-xs text-muted-foreground mt-0.5">
+                          Covered by: {coveredByMap.get(req.id)}
+                        </span>
+                      )}
                     </div>
                     <StatusBadge status={req.status} />
                   </div>

@@ -46,14 +46,14 @@ Use this script to narrate a complete demo of **QuickSupply** by Desian Educatio
 - **Date:** "Pick a **date** — e.g. tomorrow or another future weekday. If you pick **today**, the **Emergency request** checkbox auto-checks and a red note appears about the shorter response window."
 - **Emergency:** "You can tick or untick **Emergency request** anytime. For this run we can leave it unchecked if the date is in the future."
 - **Role:** "Choose **Role Needed** — **Teacher** or **Teaching Assistant** (e.g. Teacher)."
-- **Key Stage:** "Pick a **Key Stage** (e.g. KS2). **Subject** appears if you chose Teacher — pick one (e.g. Maths)."
+- **Year group:** "Pick a **Year group** (e.g. Year 4). Primary only: EYFS and Years 1–6."
 - **Times:** "Set **Start time** and **End time** (e.g. 08:30–15:30)."
 - **Optional:** "**Request Previous Teacher** is always shown. If the school has had cover through QuickSupply before, those teachers appear here; otherwise we see a short message that they’ll appear after cover is arranged. We can leave it blank or, if you ran **pnpm db:seed-demo**, pick the one teacher shown. **Additional Notes** is for anything the agency or teacher should know."
 - "Click **Submit Cover Request**. The app takes us to **All Requests**; our new request appears at the top with status **Pending**."
 
 **Confirm on School**
 
-- "On **All Requests** we see the new row: role, subject, key stage, date, times, **Pending**. Emergency requests would show an **EMERGENCY** badge; filled ones show who was assigned or ‘Cover Arranged’ and notes if any."
+- "On **All Requests** we see the new row: role, year group, date, times, **Pending**. Emergency requests would show an **EMERGENCY** badge; filled ones show who was assigned or ‘Cover Arranged’ and notes if any."
 - **[Click "Dashboard" in the nav.]**
 - "On the **Dashboard**, **Active Requests** now shows our request. The school side is done; the agency will assign a teacher."
 - "In a **full product** we’d add **notifications** — email or SMS to the agency when a request lands, to the teacher when they’re offered the job, and to the school when cover is confirmed. This demo is in-app only; the flow is ready for you to plug in e.g. SendGrid or Twilio."
@@ -69,17 +69,17 @@ Use this script to narrate a complete demo of **QuickSupply** by Desian Educatio
 
 **Dashboard**
 
-- "The **Agency Dashboard** has four stat cards: **Pending**, **Being Offered**, **Filled Today**, and **Emergencies**. **Active Requests** lists what needs action — our new request is here — with school name, role, subject, key stage, date and time. If something’s being offered we see ‘Offering to: [Teacher name]’. Each row is clickable."
+- "The **Agency Dashboard** has four stat cards: **Pending**, **Being Offered**, **Filled Today**, and **Emergencies**. **Active Requests** lists what needs action — our new request is here — with school name, role, year group, date and time. If something’s being offered we see ‘Offering to: [Teacher name]’. Each row is clickable."
 - **[Click "Requests" in the sidebar.]**
 
 **Requests (list)**
 
-- "**Requests** is the full list from all schools, newest first. Our request is at the top with school name, role, subject, key stage, date, time, status. Emergency requests show an **EMERGENCY** badge."
+- "**Requests** is the full list from all schools, newest first. Our request is at the top with school name, role, year group, date, time, status. Emergency requests show an **EMERGENCY** badge."
 - **[Click the row for the request we created.]**
 
 **Request detail (assignment)**
 
-- "This is the **request detail** page. At the top: **school name**, **status** badge, and **EMERGENCY** if it’s an emergency. **Request Details** (left) shows date, role, subject, key stage, times, and notes."
+- "This is the **request detail** page. At the top: **school name**, **status** badge, and **EMERGENCY** if it’s an emergency. **Request Details** (left) shows date, role, year group, times, and notes."
 - "**Offer history** lists everyone we’ve offered this request to — order, name, status, timestamps. If the request is **filled**, we see **Current Booking** with who’s assigned and their phone; the **Assignment** panel shows **Cancel Booking** (with a warning that the school won’t be notified). If it’s **pending** or **offering**, the **Assignment** panel shows **Eligible Teachers**: a ranked list with score, distance, agency rating, school review when available, **Preferred** and **Previous** badges, compliance, and **Assign** and **phone** actions. We can **Start Sequential Offering** (one teacher at a time with a countdown) or **manually assign**. Phone links let the agency call teachers; in production you could add one-tap SMS or email."
 - "To **complete the loop** later: click **Start Sequential Offering** or **Assign** on one teacher, then sign in as that teacher, open **Jobs**, and **Accept**. Then the request shows **Filled** here and on the school’s Dashboard and All Requests."
 - **[Click "Teachers" in the sidebar.]**
@@ -101,7 +101,7 @@ Use this script to narrate a complete demo of **QuickSupply** by Desian Educatio
 
 **Bookings**
 
-- "**Bookings** lists **confirmed** bookings: school, teacher, role, subject, key stage, date, time; status **Confirmed** or **Cancelled**. Once our request is filled it appears here."
+- "**Bookings** lists **confirmed** bookings: school, teacher, role, year group, date, time; status **Confirmed** or **Cancelled**. Once our request is filled it appears here."
 - **[Click "Agents".]**
 
 **Agents**
@@ -129,7 +129,7 @@ Use this script to narrate a complete demo of **QuickSupply** by Desian Educatio
 
 **Jobs**
 
-- "**Jobs** is where teachers see and respond to offers. Each **pending offer** is in a card: school name, date, role, subject, key stage, time, **URGENT** badge if emergency, **countdown**, and **Accept** / **Decline**. Accepting fills the request; declining lets the agency offer to the next. **Offer History** lists past offers and outcomes. In a full build we’d notify by email or phone when a new offer lands."
+- "**Jobs** is where teachers see and respond to offers. Each **pending offer** is in a card: school name, date, role, year group, time, **URGENT** badge if emergency, **countdown**, and **Accept** / **Decline**. Accepting fills the request; declining lets the agency offer to the next. **Offer History** lists past offers and outcomes. In a full build we’d notify by email or phone when a new offer lands."
 - **[Click "Availability" in the nav.]**
 
 **Availability**

@@ -15,6 +15,8 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
+Copy `.env.example` to `.env.local` if you want to override defaults. Optional: set `CRON_SECRET` in production so only your scheduler can call `/api/cron`.
+
 ## Demo Login
 
 Click any user on the login page to instantly sign in. Seeded with:
@@ -99,6 +101,8 @@ pnpm db:reset      # Delete database file
 pnpm db:studio     # Open Drizzle Studio (DB browser)
 pnpm setup         # Migrate + seed (first-time setup)
 pnpm e2e:routes    # Smoke-test all screens (run with dev server up)
+pnpm e2e           # Playwright E2E (starts dev server if needed, or run pnpm dev first)
+pnpm e2e:ui        # Playwright UI mode
 ```
 
 ---
@@ -139,13 +143,17 @@ pnpm e2e:routes    # Smoke-test all screens (run with dev server up)
 - [ ] **Real SMS integration** - Twilio or similar for actual SMS notifications
 - [ ] **Background job runner** - Replace client-side cron polling with a proper job queue (BullMQ/Inngest) for offer expiry
 - [ ] **Deployment** - Dockerfile, Railway/Render config, environment variable management
-- [ ] **Testing** - Unit tests for assignment engine, integration tests for API routes, E2E tests with Playwright
+- [ ] **Testing** - Unit tests for assignment engine, integration tests for API routes; E2E with Playwright is set up (`pnpm e2e`)
 - [ ] **Rate limiting** - Protect API endpoints
 - [ ] **Input sanitization** - Add Zod validation to all API route handlers
 
+### Error monitoring (Sentry)
+
+Sentry is integrated: set `NEXT_PUBLIC_SENTRY_DSN` (and optionally `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` for source maps) to send errors and replays. Without a DSN, the app runs as before; with a DSN, the Sentry MCP can list issues, fetch stack traces, and run Seer analysis.
+
 ### MCP & tooling that could improve QuickSupply
 
-- **Sentry MCP** – Once you add [Sentry](https://sentry.io) to the app, the Sentry MCP can list issues, fetch stack traces, and run Seer analysis for root cause and fix suggestions. Fits well with "Error boundaries" and production debugging.
+- **Sentry MCP** – With [Sentry](https://sentry.io) configured (see above), the Sentry MCP can list issues, fetch stack traces, and run Seer analysis for root cause and fix suggestions. Fits well with "Error boundaries" and production debugging.
 - **SQLite MCP** – If pointed at `./quicksupply.db`, you can run ad-hoc queries (e.g. cover request stats, teacher counts) from the IDE without opening Drizzle Studio. Useful for debugging and one-off reports.
 - **Postgres MCP** – When you complete the "PostgreSQL migration" (Priority 4), a Postgres MCP connected to the same DB enables read-only queries and exploration from the editor.
 - **Browser / E2E MCP** – A browser automation MCP (e.g. Playwright-based or Cursor’s browser MCP) lets you drive the app through the UI for regression testing and verifying flows (school request → agency assign → teacher accept). Complements the route-check script below.

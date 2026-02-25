@@ -1,0 +1,13 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useSSE } from "@/hooks/use-sse";
+
+/** Subscribes to agency SSE and refreshes the page when events arrive so data stays live. */
+export function AgencyLiveRefresh() {
+  const router = useRouter();
+  useSSE("/api/sse/agency", () => {
+    router.refresh();
+  });
+  return null;
+}

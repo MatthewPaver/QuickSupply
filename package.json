@@ -15,10 +15,13 @@
     "db:seed-demo": "tsx scripts/seed-demo-previous-teacher.ts",
     "db:studio": "drizzle-kit studio",
     "setup": "pnpm db:migrate && pnpm db:seed",
-    "e2e:routes": "node scripts/e2e-check-routes.mjs"
+    "e2e:routes": "node scripts/e2e-check-routes.mjs",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@sentry/nextjs": "^10.40.0",
     "better-sqlite3": "^12.6.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -38,6 +41,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
