@@ -28,3 +28,26 @@ export async function GET() {
 
   return NextResponse.json(list);
 }
+
+/** PATCH: mark notifications as read for current user. */
+export async function PATCH() {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const recipientType =
+    session.role === "school" ? "school" : session.role === "teacher" ? "teacher" : "agent";
+  db.update(notificationLog)
+    .set({ read: true })
+    .where(
+      and(
+        eq(notificationLog.recipientType, recipientType),
+        eq(notificationLog.recipientId, session.userId),
+        eq(notificationLog.read, false)
+      )
+    )
+    .run();
+
+  return NextResponse.json({ ok: true });
+}

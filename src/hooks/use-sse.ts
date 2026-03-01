@@ -26,8 +26,11 @@ export function useSSE(url: string | null, onEvent: (event: SSEEvent) => void) {
 
     function connect() {
       eventSource = new EventSource(baseUrl);
-      setConnected(true);
-      attempt = 0;
+
+      eventSource.onopen = () => {
+        setConnected(true);
+        attempt = 0; // Reset backoff only after a successful connection
+      };
 
       eventSource.onmessage = (e) => {
         try {

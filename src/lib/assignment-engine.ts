@@ -55,7 +55,7 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
     .map((b) => b.teacherId);
 
   // Get availability data
-  const dayOfWeek = new Date(request.date).getDay();
+  const dayOfWeek = new Date(request.date + "T00:00:00").getDay();
   const allAvailability = db.select().from(teacherAvailability).all();
 
   // Get school review averages per teacher
@@ -128,12 +128,11 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
 
     // Filter: contact night before only
     if (teacher.contactNightBeforeOnly) {
-      const requestDate = new Date(request.date);
+      const requestDate = new Date(request.date + "T00:00:00");
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      // Only include if request is for tomorrow or today
       if (requestDate > tomorrow) continue;
     }
 
@@ -157,6 +156,9 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
 
     // Calculate distance
     const distanceMiles = haversineDistance(teacher.lat, teacher.lng, school.lat, school.lng);
+
+    // Filter: beyond teacher's max travel distance
+    if (distanceMiles > teacher.maxDistanceMiles) continue;
 
     // Score
     let score = 0;

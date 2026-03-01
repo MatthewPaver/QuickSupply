@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { coverRequests, bookings, teachers } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, sql, inArray } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,8 +34,8 @@ export default async function SchoolRequestsPage() {
         })
         .from(bookings)
         .innerJoin(teachers, eq(bookings.teacherId, teachers.id))
+        .where(and(sql`${bookings.cancelledAt} IS NULL`, inArray(bookings.coverRequestId, filledRequestIds)))
         .all()
-        .filter((b) => filledRequestIds.includes(b.coverRequestId))
     : [];
 
   const bookingMap = new Map(bookingData.map((b) => [b.coverRequestId, b]));
@@ -85,7 +85,7 @@ export default async function SchoolRequestsPage() {
                         )}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {format(new Date(req.date), "EEEE, d MMMM yyyy")} &middot; {req.startTime} - {req.endTime}
+                        {format(new Date(req.date + "T00:00:00"), "EEEE, d MMMM yyyy")} &middot; {req.startTime} - {req.endTime}
                       </div>
                       {req.status === "filled" && booking && req.preferredTeacherId && (
                         <div className="text-sm text-green-700">

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { format } from "date-fns";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -14,14 +15,12 @@ export default function TeacherAvailabilityPage() {
   const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    loadAvailability();
-  }, []);
-
-  async function loadAvailability() {
+  const loadAvailability = useCallback(async () => {
     try {
       const res = await fetch("/api/teacher/availability");
+      if (!res.ok) throw new Error("Failed to load");
       const data = await res.json();
       if (data.recurring) {
         const days = [false, false, false, false, false, false, false];
@@ -34,13 +33,21 @@ export default function TeacherAvailabilityPage() {
         setUnavailableDates(
           data.specific
             .filter((s: { isAvailable: boolean }) => !s.isAvailable)
-            .map((s: { date: string }) => new Date(s.date))
+            .map((s: { date: string }) => new Date(s.date + "T00:00:00"))
         );
       }
+      setError(false);
+    } catch {
+      setError(true);
+      toast.error("Could not load availability. Please try again.");
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    loadAvailability();
+  }, [loadAvailability]);
 
   function toggleRecurring(dayIdx: number) {
     const updated = [...recurringDays];
@@ -56,12 +63,16 @@ export default function TeacherAvailabilityPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           recurring: recurringDays.map((avail, idx) => ({ dayOfWeek: idx, isAvailable: avail })),
-          unavailableDates: unavailableDates.map((d) => d.toISOString().split("T")[0]),
+          unavailableDates: unavailableDates.map((d) => format(d, "yyyy-MM-dd")),
         }),
       });
       if (res.ok) {
         toast.success("Availability saved");
+      } else {
+        toast.error("Failed to save availability. Please try again.");
       }
+    } catch {
+      toast.error("Failed to save. Check your connection.");
     } finally {
       setSaving(false);
     }
@@ -71,6 +82,15 @@ export default function TeacherAvailabilityPage() {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20">
+        <p className="text-sm text-muted-foreground">Could not load availability.</p>
+        <Button onClick={() => { setLoading(true); loadAvailability(); }}>Retry</Button>
       </div>
     );
   }
@@ -92,7 +112,7 @@ export default function TeacherAvailabilityPage() {
             <p className="mb-4 text-sm text-muted-foreground">
               Select the days you are generally available to work
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {DAY_NAMES.map((day, idx) => (
                 <button
                   key={day}
@@ -100,7 +120,7 @@ export default function TeacherAvailabilityPage() {
                   className={`flex h-14 w-14 flex-col items-center justify-center rounded-lg border-2 text-sm font-medium transition-colors ${
                     recurringDays[idx]
                       ? "border-primary bg-primary text-white"
-                      : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
+                      : "border-muted bg-background text-muted-foreground hover:border-muted-foreground/30"
                   }`}
                 >
                   {day}

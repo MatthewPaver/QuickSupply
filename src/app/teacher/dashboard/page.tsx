@@ -14,7 +14,8 @@ export default async function TeacherDashboard() {
   const session = await requireSession("teacher");
 
   const teacher = db.select().from(teachers).where(eq(teachers.id, session.userId)).get();
-  const today = new Date().toISOString().split("T")[0];
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   // Active offers (pending)
   const activeOffers = db
@@ -80,12 +81,12 @@ export default async function TeacherDashboard() {
           <CardContent className="space-y-3">
             {activeOffers.map((offer) => (
               <Link key={offer.offerId} href={`/teacher/jobs`}>
-                <div className="rounded-lg border bg-white p-4 transition-colors hover:border-primary">
+                <div className="rounded-lg border bg-background p-4 transition-colors hover:border-primary">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-medium">{offer.schoolName}</div>
                       <div className="text-sm text-muted-foreground">
-                        {format(new Date(offer.date), "EEE d MMM")} &middot; {offer.startTime} - {offer.endTime}
+                        {format(new Date(offer.date + "T00:00:00"), "EEE d MMM")} &middot; {offer.startTime} - {offer.endTime}
                       </div>
                       <div className="text-sm">
                         <span className="capitalize">{offer.roleNeeded}</span>
@@ -158,8 +159,8 @@ export default async function TeacherDashboard() {
               {upcomingBookings
                 .filter((b) => b.date !== today)
                 .slice(0, 5)
-                .map((b, i) => (
-                  <div key={i} className="flex items-center justify-between rounded border p-3">
+                .map((b) => (
+                  <div key={`${b.date}-${b.schoolName}`} className="flex items-center justify-between rounded border p-3">
                     <div>
                       <div className="text-sm font-medium">{b.schoolName}</div>
                       <div className="text-xs text-muted-foreground">
@@ -168,7 +169,7 @@ export default async function TeacherDashboard() {
                       </div>
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {format(new Date(b.date), "EEE d MMM")} &middot; {b.startTime}
+                      {format(new Date(b.date + "T00:00:00"), "EEE d MMM")} &middot; {b.startTime}
                     </div>
                   </div>
                 ))}

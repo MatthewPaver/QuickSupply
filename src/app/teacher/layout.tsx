@@ -2,11 +2,11 @@ import { requireSession } from "@/lib/auth";
 import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
-import { Home, Calendar, Briefcase, User, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { TeacherMobileBottomNav } from "@/components/teacher/mobile-bottom-nav";
+import { TeacherDesktopNav } from "@/components/teacher/teacher-desktop-nav";
 import { PageSkeleton } from "@/components/shared/page-skeleton";
 import { NotificationBell } from "@/components/shared/notification-bell";
+import { SignOutButton } from "@/components/shared/sign-out-button";
 
 /** Async: resolves session then renders header right (name + logout). */
 async function TeacherAuthHeader() {
@@ -16,11 +16,7 @@ async function TeacherAuthHeader() {
       <span className="hidden max-w-[120px] truncate text-sm text-muted-foreground sm:max-w-none md:inline">
         {session.name}
       </span>
-      <Link href="/login">
-        <Button variant="ghost" size="sm" className="shrink-0">
-          <LogOut className="h-4 w-4" />
-        </Button>
-      </Link>
+      <SignOutButton variant="ghost" size="sm" className="shrink-0" />
     </div>
   );
 }
@@ -44,33 +40,7 @@ export default function TeacherLayout({
             <Image src="/desian-logo.svg" alt="Desian" width={80} height={22} className="brightness-0 h-6 w-auto" />
             <span className="hidden text-sm font-semibold text-primary sm:inline">QuickSupply</span>
           </Link>
-          {/* Desktop nav */}
-          <nav className="hidden items-center gap-1 md:flex">
-            <Link href="/teacher/dashboard">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <Home className="h-4 w-4" />
-                Dashboard
-              </Button>
-            </Link>
-            <Link href="/teacher/availability">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <Calendar className="h-4 w-4" />
-                Availability
-              </Button>
-            </Link>
-            <Link href="/teacher/jobs">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <Briefcase className="h-4 w-4" />
-                Jobs
-              </Button>
-            </Link>
-            <Link href="/teacher/profile">
-              <Button variant="ghost" size="sm" className="gap-2">
-                <User className="h-4 w-4" />
-                Profile
-              </Button>
-            </Link>
-          </nav>
+          <TeacherDesktopNav />
           <div className="flex items-center gap-2">
             <NotificationBell />
             <Suspense fallback={<span className="text-muted-foreground">...</span>}>

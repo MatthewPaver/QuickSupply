@@ -3,10 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, LogOut } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { agencyNavItems } from "@/app/agency/nav-config";
+import { SignOutButton } from "@/components/shared/sign-out-button";
+import { ActiveLinkButton } from "@/components/shared/active-link-button";
+import { NotificationBell } from "@/components/shared/notification-bell";
 
 interface AgencyMobileNavProps {
   sessionName: string;
@@ -31,24 +34,30 @@ export function AgencyMobileNav({ sessionName }: AgencyMobileNavProps) {
             <Image src="/desian-logo.svg" alt="Desian" width={72} height={20} className="brightness-0 h-5 w-auto" />
             <span className="text-sm font-semibold text-primary">QuickSupply</span>
           </div>
-          <nav className="flex flex-1 flex-col gap-1 p-3">
+          <nav className="flex flex-1 flex-col gap-1.5 p-3">
+            <p className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+              Operations
+            </p>
             {agencyNavItems.map((item) => (
-              <Link key={item.href} href={item.href} onClick={() => setOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start gap-2" size="sm">
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Button>
-              </Link>
+              <ActiveLinkButton
+                key={item.href}
+                href={item.href}
+                label={item.label}
+                icon={item.icon}
+                className="w-full justify-start"
+                onClick={() => setOpen(false)}
+              />
             ))}
           </nav>
           <div className="border-t p-3">
             <p className="mb-2 truncate px-2 text-xs text-muted-foreground">{sessionName}</p>
-            <Link href="/login" onClick={() => setOpen(false)}>
-              <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </Button>
-            </Link>
+            <SignOutButton
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start gap-2"
+              showLabel
+              onSignOut={() => setOpen(false)}
+            />
           </div>
         </SheetContent>
       </Sheet>
@@ -56,7 +65,7 @@ export function AgencyMobileNav({ sessionName }: AgencyMobileNavProps) {
         <Image src="/desian-logo.svg" alt="Desian" width={72} height={20} className="brightness-0 h-5 w-auto" />
         <span className="text-sm font-semibold text-primary">QuickSupply</span>
       </Link>
-      <div className="w-10" />
+      <NotificationBell />
     </div>
   );
 }

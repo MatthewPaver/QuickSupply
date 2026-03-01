@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { School, GraduationCap, LayoutDashboard, Loader2 } from "lucide-react";
+import { School, GraduationCap, LayoutDashboard, Loader2, ArrowLeft } from "lucide-react";
 
 interface DemoUser {
   id: string;
@@ -29,27 +30,41 @@ const demoUsers: DemoUser[] = [
   { id: "agent-2", name: "James Powell", role: "agent", subtitle: "Agent" },
 ];
 
-const roleIcon = {
+const allRoles = ["school", "teacher", "agent"] as const;
+type Role = (typeof allRoles)[number];
+
+const roleIcon: Record<Role, typeof School> = {
   school: School,
   teacher: GraduationCap,
   agent: LayoutDashboard,
 };
 
-const roleLabel = {
+const roleLabel: Record<Role, string> = {
   school: "Schools",
   teacher: "Teachers & TAs",
   agent: "Agency Staff",
 };
 
-const roleRedirect = {
+const roleRedirect: Record<Role, string> = {
   school: "/school/dashboard",
   teacher: "/teacher/dashboard",
   agent: "/agency/dashboard",
 };
 
-export default function LoginPage() {
+const roleSubtitle: Record<Role, string> = {
+  school: "Sign in as a school",
+  teacher: "Sign in as a teacher or TA",
+  agent: "Sign in as agency staff",
+};
+
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState<string | null>(null);
+
+  const portalParam = searchParams.get("portal");
+  const isFiltered = portalParam !== null && allRoles.includes(portalParam as Role);
+  const visibleRoles: readonly Role[] = isFiltered ? [portalParam as Role] : allRoles;
 
   async function handleQuickLogin(user: DemoUser) {
     setLoading(user.id);
@@ -71,7 +86,7 @@ export default function LoginPage() {
     }
   }
 
-  const grouped = {
+  const grouped: Record<Role, DemoUser[]> = {
     school: demoUsers.filter((u) => u.role === "school"),
     teacher: demoUsers.filter((u) => u.role === "teacher"),
     agent: demoUsers.filter((u) => u.role === "agent"),
@@ -89,11 +104,25 @@ export default function LoginPage() {
           priority
         />
         <h1 className="text-xl font-bold text-primary sm:text-2xl">QuickSupply Demo</h1>
-        <p className="text-center text-xs text-muted-foreground sm:text-sm">Click any user below to sign in instantly</p>
+        <p className="text-center text-xs text-muted-foreground sm:text-sm">
+          {isFiltered ? roleSubtitle[portalParam as Role] : "Click any user below to sign in instantly"}
+        </p>
       </div>
 
-      <div className="grid w-full max-w-5xl gap-4 sm:gap-6 md:grid-cols-3">
-        {(["school", "teacher", "agent"] as const).map((role) => {
+      {isFiltered && (
+        <div className="mb-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back to portals
+          </Link>
+        </div>
+      )}
+
+      <div className={isFiltered ? "w-full max-w-sm" : "grid w-full max-w-5xl gap-4 sm:gap-6 md:grid-cols-3"}>
+        {visibleRoles.map((role) => {
           const Icon = roleIcon[role];
           return (
             <Card key={role}>
@@ -134,5 +163,13 @@ export default function LoginPage() {
         })}
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   );
 }

@@ -19,7 +19,7 @@ export function TeacherMobileBottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t bg-background/95 px-2 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
       aria-label="Primary"
     >
       {items.map((item) => {
@@ -29,11 +29,16 @@ export function TeacherMobileBottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex min-h-[44px] min-w-0 flex-col items-center justify-center gap-1 px-3 py-2 text-xs transition-colors touch-manipulation ${
-              isActive ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+            className={`relative flex min-h-[48px] min-w-0 flex-col items-center justify-center gap-1 rounded-md px-3 py-2 text-xs transition-all touch-manipulation ${
+              isActive
+                ? "text-primary font-semibold"
+                : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
             }`}
           >
-            <Icon className="h-5 w-5 shrink-0" aria-hidden />
+            {isActive && (
+              <span className="absolute -top-[1px] h-[2px] w-10 rounded-full bg-primary" />
+            )}
+            <Icon className={`h-5 w-5 shrink-0 transition-transform ${isActive ? "scale-105" : ""}`} aria-hidden />
             <span className="truncate">{item.label}</span>
           </Link>
         );

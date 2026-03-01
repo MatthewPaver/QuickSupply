@@ -25,7 +25,7 @@ export function TeacherRow({ t }: { t: Teacher }) {
     <div
       role="button"
       tabIndex={0}
-      className="flex items-center justify-between px-6 py-4 hover:bg-muted/50 transition-colors cursor-pointer"
+      className="flex cursor-pointer items-center justify-between px-6 py-4 transition-colors hover:bg-muted/50"
       onClick={() => router.push(`/agency/teachers/${t.id}`)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -41,10 +41,10 @@ export function TeacherRow({ t }: { t: Teacher }) {
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="font-medium">
+            <span className="text-sm font-semibold">
               {t.firstName} {t.lastName}
             </span>
-            <span className="text-xs capitalize text-muted-foreground rounded bg-muted px-2 py-0.5">
+            <span className="rounded bg-muted px-2 py-0.5 text-[11px] font-medium capitalize text-muted-foreground">
               {t.roleType}
             </span>
           </div>
@@ -61,7 +61,7 @@ export function TeacherRow({ t }: { t: Teacher }) {
               </span>
             )}
             {t.emergencyAvailable && (
-              <span className="text-red-500">Emergency OK</span>
+              <span className="rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-600">Emergency OK</span>
             )}
           </div>
         </div>
@@ -69,7 +69,8 @@ export function TeacherRow({ t }: { t: Teacher }) {
       <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
         <a
           href={`tel:${t.phone}`}
-          className="text-primary hover:underline text-sm"
+          aria-label={`Call ${t.firstName} ${t.lastName}`}
+          className="rounded-md p-1 text-primary transition-colors hover:bg-primary/10"
         >
           <Phone className="h-4 w-4" />
         </a>

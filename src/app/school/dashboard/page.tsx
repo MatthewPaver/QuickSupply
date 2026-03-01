@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { coverRequests, assignmentOffers, bookings, teachers } from "@/lib/db/schema";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, inArray } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,17 +35,17 @@ export default async function SchoolDashboard() {
       })
       .from(assignmentOffers)
       .innerJoin(teachers, eq(assignmentOffers.teacherId, teachers.id))
-      .where(and(eq(assignmentOffers.status, "pending")))
+      .where(and(eq(assignmentOffers.status, "pending"), inArray(assignmentOffers.coverRequestId, activeRequestIds)))
       .all();
     pendingOffers.forEach((o) => {
-      if (activeRequestIds.includes(o.coverRequestId)) {
-        offeringToMap.set(o.coverRequestId, `${o.firstName} ${o.lastName}`);
-      }
+      offeringToMap.set(o.coverRequestId, `${o.firstName} ${o.lastName}`);
     });
   }
 
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const filledToday = requests.filter(
-    (r) => r.status === "filled" && r.date === new Date().toISOString().split("T")[0]
+    (r) => r.status === "filled" && r.date === todayStr
   );
   const totalFilled = requests.filter((r) => r.status === "filled").length;
 
@@ -61,19 +61,19 @@ export default async function SchoolDashboard() {
       })
       .from(bookings)
       .innerJoin(teachers, eq(bookings.teacherId, teachers.id))
-      .where(sql`${bookings.cancelledAt} IS NULL`)
-      .all()
-      .filter((b) => filledRequestIds.includes(b.coverRequestId));
+      .where(and(sql`${bookings.cancelledAt} IS NULL`, inArray(bookings.coverRequestId, filledRequestIds)))
+      .all();
     covered.forEach((b) => coveredByMap.set(b.coverRequestId, `${b.firstName} ${b.lastName}`));
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 qs-enter">
       <SchoolLiveRefresh schoolId={session.userId} />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{session.name}</h1>
-          <p className="text-muted-foreground">School Dashboard</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary/80">School Portal</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight">{session.name}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Create requests and track live agency progress.</p>
         </div>
         <Link href="/school/requests/new">
           <Button className="gap-2">
@@ -85,27 +85,27 @@ export default async function SchoolDashboard() {
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="qs-pop">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Requests</CardTitle>
+            <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Active Requests</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{activeRequests.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="qs-pop">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Filled Today</CardTitle>
+            <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Filled Today</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{filledToday.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="qs-pop">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Filled</CardTitle>
+            <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Total Filled</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -133,11 +133,11 @@ export default async function SchoolDashboard() {
               {activeRequests.map((req) => (
                 <div
                   key={req.id}
-                  className="flex items-center justify-between rounded-lg border p-4"
+                  className="flex items-center justify-between rounded-lg border bg-background p-4 transition-colors hover:bg-muted/30"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium capitalize">{req.roleNeeded}</span>
+                      <span className="text-sm font-semibold capitalize">{req.roleNeeded}</span>
                       {req.subject && (
                         <span className="text-sm text-muted-foreground">- {req.subject}</span>
                       )}
@@ -146,7 +146,7 @@ export default async function SchoolDashboard() {
                       )}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {format(new Date(req.date), "EEE, d MMM yyyy")} &middot; {req.startTime} - {req.endTime}
+                      {format(new Date(req.date + "T00:00:00"), "EEE, d MMM yyyy")} &middot; {req.startTime} - {req.endTime}
                       {req.isEmergency && (
                         <span className="ml-2 text-xs font-semibold text-red-600">EMERGENCY</span>
                       )}
@@ -189,7 +189,7 @@ export default async function SchoolDashboard() {
                     <div className="text-sm">
                       <span className="font-medium capitalize">{req.roleNeeded}</span>
                       {req.subject && <span> - {req.subject}</span>}
-                      <span className="text-muted-foreground"> &middot; {format(new Date(req.date), "d MMM")}</span>
+                      <span className="text-muted-foreground"> &middot; {format(new Date(req.date + "T00:00:00"), "d MMM")}</span>
                       {req.status === "filled" && coveredByMap.get(req.id) && (
                         <span className="block text-xs text-muted-foreground mt-0.5">
                           Covered by: {coveredByMap.get(req.id)}

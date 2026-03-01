@@ -22,7 +22,8 @@ export default async function AgencyDashboard() {
 
   const schoolMap = new Map(allSchools.map((s) => [s.id, s]));
 
-  const today = new Date().toISOString().split("T")[0];
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const pending = allRequests.filter((r) => r.status === "pending");
   const offering = allRequests.filter((r) => r.status === "offering");
   const filledToday = allRequests.filter((r) => r.status === "filled" && r.date === today);
@@ -46,48 +47,49 @@ export default async function AgencyDashboard() {
   const activeOfferMap = new Map(activeOffers.map((o) => [o.requestId, o]));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 qs-enter">
       <AgencyLiveRefresh />
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Agency Dashboard</h1>
-          <p className="text-muted-foreground">Real-time overview of all operations</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary/80">Agency Command Centre</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-tight">Agency Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Live overview of requests, offers, and capacity.</p>
         </div>
         <SmsLogDrawer />
       </div>
 
       {/* Stats Row */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="qs-pop">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
+            <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Pending</CardTitle>
             <Clock className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-amber-600">{pending.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="qs-pop">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Being Offered</CardTitle>
+            <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Being Offered</CardTitle>
             <ArrowRight className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-blue-600">{offering.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="qs-pop">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Filled Today</CardTitle>
+            <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Filled Today</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-green-600">{filledToday.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="qs-pop">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Emergencies</CardTitle>
+            <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Emergencies</CardTitle>
             <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
@@ -120,10 +122,10 @@ export default async function AgencyDashboard() {
                 const activeOffer = activeOfferMap.get(req.id);
                 return (
                   <Link key={req.id} href={`/agency/requests/${req.id}`}>
-                    <div className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted/50">
+                    <div className="flex items-center justify-between rounded-lg border bg-background p-4 transition-colors hover:bg-muted/50">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">{school?.name || "Unknown School"}</span>
+                          <span className="text-sm font-semibold">{school?.name || "Unknown School"}</span>
                           {req.isEmergency && (
                             <Badge variant="destructive" className="text-xs">EMERGENCY</Badge>
                           )}
@@ -132,7 +134,7 @@ export default async function AgencyDashboard() {
                           <span className="capitalize">{req.roleNeeded}</span>
                           {req.subject && <span> - {req.subject}</span>}
                           {req.keyStage && <span> ({req.keyStage})</span>}
-                          {" "}&middot; {format(new Date(req.date), "EEE d MMM")} &middot; {req.startTime}
+                          {" "}&middot; {format(new Date(req.date + "T00:00:00"), "EEE d MMM")} &middot; {req.startTime}
                         </div>
                         {activeOffer && (
                           <div className="text-sm text-blue-600">
@@ -152,7 +154,7 @@ export default async function AgencyDashboard() {
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card className="qs-pop">
           <CardHeader>
             <CardTitle className="text-base">Teachers</CardTitle>
           </CardHeader>
@@ -183,7 +185,7 @@ export default async function AgencyDashboard() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="qs-pop">
           <CardHeader>
             <CardTitle className="text-base">Schools</CardTitle>
           </CardHeader>

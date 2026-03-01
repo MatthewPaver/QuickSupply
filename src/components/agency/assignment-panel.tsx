@@ -55,6 +55,7 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [callModal, setCallModal] = useState<{ name: string; phone: string } | null>(null);
+  const [confirmOffering, setConfirmOffering] = useState(false);
 
   const loadRankedTeachers = useCallback(async () => {
     setLoading(true);
@@ -89,13 +90,14 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
     }
   }, [loadRankedTeachers, requestStatus]);
 
-  // Poll for expiry
+  // Poll for expiry only when there's an active offer
   useEffect(() => {
+    if (!hasActiveOffer) return;
     const interval = setInterval(() => {
       fetch("/api/cron").then(() => router.refresh());
     }, 30000);
     return () => clearInterval(interval);
-  }, [router]);
+  }, [router, hasActiveOffer]);
 
   async function handleStartOffering() {
     setActionLoading("offering");
@@ -257,19 +259,20 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
   }
 
   return (
-    <Card>
+    <Card className="qs-pop">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-base">
+        <CardTitle className="text-base font-semibold">
           {hasActiveOffer ? "Active Offer" : "Eligible Teachers"}
         </CardTitle>
         <div className="flex items-center gap-2">
           {hasActiveOffer && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleWithdrawOffer}
-              disabled={actionLoading === "withdraw"}
-            >
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleWithdrawOffer}
+                disabled={actionLoading === "withdraw"}
+                className="border-rose-300 text-rose-700 hover:bg-rose-50"
+              >
               {actionLoading === "withdraw" ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -278,19 +281,35 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
               Withdraw offer
             </Button>
           )}
-          {!hasActiveOffer && ranked.length > 0 && requestStatus === "pending" && (
-            <Button onClick={handleStartOffering} disabled={actionLoading === "offering"} size="sm">
-              {actionLoading === "offering" ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Play className="mr-2 h-4 w-4" />
-              )}
+          {!hasActiveOffer && ranked.length > 0 && requestStatus === "pending" && !confirmOffering && (
+            <Button onClick={() => setConfirmOffering(true)} disabled={actionLoading === "offering"} size="sm">
+              <Play className="mr-2 h-4 w-4" />
               Start Sequential Offering
             </Button>
           )}
         </div>
       </CardHeader>
       <CardContent>
+        {confirmOffering && (
+          <div className="mb-4 rounded-lg border-2 border-primary/30 bg-primary/5 p-4">
+            <p className="text-sm font-medium">
+              Start offering to teachers sequentially? The first teacher in the ranked list will receive an SMS/notification.
+            </p>
+            <div className="mt-3 flex gap-2">
+              <Button
+                size="sm"
+                onClick={() => { setConfirmOffering(false); handleStartOffering(); }}
+                disabled={actionLoading === "offering"}
+              >
+                {actionLoading === "offering" ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Play className="mr-1 h-4 w-4" />}
+                Confirm
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setConfirmOffering(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -300,19 +319,19 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
             No eligible teachers found for this request.
           </p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {ranked.map((r, idx) => (
               <div
                 key={r.teacher.id}
-                className="flex items-center justify-between rounded-lg border p-3 hover:bg-muted/30"
+                className="flex items-center justify-between rounded-lg border bg-background p-3 transition-colors hover:bg-muted/30"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                     {idx + 1}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">
+                      <span className="text-sm font-semibold">
                         {r.teacher.firstName} {r.teacher.lastName}
                       </span>
                       {r.isPreferred && (
@@ -345,20 +364,21 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
                       )}
                       <span className="capitalize">{r.teacher.roleType}</span>
                       {r.teacher.complianceStatus === "compliant" ? (
-                        <Shield className="h-3 w-3 text-green-500" />
+                        <Shield className="h-3 w-3 text-green-500" aria-label="Compliant" />
                       ) : (
-                        <ShieldAlert className="h-3 w-3 text-red-500" />
+                        <ShieldAlert className="h-3 w-3 text-red-500" aria-label="Not compliant" />
                       )}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">
+                  <span className="rounded bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground">
                     {r.score.toFixed(0)} pts
                   </span>
                   <Button
                     variant="ghost"
                     size="sm"
+                    aria-label={`Call ${r.teacher.firstName} ${r.teacher.lastName}`}
                     onClick={() => setCallModal({ name: `${r.teacher.firstName} ${r.teacher.lastName}`, phone: r.teacher.phone })}
                   >
                     <Phone className="h-4 w-4" />
@@ -366,6 +386,7 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
                   <Button
                     variant="outline"
                     size="sm"
+                    aria-label={`Assign ${r.teacher.firstName} ${r.teacher.lastName}`}
                     onClick={() => handleManualAssign(r.teacher.id)}
                     disabled={actionLoading !== null}
                   >

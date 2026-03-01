@@ -1,9 +1,9 @@
 import { requireSession } from "@/lib/auth";
 import Link from "next/link";
 import Image from "next/image";
-import { School, FileText, Clock, History, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/shared/notification-bell";
+import { SignOutButton } from "@/components/shared/sign-out-button";
+import { SchoolTopNav } from "@/components/school/school-top-nav";
 
 export default async function SchoolLayout({
   children,
@@ -20,42 +20,13 @@ export default async function SchoolLayout({
             <Image src="/desian-logo.svg" alt="Desian" width={80} height={22} className="brightness-0 h-6 w-auto" />
             <span className="hidden text-sm font-semibold text-primary sm:inline">QuickSupply</span>
           </Link>
-          <nav className="flex flex-wrap items-center gap-1">
-            <Link href="/school/dashboard">
-              <Button variant="ghost" size="sm" className="gap-1.5 text-xs sm:text-sm">
-                <School className="h-4 w-4" />
-                Dashboard
-              </Button>
-            </Link>
-            <Link href="/school/requests/new">
-              <Button variant="ghost" size="sm" className="gap-1.5 text-xs sm:text-sm">
-                <FileText className="h-4 w-4" />
-                New Request
-              </Button>
-            </Link>
-            <Link href="/school/requests">
-              <Button variant="ghost" size="sm" className="gap-1.5 text-xs sm:text-sm">
-                <Clock className="h-4 w-4" />
-                All Requests
-              </Button>
-            </Link>
-            <Link href="/school/history">
-              <Button variant="ghost" size="sm" className="gap-1.5 text-xs sm:text-sm">
-                <History className="h-4 w-4" />
-                History
-              </Button>
-            </Link>
-          </nav>
+          <SchoolTopNav />
           <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
             <NotificationBell />
-            <span className="max-w-[140px] truncate text-xs text-muted-foreground sm:max-w-none sm:text-sm">
+            <span className="max-w-[140px] truncate text-xs font-medium text-muted-foreground sm:max-w-none sm:text-sm">
               {session.name}
             </span>
-            <Link href="/login">
-              <Button variant="ghost" size="sm">
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </Link>
+            <SignOutButton variant="ghost" size="sm" />
           </div>
         </div>
       </header>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
+import { toast } from "sonner";
 
 interface Props {
   bookingId: string;
@@ -47,8 +48,13 @@ export function ReviewForm({ bookingId, teacherName, existingRating, existingCom
       });
       const data = await res.json();
       if (res.ok && data.success) {
+        toast.success("Review submitted");
         router.refresh();
+      } else {
+        toast.error("Failed to submit review. Please try again.");
       }
+    } catch {
+      toast.error("Network error. Please try again.");
     } finally {
       setLoading(false);
     }

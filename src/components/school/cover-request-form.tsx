@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Loader2, AlertTriangle, User } from "lucide-react";
+import { toast } from "sonner";
 import { format, isToday, isBefore, startOfDay } from "date-fns";
 
 interface PreviousTeacher {
@@ -47,6 +48,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
   const [isEmergency, setIsEmergency] = useState(false);
   // Teacher IDs that are unavailable on the selected date (for previous-teacher list)
   const [unavailableOnDate, setUnavailableOnDate] = useState<Set<string>>(new Set());
+  const [showRequiredHint, setShowRequiredHint] = useState(false);
 
   // Only show previous teachers who match the selected role (teacher/TA/both)
   const eligiblePreviousTeachers = useMemo(() => {
@@ -88,9 +90,16 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
     });
   }, [date, eligiblePreviousTeachers]);
 
+  const timeValid = startTime < endTime;
+  const canSubmit = Boolean(date && roleNeeded && timeValid);
+  const selectedTeacher = eligiblePreviousTeachers.find((t) => t.id === preferredTeacherId) ?? null;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!date || !roleNeeded) return;
+    if (!date || !roleNeeded) {
+      setShowRequiredHint(true);
+      return;
+    }
 
     setLoading(true);
     try {
@@ -112,9 +121,15 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
       });
 
       if (res.ok) {
+        toast.success("Cover request submitted");
         router.push("/school/requests");
         router.refresh();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data?.error || "Failed to submit cover request. Please try again.");
       }
+    } catch {
+      toast.error("Network error. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -123,10 +138,23 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-6">
+        <Card className="qs-pop border-primary/20 bg-primary/[0.03]">
+          <CardContent className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">Step 1</span>
+            <span className={date ? "font-medium" : "text-muted-foreground"}>Date</span>
+            <span className="text-muted-foreground">•</span>
+            <span className={roleNeeded ? "font-medium" : "text-muted-foreground"}>Role</span>
+            <span className="text-muted-foreground">•</span>
+            <span className={keyStage ? "font-medium" : "text-muted-foreground"}>Year Group</span>
+            <span className="text-muted-foreground">•</span>
+            <span className={selectedTeacher ? "font-medium" : "text-muted-foreground"}>Previous Teacher (Optional)</span>
+          </CardContent>
+        </Card>
+
         {/* Date Selection */}
-        <Card>
+        <Card className="qs-pop">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Date</CardTitle>
+            <CardTitle className="text-base">1. Date</CardTitle>
           </CardHeader>
           <CardContent>
             <Calendar
@@ -165,9 +193,9 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
         </Card>
 
         {/* Role & Subject */}
-        <Card>
+        <Card className="qs-pop">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Role Details</CardTitle>
+            <CardTitle className="text-base">2. Role Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -201,9 +229,9 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
         </Card>
 
         {/* Times */}
-        <Card>
+        <Card className="qs-pop">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Times</CardTitle>
+            <CardTitle className="text-base">3. Times</CardTitle>
           </CardHeader>
           <CardContent className="flex gap-4">
             <div className="flex-1 space-y-2">
@@ -222,13 +250,16 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
                 onChange={(e) => setEndTime(e.target.value)}
               />
             </div>
+            {!timeValid && startTime && endTime && (
+              <p className="mt-2 text-xs text-red-600">End time must be after start time.</p>
+            )}
           </CardContent>
         </Card>
 
         {/* Previous Teachers — always shown so the option is visible in the demo; empty state when none yet */}
-        <Card>
+        <Card className="qs-pop">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Request Previous Teacher</CardTitle>
+            <CardTitle className="text-base">4. Request Previous Teacher</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <p className="text-xs text-muted-foreground mb-3">
@@ -290,9 +321,9 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
         </Card>
 
         {/* Notes */}
-        <Card>
+        <Card className="qs-pop">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Additional Notes</CardTitle>
+            <CardTitle className="text-base">5. Additional Notes</CardTitle>
           </CardHeader>
           <CardContent>
             <Textarea
@@ -305,16 +336,33 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
         </Card>
 
         {/* Submit */}
-        <Button type="submit" disabled={loading || !date || !roleNeeded} className="w-full" size="lg">
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Submitting...
-            </>
-          ) : (
-            "Submit Cover Request"
+        <div className="sticky bottom-2 z-10 rounded-xl border bg-background/95 p-3 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/80">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm">
+              <p className="font-medium">
+                {date ? format(date, "EEE d MMM yyyy") : "Choose a date"} • {roleNeeded ? roleNeeded.toUpperCase() : "Choose role"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {selectedTeacher
+                  ? `Preferred teacher: ${selectedTeacher.firstName} ${selectedTeacher.lastName}`
+                  : "Preferred teacher not selected"}
+              </p>
+            </div>
+            <Button type="submit" disabled={loading || !canSubmit} className="w-full sm:w-auto" size="lg">
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Cover Request"
+              )}
+            </Button>
+          </div>
+          {showRequiredHint && !canSubmit && (
+            <p className="mt-2 text-xs text-red-600">Please select both a date and role before submitting.</p>
           )}
-        </Button>
+        </div>
       </div>
     </form>
   );

@@ -11,11 +11,14 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { offerId, response } = body as { offerId: string; response: "accepted" | "declined" };
+  const body = await request.json().catch(() => ({}));
+  const { offerId, response } = body as { offerId: string; response: string };
 
   if (!offerId || !response) {
     return NextResponse.json({ error: "Missing offerId or response" }, { status: 400 });
+  }
+  if (response !== "accepted" && response !== "declined") {
+    return NextResponse.json({ error: "Response must be 'accepted' or 'declined'" }, { status: 400 });
   }
 
   const offer = db.select().from(assignmentOffers).where(eq(assignmentOffers.id, offerId)).get();

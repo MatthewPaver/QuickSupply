@@ -22,6 +22,7 @@ export async function GET() {
     contactNightBeforeOnly: teacher.contactNightBeforeOnly,
     longTermWilling: teacher.longTermWilling,
     roleType: teacher.roleType,
+    complianceStatus: teacher.complianceStatus,
   });
 }
 
@@ -33,16 +34,24 @@ export async function PATCH(request: NextRequest) {
 
   const body = await request.json();
 
-  db.update(teachers)
-    .set({
-      canDrive: body.canDrive,
-      maxDistanceMiles: body.maxDistanceMiles,
-      emergencyAvailable: body.emergencyAvailable,
-      contactNightBeforeOnly: body.contactNightBeforeOnly,
-      longTermWilling: body.longTermWilling,
-    })
-    .where(eq(teachers.id, session.userId))
-    .run();
+  const setFields: {
+    canDrive: boolean;
+    maxDistanceMiles: number;
+    emergencyAvailable: boolean;
+    contactNightBeforeOnly: boolean;
+    longTermWilling: boolean;
+    roleType?: "teacher" | "ta" | "both";
+  } = {
+    canDrive: body.canDrive,
+    maxDistanceMiles: body.maxDistanceMiles,
+    emergencyAvailable: body.emergencyAvailable,
+    contactNightBeforeOnly: body.contactNightBeforeOnly,
+    longTermWilling: body.longTermWilling,
+  };
+  if (body.roleType === "teacher" || body.roleType === "ta" || body.roleType === "both") {
+    setFields.roleType = body.roleType;
+  }
+  db.update(teachers).set(setFields).where(eq(teachers.id, session.userId)).run();
 
   return NextResponse.json({ ok: true });
 }

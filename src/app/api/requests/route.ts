@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden: only schools can create cover requests" }, { status: 403 });
   }
 
-  const body = await request.json();
+  const body = await request.json().catch(() => ({}));
   const { schoolId, date, roleNeeded, subject, keyStage, startTime, endTime, notes, preferredTeacherId, isEmergency } = body;
 
   if (!schoolId || !date || !roleNeeded) {
