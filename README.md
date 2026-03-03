@@ -21,10 +21,10 @@ Copy `.env.example` to `.env.local` if you want to override defaults.
 
 For production (real users, no demo click-to-sign-in):
 
-1. **Environment:** Set `SESSION_SECRET` (e.g. `openssl rand -hex 32`), `CRON_SECRET`, and `NEXT_PUBLIC_DEMO_MODE=false` (or omit it). Set `RESEND_API_KEY` and `FROM_EMAIL` for notification emails; set `NEXT_PUBLIC_APP_URL` to your app URL (e.g. `https://app.quicksupply.com`) for password-reset links.
+1. **Environment:** Set `SESSION_SECRET` (e.g. `openssl rand -hex 32`), `CRON_SECRET`, and `NEXT_PUBLIC_DEMO_MODE=false` (or omit it). Set `RESEND_API_KEY` and `FROM_EMAIL` for notification emails; set `NEXT_PUBLIC_APP_URL` to your app URL (e.g. `https://app.quicksupply.com`) for password-reset links. For distributed production rate limiting, also set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` (otherwise rate limiting is in-memory per instance).
 2. **Database:** Run `pnpm db:migrate` then `pnpm db:seed`. Seeded users get a default password (see seed output; document it or change it after first login). For multi-instance or serverless hosting, plan a migration from SQLite to Postgres and set `DATABASE_URL` accordingly.
 3. **Deploy:** Deploy to Vercel (or similar); add all env vars in the dashboard. Note: SQLite file storage is not suitable for serverless; use Postgres for production at scale.
-4. **Cron:** Call `/api/cron` with `Authorization: Bearer <CRON_SECRET>` or `?secret=<CRON_SECRET>` to expire offers (e.g. Vercel Cron or GitHub Actions).
+4. **Cron:** Call `/api/cron` with `Authorization: Bearer <CRON_SECRET>` or `?secret=<CRON_SECRET>` to expire offers, remove expired password-reset tokens, and prune old read notifications (configurable via `NOTIFICATION_RETENTION_DAYS`, default 30).
 5. **Data deletion:** Users can request account deletion. `DELETE /api/me` (with a valid session) anonymises the current user's PII (name, email, phone set to "deleted") and disables login. Link to this from profile/settings or document for support.
 
 ## Demo Login
@@ -154,7 +154,7 @@ pnpm e2e:ui        # Playwright UI mode
 - [ ] **Background job runner** - Replace client-side cron polling with a proper job queue (BullMQ/Inngest) for offer expiry
 - [ ] **Deployment** - Dockerfile, Railway/Render config, environment variable management
 - [ ] **Testing** - Unit tests for assignment engine, integration tests for API routes; E2E with Playwright is set up (`pnpm e2e`)
-- [ ] **Rate limiting** - Protect API endpoints
+- [x] **Rate limiting** - Protect high-risk endpoints (login, reset, requests/offers/assignments)
 - [ ] **Input sanitization** - Add Zod validation to all API route handlers
 
 ### Error monitoring (Sentry)

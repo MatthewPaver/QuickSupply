@@ -1,4 +1,12 @@
-import { sqliteTable, text, integer, real, primaryKey } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  real,
+  primaryKey,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 // ============================================================
 // CORE ENTITIES
@@ -144,18 +152,24 @@ export const schoolTeacherReviews = sqliteTable("school_teacher_reviews", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 });
 
-export const notificationLog = sqliteTable("notification_log", {
-  id: text("id").primaryKey(),
-  recipientType: text("recipient_type", { enum: ["teacher", "school", "agent"] }).notNull(),
-  recipientId: text("recipient_id").notNull(),
-  type: text("type", { enum: ["offer", "accepted", "declined", "expired", "cancellation", "reminder", "filled"] }).notNull(),
-  title: text("title").notNull(),
-  body: text("body").notNull(),
-  read: integer("read", { mode: "boolean" }).notNull().default(false),
-  relatedEntityType: text("related_entity_type"),
-  relatedEntityId: text("related_entity_id"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-});
+export const notificationLog = sqliteTable(
+  "notification_log",
+  {
+    id: text("id").primaryKey(),
+    recipientType: text("recipient_type", { enum: ["teacher", "school", "agent"] }).notNull(),
+    recipientId: text("recipient_id").notNull(),
+    type: text("type", { enum: ["offer", "accepted", "declined", "expired", "cancellation", "reminder", "filled"] }).notNull(),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    read: integer("read", { mode: "boolean" }).notNull().default(false),
+    relatedEntityType: text("related_entity_type"),
+    relatedEntityId: text("related_entity_id"),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => [
+    index("notification_log_read_created_at_idx").on(table.read, table.createdAt),
+  ]
+);
 
 export const appConfig = sqliteTable("app_config", {
   key: text("key").primaryKey(),
@@ -163,11 +177,19 @@ export const appConfig = sqliteTable("app_config", {
 });
 
 /** Password reset tokens for forgot-password flow. */
-export const passwordResetTokens = sqliteTable("password_reset_tokens", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull(),
-  role: text("role", { enum: ["school", "teacher", "agent"] }).notNull(),
-  token: text("token").notNull(),
-  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-});
+export const passwordResetTokens = sqliteTable(
+  "password_reset_tokens",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    role: text("role", { enum: ["school", "teacher", "agent"] }).notNull(),
+    tokenHash: text("token_hash").notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => [
+    uniqueIndex("password_reset_tokens_token_hash_unique").on(table.tokenHash),
+    index("password_reset_tokens_user_role_idx").on(table.userId, table.role),
+    index("password_reset_tokens_expires_at_idx").on(table.expiresAt),
+  ]
+);

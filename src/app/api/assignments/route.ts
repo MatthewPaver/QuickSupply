@@ -5,7 +5,7 @@ import { startOfferingSequence, manualAssign, cancelBooking, rankTeachersForRequ
 
 export async function POST(request: NextRequest) {
   const identifier = getClientIdentifier(request);
-  if (rateLimitApi(identifier)) {
+  if (await rateLimitApi(identifier)) {
     return NextResponse.json({ error: "Too many requests. Try again in a minute." }, { status: 429 });
   }
 

@@ -1,69 +1,161 @@
-/**
- * In-memory rate limiter. Resets on deploy; for multi-instance production use Redis/KV.
- * Used per-route; key is typically IP or session identifier.
- */
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+interface RuleConfig {
+  limit: number;
+  windowMs: number;
+  window: `${number} m`;
+  prefix: string;
+}
+
+const RULES = {
+  login: {
+    limit: 5,
+    windowMs: 15 * 60 * 1000,
+    window: "15 m",
+    prefix: "qs:rl:login",
+  },
+  api: {
+    limit: 20,
+    windowMs: 60 * 1000,
+    window: "1 m",
+    prefix: "qs:rl:api",
+  },
+  passwordResetRequest: {
+    limit: 3,
+    windowMs: 15 * 60 * 1000,
+    window: "15 m",
+    prefix: "qs:rl:pw-reset-request",
+  },
+  passwordResetConfirm: {
+    limit: 10,
+    windowMs: 15 * 60 * 1000,
+    window: "15 m",
+    prefix: "qs:rl:pw-reset-confirm",
+  },
+} satisfies Record<string, RuleConfig>;
+
+type RuleName = keyof typeof RULES;
 
 interface Entry {
   count: number;
   resetAt: number;
 }
 
-const store = new Map<string, Entry>();
+const memoryStore = new Map<string, Entry>();
 
-/** Window in ms; after this we reset the count for that key. */
-const WINDOW_MS = 15 * 60 * 1000; // 15 minutes for login
-const WINDOW_MS_API = 60 * 1000;   // 1 minute for API
+const upstashEnabled = Boolean(
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+);
 
-function getKey(prefix: string, identifier: string): string {
-  return `${prefix}:${identifier}`;
+const upstashRedis = upstashEnabled ? Redis.fromEnv() : null;
+
+const upstashLimiters: Record<RuleName, Ratelimit> | null = upstashRedis
+  ? {
+      login: new Ratelimit({
+        redis: upstashRedis,
+        limiter: Ratelimit.fixedWindow(RULES.login.limit, RULES.login.window),
+        prefix: RULES.login.prefix,
+      }),
+      api: new Ratelimit({
+        redis: upstashRedis,
+        limiter: Ratelimit.fixedWindow(RULES.api.limit, RULES.api.window),
+        prefix: RULES.api.prefix,
+      }),
+      passwordResetRequest: new Ratelimit({
+        redis: upstashRedis,
+        limiter: Ratelimit.fixedWindow(
+          RULES.passwordResetRequest.limit,
+          RULES.passwordResetRequest.window
+        ),
+        prefix: RULES.passwordResetRequest.prefix,
+      }),
+      passwordResetConfirm: new Ratelimit({
+        redis: upstashRedis,
+        limiter: Ratelimit.fixedWindow(
+          RULES.passwordResetConfirm.limit,
+          RULES.passwordResetConfirm.window
+        ),
+        prefix: RULES.passwordResetConfirm.prefix,
+      }),
+    }
+  : null;
+
+let upstashErrorLogged = false;
+
+function logUpstashFallback(error: unknown) {
+  if (upstashErrorLogged) return;
+  upstashErrorLogged = true;
+  console.error(
+    "[rate-limit] Upstash unavailable, falling back to in-memory limiting.",
+    error
+  );
 }
 
-function isLimited(prefix: string, identifier: string, limit: number, windowMs: number): boolean {
-  const key = getKey(prefix, identifier);
+function getMemoryKey(rule: RuleName, identifier: string): string {
+  return `${RULES[rule].prefix}:${identifier}`;
+}
+
+function isMemoryLimited(rule: RuleName, identifier: string): boolean {
+  const { limit, windowMs } = RULES[rule];
+  const key = getMemoryKey(rule, identifier);
   const now = Date.now();
-  const entry = store.get(key);
+  const entry = memoryStore.get(key);
 
-  if (!entry) {
-    store.set(key, { count: 1, resetAt: now + windowMs });
-    return false;
-  }
-
-  if (now >= entry.resetAt) {
-    store.set(key, { count: 1, resetAt: now + windowMs });
+  if (!entry || now >= entry.resetAt) {
+    memoryStore.set(key, { count: 1, resetAt: now + windowMs });
     return false;
   }
 
   entry.count += 1;
-  if (entry.count > limit) return true;
-  return false;
+  return entry.count > limit;
 }
 
-// Prune old entries periodically so the map doesn't grow forever
 let lastPrune = 0;
-function prune(now: number) {
+function pruneMemory(now: number) {
   if (now - lastPrune < 60_000) return;
   lastPrune = now;
-  for (const [k, v] of store.entries()) {
-    if (now >= v.resetAt) store.delete(k);
+  for (const [key, entry] of memoryStore.entries()) {
+    if (now >= entry.resetAt) memoryStore.delete(key);
   }
 }
 
+async function isLimited(rule: RuleName, identifier: string): Promise<boolean> {
+  if (!identifier) return false;
+
+  if (upstashLimiters) {
+    try {
+      const result = await upstashLimiters[rule].limit(identifier);
+      return !result.success;
+    } catch (error) {
+      logUpstashFallback(error);
+    }
+  }
+
+  pruneMemory(Date.now());
+  return isMemoryLimited(rule, identifier);
+}
+
 /** Returns true if the request should be rate-limited (caller should return 429). */
-export function rateLimitLogin(identifier: string): boolean {
-  prune(Date.now());
-  return isLimited("login", identifier, 5, WINDOW_MS);
+export async function rateLimitLogin(identifier: string): Promise<boolean> {
+  return isLimited("login", identifier);
 }
 
-/** Returns true if the request should be rate-limited for high-value API (requests/assignments/offers). */
-export function rateLimitApi(identifier: string): boolean {
-  prune(Date.now());
-  return isLimited("api", identifier, 20, WINDOW_MS_API);
+/** Returns true if high-value APIs should be rate-limited. */
+export async function rateLimitApi(identifier: string): Promise<boolean> {
+  return isLimited("api", identifier);
 }
 
-/** Returns true if the request should be rate-limited for password reset (3 per 15 min per IP). */
-export function rateLimitPasswordReset(identifier: string): boolean {
-  prune(Date.now());
-  return isLimited("pw-reset", identifier, 3, WINDOW_MS);
+/** Returns true if forgot-password should be rate-limited (3 per 15 min per client). */
+export async function rateLimitPasswordReset(identifier: string): Promise<boolean> {
+  return isLimited("passwordResetRequest", identifier);
+}
+
+/** Returns true if reset-password confirmation should be rate-limited. */
+export async function rateLimitPasswordResetConfirm(
+  identifier: string
+): Promise<boolean> {
+  return isLimited("passwordResetConfirm", identifier);
 }
 
 /** Get client identifier for rate limiting (IP or fallback). */

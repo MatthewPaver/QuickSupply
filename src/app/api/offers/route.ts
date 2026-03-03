@@ -8,7 +8,7 @@ import { handleTeacherResponse } from "@/lib/assignment-engine";
 
 export async function PATCH(request: NextRequest) {
   const identifier = getClientIdentifier(request);
-  if (rateLimitApi(identifier)) {
+  if (await rateLimitApi(identifier)) {
     return NextResponse.json({ error: "Too many requests. Try again in a minute." }, { status: 429 });
   }
 

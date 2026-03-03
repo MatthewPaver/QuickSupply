@@ -1,12 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
-import { and, eq, gt } from "drizzle-orm";
+import { createHash } from "crypto";
+import { and, eq, gt, lte } from "drizzle-orm";
 import * as bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { schools, teachers, agents, passwordResetTokens } from "@/lib/db/schema";
+import {
+  getClientIdentifier,
+  rateLimitPasswordResetConfirm,
+} from "@/lib/rate-limit";
 
 const BCRYPT_ROUNDS = 10;
 
+function hashResetToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
 export async function POST(request: NextRequest) {
+  const identifier = getClientIdentifier(request);
+  if (await rateLimitPasswordResetConfirm(identifier)) {
+    return NextResponse.json(
+      { error: "Too many attempts. Try again later." },
+      { status: 429 }
+    );
+  }
+
   const body = await request.json().catch(() => ({}));
   const token = typeof body?.token === "string" ? body.token.trim() : "";
   const newPassword = typeof body?.newPassword === "string" ? body.newPassword : "";
@@ -19,11 +36,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
   }
 
+  db.delete(passwordResetTokens)
+    .where(lte(passwordResetTokens.expiresAt, new Date()))
+    .run();
+
+  const tokenHash = hashResetToken(token);
   const now = new Date();
   const row = db
     .select()
     .from(passwordResetTokens)
-    .where(and(eq(passwordResetTokens.token, token), gt(passwordResetTokens.expiresAt, now)))
+    .where(
+      and(
+        eq(passwordResetTokens.tokenHash, tokenHash),
+        gt(passwordResetTokens.expiresAt, now)
+      )
+    )
     .get();
 
   if (!row) {
@@ -40,7 +67,15 @@ export async function POST(request: NextRequest) {
     db.update(agents).set({ passwordHash: hashed }).where(eq(agents.id, row.userId)).run();
   }
 
-  db.delete(passwordResetTokens).where(eq(passwordResetTokens.id, row.id)).run();
+  // Invalidate all outstanding reset links for this account.
+  db.delete(passwordResetTokens)
+    .where(
+      and(
+        eq(passwordResetTokens.userId, row.userId),
+        eq(passwordResetTokens.role, row.role)
+      )
+    )
+    .run();
 
   return NextResponse.json({ message: "Password updated. You can now sign in." });
 }

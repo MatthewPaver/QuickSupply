@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,41 +22,78 @@ interface Notification {
 export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
+  const inFlightRef = useRef<Promise<void> | null>(null);
+  const wasOpenedRef = useRef(false);
 
-  const fetchNotifications = useCallback(() => {
-    fetch("/api/notifications", { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((data) => setNotifications(Array.isArray(data) ? data : []))
-      .catch(() => setNotifications([]));
+  const fetchNotifications = useCallback(async () => {
+    if (inFlightRef.current) {
+      await inFlightRef.current;
+      return;
+    }
+
+    const task = (async () => {
+      try {
+        const res = await fetch("/api/notifications", { credentials: "include" });
+        const data = res.ok ? await res.json() : [];
+        setNotifications(Array.isArray(data) ? data : []);
+      } catch {
+        setNotifications([]);
+      }
+    })();
+
+    inFlightRef.current = task;
+    try {
+      await task;
+    } finally {
+      if (inFlightRef.current === task) {
+        inFlightRef.current = null;
+      }
+    }
   }, []);
 
   // Initial fetch on mount
   useEffect(() => {
-    fetchNotifications();
+    void fetchNotifications();
   }, [fetchNotifications]);
 
   // Refetch when SSE delivers a new notification (so badge updates without opening dropdown)
   useEffect(() => {
-    const handler = () => fetchNotifications();
+    const handler = () => void fetchNotifications();
     window.addEventListener("qs-notification", handler);
     return () => window.removeEventListener("qs-notification", handler);
   }, [fetchNotifications]);
 
-  // Fetch only when dropdown opens; mark as read when closing
+  const markNotificationsRead = useCallback(async () => {
+    try {
+      await fetch("/api/notifications", { method: "PATCH", credentials: "include" });
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    } catch {
+      // Ignore best-effort failures; unread state will refresh on next fetch.
+    }
+  }, []);
+
+  // Fetch when opening; mark read once after closing.
   useEffect(() => {
     if (open) {
-      fetchNotifications();
-    } else if (notifications.some((n) => !n.read)) {
-      fetch("/api/notifications", { method: "PATCH", credentials: "include" })
-        .then(() => {
-          setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-        })
-        .catch(() => {});
+      wasOpenedRef.current = true;
+      void fetchNotifications();
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+    if (!wasOpenedRef.current) {
+      return;
+    }
+    wasOpenedRef.current = false;
+
+    if (notifications.some((n) => !n.read)) {
+      void markNotificationsRead();
+    }
+  }, [open, notifications, fetchNotifications, markNotificationsRead]);
+
+  const unreadCount = notifications.reduce(
+    (count, notification) => count + (notification.read ? 0 : 1),
+    0
+  );
   const grouped = {
     new: notifications.filter((n) => !n.read),
     earlier: notifications.filter((n) => n.read),

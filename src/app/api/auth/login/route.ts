@@ -50,7 +50,7 @@ function findUserByEmail(email: string): { userId: string; role: UserRole; name:
 
 export async function POST(request: NextRequest) {
   const identifier = getClientIdentifier(request);
-  if (rateLimitLogin(identifier)) {
+  if (await rateLimitLogin(identifier)) {
     return NextResponse.json({ error: "Too many attempts. Try again later." }, { status: 429 });
   }
 

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomBytes } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import { ulid } from "ulid";
 import { db } from "@/lib/db";
 import { schools, teachers, agents, passwordResetTokens } from "@/lib/db/schema";
 import { sendNotificationEmail } from "@/lib/email";
 import { getClientIdentifier, rateLimitPasswordReset } from "@/lib/rate-limit";
-import { sql } from "drizzle-orm";
+import { and, eq, lte, sql } from "drizzle-orm";
 
 type UserRole = "school" | "teacher" | "agent";
 
@@ -29,15 +29,19 @@ function findUserByEmail(
 }
 
 const TOKEN_EXPIRY_HOURS = 1;
+const GENERIC_RESPONSE = {
+  message: "If that email is registered, you will receive a reset link.",
+};
+
+function hashResetToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
 
 export async function POST(request: NextRequest) {
   const identifier = getClientIdentifier(request);
-  if (rateLimitPasswordReset(identifier)) {
+  if (await rateLimitPasswordReset(identifier)) {
     // Return the same generic message so rate limiting isn't detectable
-    return NextResponse.json(
-      { message: "If that email is registered, you will receive a reset link." },
-      { status: 200 }
-    );
+    return NextResponse.json(GENERIC_RESPONSE, { status: 200 });
   }
 
   const body = await request.json().catch(() => ({}));
@@ -47,33 +51,50 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Email is required." }, { status: 400 });
   }
 
+  // Opportunistic cleanup so expired tokens do not accumulate between cron runs.
+  db.delete(passwordResetTokens)
+    .where(lte(passwordResetTokens.expiresAt, new Date()))
+    .run();
+
   const user = findUserByEmail(email);
   if (!user) {
-    return NextResponse.json({ error: "If that email is registered, you will receive a reset link." }, { status: 200 });
+    return NextResponse.json(GENERIC_RESPONSE, { status: 200 });
   }
 
-  const token = randomBytes(32).toString("hex");
+  const token = randomBytes(32).toString("base64url");
+  const tokenHash = hashResetToken(token);
   const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
   const id = ulid();
+
+  // Keep one active token per account by invalidating old reset links.
+  db.delete(passwordResetTokens)
+    .where(
+      and(
+        eq(passwordResetTokens.userId, user.userId),
+        eq(passwordResetTokens.role, user.role)
+      )
+    )
+    .run();
 
   db.insert(passwordResetTokens)
     .values({
       id,
       userId: user.userId,
       role: user.role,
-      token,
+      tokenHash,
       expiresAt,
       createdAt: new Date(),
     })
     .run();
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const resetLink = `${baseUrl}/reset-password?token=${token}`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? request.nextUrl.origin;
+  const resetUrl = new URL("/reset-password", baseUrl);
+  resetUrl.searchParams.set("token", token);
 
   const subject = "Reset your QuickSupply password";
-  const bodyText = `You requested a password reset. Click the link below to set a new password (valid for ${TOKEN_EXPIRY_HOURS} hour(s)):\n\n${resetLink}\n\nIf you did not request this, you can ignore this email.`;
+  const bodyText = `You requested a password reset. Click the link below to set a new password (valid for ${TOKEN_EXPIRY_HOURS} hour(s)):\n\n${resetUrl.toString()}\n\nIf you did not request this, you can ignore this email.`;
 
   await sendNotificationEmail(user.email, subject, bodyText);
 
-  return NextResponse.json({ message: "If that email is registered, you will receive a reset link." });
+  return NextResponse.json(GENERIC_RESPONSE);
 }
