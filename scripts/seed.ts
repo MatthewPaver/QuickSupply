@@ -1,7 +1,12 @@
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { ulid } from "ulid";
+import * as bcrypt from "bcryptjs";
 import * as schema from "../src/lib/db/schema";
+
+/** Default password for all seeded users (document in README). Cost 10 for production readiness. */
+const DEFAULT_SEED_PASSWORD = "Password1!";
+const SEED_PASSWORD_HASH = bcrypt.hashSync(DEFAULT_SEED_PASSWORD, 10);
 
 const sqlite = new Database("./quicksupply.db");
 sqlite.pragma("journal_mode = WAL");
@@ -29,9 +34,18 @@ function isoDate(date: Date) {
 }
 
 async function seed() {
+  if (process.env.NODE_ENV === "production" && !process.env.SEED_ALLOW_PRODUCTION) {
+    console.error(
+      "\x1b[31mERROR: Refusing to seed in production.\x1b[0m\n" +
+      "Set SEED_ALLOW_PRODUCTION=1 to override."
+    );
+    process.exit(1);
+  }
+
   console.log("Seeding QuickSupply demo data...\n");
 
   // Clear all tables in reverse FK order
+  db.delete(schema.passwordResetTokens).run();
   db.delete(schema.schoolTeacherReviews).run();
   db.delete(schema.notificationLog).run();
   db.delete(schema.bookings).run();
@@ -67,7 +81,7 @@ async function seed() {
       contactName: "Catherine Walsh",
       contactEmail: "admin@stmarysliverpool.sch.uk",
       contactPhone: "0151 207 1234",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       createdAt: daysAgo(90),
     },
     {
@@ -80,7 +94,7 @@ async function seed() {
       contactName: "David Turner",
       contactEmail: "admin@kensingtonprimary.sch.uk",
       contactPhone: "0151 263 5678",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       createdAt: daysAgo(90),
     },
     {
@@ -93,7 +107,7 @@ async function seed() {
       contactName: "Linda McKenzie",
       contactEmail: "admin@broadgreen.sch.uk",
       contactPhone: "0151 722 1561",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       createdAt: daysAgo(85),
     },
     {
@@ -106,7 +120,7 @@ async function seed() {
       contactName: "Patrick Brennan",
       contactEmail: "admin@allsaintsliverpool.sch.uk",
       contactPhone: "0151 263 2323",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       createdAt: daysAgo(80),
     },
     {
@@ -119,7 +133,7 @@ async function seed() {
       contactName: "Helen Foster",
       contactEmail: "admin@mossleyhill.sch.uk",
       contactPhone: "0151 724 1647",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       createdAt: daysAgo(75),
     },
   ]).run();
@@ -151,7 +165,7 @@ async function seed() {
       lastName: "Johnson",
       email: "sarah.johnson@email.com",
       phone: "07700 900001",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       postcode: "L15 6TN",
       lat: 53.3950,
       lng: -2.9200,
@@ -171,7 +185,7 @@ async function seed() {
       lastName: "Chen",
       email: "michael.chen@email.com",
       phone: "07700 900002",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       postcode: "L8 0SY",
       lat: 53.3870,
       lng: -2.9630,
@@ -191,7 +205,7 @@ async function seed() {
       lastName: "Patel",
       email: "amira.patel@email.com",
       phone: "07700 900003",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       postcode: "L17 7BD",
       lat: 53.3780,
       lng: -2.9320,
@@ -211,7 +225,7 @@ async function seed() {
       lastName: "O'Brien",
       email: "james.obrien@email.com",
       phone: "07700 900004",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       postcode: "L6 5DR",
       lat: 53.4190,
       lng: -2.9510,
@@ -231,7 +245,7 @@ async function seed() {
       lastName: "Williams",
       email: "emma.williams@email.com",
       phone: "07700 900005",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       postcode: "L25 5JQ",
       lat: 53.3650,
       lng: -2.8700,
@@ -251,7 +265,7 @@ async function seed() {
       lastName: "Lewis",
       email: "daniel.lewis@email.com",
       phone: "07700 900006",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       postcode: "L12 0BP",
       lat: 53.4230,
       lng: -2.8990,
@@ -271,7 +285,7 @@ async function seed() {
       lastName: "Hassan",
       email: "fatima.hassan@email.com",
       phone: "07700 900007",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       postcode: "L9 3BS",
       lat: 53.4450,
       lng: -2.9650,
@@ -292,7 +306,7 @@ async function seed() {
       lastName: "Roberts",
       email: "tom.roberts@email.com",
       phone: "07700 900008",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       postcode: "L3 8EN",
       lat: 53.4100,
       lng: -2.9800,
@@ -312,7 +326,7 @@ async function seed() {
       lastName: "Kelly",
       email: "rachel.kelly@email.com",
       phone: "07700 900009",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       postcode: "L18 9TT",
       lat: 53.3800,
       lng: -2.9050,
@@ -332,7 +346,7 @@ async function seed() {
       lastName: "Thompson",
       email: "ben.thompson@email.com",
       phone: "07700 900010",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       postcode: "L4 4EG",
       lat: 53.4350,
       lng: -2.9600,
@@ -353,7 +367,7 @@ async function seed() {
       lastName: "Murphy",
       email: "lisa.murphy@email.com",
       phone: "07700 900011",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       postcode: "L14 3NL",
       lat: 53.4080,
       lng: -2.8950,
@@ -373,7 +387,7 @@ async function seed() {
       lastName: "Garcia",
       email: "carlos.garcia@email.com",
       phone: "07700 900012",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       postcode: "L1 1JQ",
       lat: 53.4030,
       lng: -2.9880,
@@ -405,7 +419,7 @@ async function seed() {
       id: agentIds.sarah,
       name: "Sarah Mitchell",
       email: "sarah.mitchell@desian.co.uk",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       isAdmin: true,
       createdAt: daysAgo(100),
     },
@@ -413,7 +427,7 @@ async function seed() {
       id: agentIds.james,
       name: "James Powell",
       email: "james.powell@desian.co.uk",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       isAdmin: false,
       createdAt: daysAgo(80),
     },
@@ -421,7 +435,7 @@ async function seed() {
       id: agentIds.emma,
       name: "Emma Rodriguez",
       email: "emma.rodriguez@desian.co.uk",
-      passwordHash: "demo",
+      passwordHash: SEED_PASSWORD_HASH,
       isAdmin: false,
       createdAt: daysAgo(60),
     },
@@ -940,6 +954,7 @@ async function seed() {
 
   console.log("\nSeed complete!");
   console.log("  5 schools, 12 teachers, 3 agents, 7 requests, 2 bookings");
+  console.log(`  Default password for all users (when not in DEMO_MODE): ${DEFAULT_SEED_PASSWORD}`);
   console.log('  Run "pnpm dev" to start the demo');
 
   sqlite.close();

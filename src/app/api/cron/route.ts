@@ -12,7 +12,8 @@ export async function GET(request: NextRequest) {
     if (secret !== CRON_SECRET) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-  } else if (process.env.NODE_ENV === "production") {
+  } else if (process.env.NODE_ENV !== "development") {
+    // Require CRON_SECRET in all non-development environments (production, staging, preview)
     return NextResponse.json({ error: "CRON_SECRET not configured" }, { status: 500 });
   }
   const expired = checkExpiredOffers();

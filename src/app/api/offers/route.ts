@@ -1,17 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
+import { getClientIdentifier, rateLimitApi } from "@/lib/rate-limit";
 import { db } from "@/lib/db";
 import { assignmentOffers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { handleTeacherResponse } from "@/lib/assignment-engine";
 
 export async function PATCH(request: NextRequest) {
+  const identifier = getClientIdentifier(request);
+  if (rateLimitApi(identifier)) {
+    return NextResponse.json({ error: "Too many requests. Try again in a minute." }, { status: 429 });
+  }
+
   const session = await getSession();
   if (!session || session.role !== "teacher") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json().catch(() => ({}));
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
   const { offerId, response } = body as { offerId: string; response: string };
 
   if (!offerId || !response) {

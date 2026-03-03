@@ -117,6 +117,8 @@ export default function TeacherAvailabilityPage() {
                 <button
                   key={day}
                   onClick={() => toggleRecurring(idx)}
+                  aria-label={`Toggle ${day} availability`}
+                  aria-pressed={recurringDays[idx]}
                   className={`flex h-14 w-14 flex-col items-center justify-center rounded-lg border-2 text-sm font-medium transition-colors ${
                     recurringDays[idx]
                       ? "border-primary bg-primary text-white"

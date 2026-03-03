@@ -35,6 +35,13 @@ export function NotificationBell() {
     fetchNotifications();
   }, [fetchNotifications]);
 
+  // Refetch when SSE delivers a new notification (so badge updates without opening dropdown)
+  useEffect(() => {
+    const handler = () => fetchNotifications();
+    window.addEventListener("qs-notification", handler);
+    return () => window.removeEventListener("qs-notification", handler);
+  }, [fetchNotifications]);
+
   // Fetch only when dropdown opens; mark as read when closing
   useEffect(() => {
     if (open) {

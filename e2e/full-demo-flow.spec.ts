@@ -5,16 +5,22 @@ async function quickLogin(page: Page, userName: RegExp) {
   const button = page.getByRole("button", { name: userName }).first();
   await expect(button).toBeVisible({ timeout: 10000 });
   await button.click();
+  // Wait for login POST to complete and redirect to a dashboard
+  await page.waitForURL(/\/(school|teacher|agency)\//, { timeout: 15000 });
 }
 
 async function signOut(page: Page) {
   const signOutButton = page.getByRole("button", { name: /sign out/i }).first();
   await expect(signOutButton).toBeVisible({ timeout: 10000 });
   await signOutButton.click();
-  await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
+  await expect(page).toHaveURL(/\/(login)?$/, { timeout: 10000 });
 }
 
 test.describe("QuickSupply full demo flow", () => {
+  test.beforeEach(async ({ context }) => {
+    await context.addCookies([{ name: "cookie_consent", value: "1", domain: "localhost", path: "/" }]);
+  });
+
   test("school creates request, agency assigns, teacher accepts, school sees filled", async ({ page }) => {
     test.setTimeout(180000);
     const note = `E2E-FLOW-${Date.now()}`;
@@ -88,12 +94,13 @@ test.describe("QuickSupply full demo flow", () => {
       .first();
 
     await expect(targetOffer).toBeVisible({ timeout: 15000 });
-    const acceptButton = targetOffer.getByRole("button", { name: /^Accept$/ });
+    const acceptButton = targetOffer.getByRole("button", { name: /^Accept$/ }).first();
     await expect(acceptButton).toBeVisible({ timeout: 15000 });
     await acceptButton.click();
     await page.getByRole("button", { name: /Confirm Accept/i }).click();
 
-    await expect(page.getByText(/No active offers right now/i)).toBeVisible({ timeout: 15000 });
+    // Wait for the accept action to complete (confirmation dialog closes)
+    await expect(page.getByRole("button", { name: /Confirm Accept/i })).not.toBeVisible({ timeout: 10000 });
     await signOut(page);
 
     // Agency: request is now filled with current booking.

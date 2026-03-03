@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { coverRequests, teachers } from "@/lib/db/schema";
+import { coverRequests, teachers, schools } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { ulid } from "ulid";
 import { getSession } from "@/lib/auth";
 import { sseManager } from "@/lib/sse-manager";
+import { notifyAllAgents } from "@/lib/notifications";
+import { getClientIdentifier, rateLimitApi } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+  const identifier = getClientIdentifier(request);
+  if (rateLimitApi(identifier)) {
+    return NextResponse.json({ error: "Too many requests. Try again in a minute." }, { status: 429 });
+  }
+
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -16,7 +23,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden: only schools can create cover requests" }, { status: 403 });
   }
 
-  const body = await request.json().catch(() => ({}));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
   const { schoolId, date, roleNeeded, subject, keyStage, startTime, endTime, notes, preferredTeacherId, isEmergency } = body;
 
   if (!schoolId || !date || !roleNeeded) {
@@ -68,6 +81,12 @@ export async function POST(request: NextRequest) {
     type: "new_request",
     data: { requestId: id, schoolId, date, roleNeeded },
   });
+
+  // In-app notifications and email for all agents
+  const school = db.select({ name: schools.name }).from(schools).where(eq(schools.id, schoolId)).get();
+  const schoolName = school?.name ?? "A school";
+  const notifBody = `${schoolName} has submitted a new cover request for ${date} (${roleNeeded}). Log in to assign a teacher.`;
+  notifyAllAgents("reminder", "New cover request", notifBody, "cover_request", id);
 
   return NextResponse.json({ id });
 }

@@ -9,7 +9,8 @@ class SSEManager {
     if (!this.channels.has(channel)) {
       this.channels.set(channel, new Set());
     }
-    this.channels.get(channel)!.add(listener);
+    const listeners = this.channels.get(channel);
+    if (listeners) listeners.add(listener);
 
     // Return unsubscribe function
     return () => {

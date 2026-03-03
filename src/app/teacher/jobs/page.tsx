@@ -63,6 +63,9 @@ export default function TeacherJobsPage() {
   }, []);
 
   useSSE(teacherId ? `/api/sse/teacher/${teacherId}` : null, (event: SSEEvent) => {
+    if (event.type === "notification") {
+      if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("qs-notification"));
+    }
     if (OFFER_EVENTS.includes(event.type)) {
       loadOffers();
       if (event.type === "new_offer" && typeof document !== "undefined" && document.hidden) {

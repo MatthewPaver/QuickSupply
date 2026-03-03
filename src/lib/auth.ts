@@ -33,6 +33,7 @@ function verifySignedCookie(value: string): string | null {
   hmac.update(payload);
   const expected = hmac.digest("hex");
   if (expected.length !== sig.length) return null;
+  if (!/^[0-9a-f]+$/i.test(sig)) return null;
   try {
     if (!timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(sig, "hex"))) return null;
   } catch {

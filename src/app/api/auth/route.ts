@@ -5,6 +5,8 @@ import type { UserRole } from "@/types";
 /**
  * Server-side allowlist of demo users; session is created only for these IDs.
  * Prevents clients from forging arbitrary userId/role/name.
+ * No rate limiting needed: this endpoint only accepts IDs from a fixed allowlist
+ * (no credential brute-forcing possible). The real login (/api/auth/login) is rate-limited.
  */
 const DEMO_USERS: Record<string, { role: UserRole; name: string }> = {
   "school-1": { role: "school", name: "St. Mary's Catholic Primary" },

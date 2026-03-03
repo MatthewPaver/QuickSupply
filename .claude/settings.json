@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(CI=1 npm exec --yes pnpm -- exec playwright test --reporter=list)"
+    ]
+  }
+}

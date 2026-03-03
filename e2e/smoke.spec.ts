@@ -4,6 +4,10 @@ import { test, expect } from "@playwright/test";
  * Smoke E2E: login and key portals load. Requires dev server (or BASE_URL) and seeded DB.
  */
 test.describe("QuickSupply smoke", () => {
+  test.beforeEach(async ({ context }) => {
+    await context.addCookies([{ name: "cookie_consent", value: "1", domain: "localhost", path: "/" }]);
+  });
+
   async function quickLogin(page: import("@playwright/test").Page, userName: RegExp) {
     await page.goto("/login");
     const button = page.getByRole("button", { name: userName }).first();

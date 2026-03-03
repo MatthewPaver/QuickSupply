@@ -4,6 +4,8 @@ import { withSentryConfig } from "@sentry/nextjs";
 const nextConfig: NextConfig = {
   serverExternalPackages: ["better-sqlite3"],
   devIndicators: false,
+  output: "standalone",
+  poweredByHeader: false,
 };
 
 export default withSentryConfig(nextConfig, {

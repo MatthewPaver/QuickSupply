@@ -29,11 +29,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
   const { recurring, unavailableDates } = body as {
-    recurring: { dayOfWeek: number; isAvailable: boolean }[];
-    unavailableDates: string[];
+    recurring?: { dayOfWeek: number; isAvailable: boolean }[];
+    unavailableDates?: string[];
   };
+
+  if (!Array.isArray(recurring) || !Array.isArray(unavailableDates)) {
+    return NextResponse.json({ error: "Missing recurring or unavailableDates arrays" }, { status: 400 });
+  }
 
   // Delete existing availability for this teacher
   db.delete(teacherAvailability)

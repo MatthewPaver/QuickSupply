@@ -161,3 +161,13 @@ export const appConfig = sqliteTable("app_config", {
   key: text("key").primaryKey(),
   value: text("value").notNull(), // JSON-encoded
 });
+
+/** Password reset tokens for forgot-password flow. */
+export const passwordResetTokens = sqliteTable("password_reset_tokens", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  role: text("role", { enum: ["school", "teacher", "agent"] }).notNull(),
+  token: text("token").notNull(),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});

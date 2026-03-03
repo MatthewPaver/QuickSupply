@@ -32,7 +32,19 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let body: any;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  if (typeof body.canDrive !== "boolean" || typeof body.maxDistanceMiles !== "number" ||
+      typeof body.emergencyAvailable !== "boolean" || typeof body.contactNightBeforeOnly !== "boolean" ||
+      typeof body.longTermWilling !== "boolean") {
+    return NextResponse.json({ error: "Missing or invalid profile fields" }, { status: 400 });
+  }
 
   const setFields: {
     canDrive: boolean;

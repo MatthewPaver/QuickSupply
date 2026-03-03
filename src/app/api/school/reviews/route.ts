@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       .set({ rating, comment: comment ?? existing.comment, createdAt: new Date() })
       .where(eq(schoolTeacherReviews.id, existing.id))
       .run();
-    return NextResponse.json({ success: true, message: "Review updated." });
+    return NextResponse.json({ ok: true });
   }
 
   db.insert(schoolTeacherReviews)
@@ -57,5 +57,5 @@ export async function POST(request: NextRequest) {
     })
     .run();
 
-  return NextResponse.json({ success: true, message: "Thanks for your review." });
+  return NextResponse.json({ ok: true });
 }

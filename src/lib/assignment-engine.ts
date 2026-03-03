@@ -14,6 +14,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { ulid } from "ulid";
 import { haversineDistance } from "@/lib/distance";
 import { sseManager } from "@/lib/sse-manager";
+import { createNotification, notifyAllAgents } from "@/lib/notifications";
 import type { RankedTeacher } from "@/types";
 
 function getConfigValue(key: string, fallback: number): number {
@@ -286,6 +287,18 @@ export function offerToNextTeacher(
     data: { requestId, teacherId: teacher.id, teacherName: `${teacher.firstName} ${teacher.lastName}`, expiresAt: expiresAt.toISOString() },
   });
 
+  const school = db.select({ name: schools.name }).from(schools).where(eq(schools.id, request.schoolId)).get();
+  const schoolName = school?.name ?? "A school";
+  createNotification({
+    recipientType: "teacher",
+    recipientId: teacher.id,
+    type: "offer",
+    title: "New job offer",
+    body: `${schoolName} – ${request.date} (${request.roleNeeded}${request.keyStage ? `, ${request.keyStage}` : ""}). ${request.startTime}–${request.endTime}. Log in to accept or decline.`,
+    relatedEntityType: "assignment_offer",
+    relatedEntityId: offerId,
+  });
+
   return { offerId, message: `Offer sent to ${teacher.firstName} ${teacher.lastName}` };
 }
 
@@ -333,6 +346,19 @@ export function handleTeacherResponse(
       data: { requestId: offer.coverRequestId },
     });
 
+    const teacherName = teacher ? `${teacher.firstName} ${teacher.lastName}` : "A teacher";
+    const schoolRow = db.select({ name: schools.name }).from(schools).where(eq(schools.id, request.schoolId)).get();
+    createNotification({
+      recipientType: "school",
+      recipientId: request.schoolId,
+      type: "filled",
+      title: "Cover arranged",
+      body: `Your request for ${request.date} has been filled by ${teacherName}.`,
+      relatedEntityType: "cover_request",
+      relatedEntityId: offer.coverRequestId,
+    });
+    notifyAllAgents("filled", "Request filled", `${schoolRow?.name ?? "A school"} – ${request.date} filled by ${teacherName}.`, "cover_request", offer.coverRequestId);
+
     return { success: true, message: "Job accepted and booking confirmed." };
   }
 
@@ -346,6 +372,10 @@ export function handleTeacherResponse(
     type: "offer_declined",
     data: { requestId: offer.coverRequestId, teacherId: offer.teacherId },
   });
+
+  const teacherRow = db.select().from(teachers).where(eq(teachers.id, offer.teacherId)).get();
+  const declinedName = teacherRow ? `${teacherRow.firstName} ${teacherRow.lastName}` : "A teacher";
+  notifyAllAgents("declined", "Offer declined", `${declinedName} declined. Moving to next teacher.`, "cover_request", offer.coverRequestId);
 
   // Auto-advance to next teacher
   const ranked = rankTeachersForRequest(offer.coverRequestId);
@@ -377,6 +407,15 @@ export function manualAssign(requestId: string, teacherId: string): { success: b
     sseManager.emit(`teacher:${offer.teacherId}`, {
       type: "offer_withdrawn",
       data: { offerId: offer.id },
+    });
+    createNotification({
+      recipientType: "teacher",
+      recipientId: offer.teacherId,
+      type: "reminder",
+      title: "Offer withdrawn",
+      body: "The agency has withdrawn the job offer. You may receive new offers for other dates.",
+      relatedEntityType: "assignment_offer",
+      relatedEntityId: offer.id,
     });
   }
 
@@ -424,6 +463,18 @@ export function manualAssign(requestId: string, teacherId: string): { success: b
     },
   });
 
+  const school = db.select({ name: schools.name }).from(schools).where(eq(schools.id, request.schoolId)).get();
+  const schoolName = school?.name ?? "A school";
+  createNotification({
+    recipientType: "teacher",
+    recipientId: teacher.id,
+    type: "offer",
+    title: "New job offer",
+    body: `${schoolName} – ${request.date} (${request.roleNeeded}${request.keyStage ? `, ${request.keyStage}` : ""}). ${request.startTime}–${request.endTime}. Log in to accept or decline.`,
+    relatedEntityType: "assignment_offer",
+    relatedEntityId: offerId,
+  });
+
   return {
     success: true,
     message: `Offer sent to ${teacher.firstName} ${teacher.lastName}. They can accept or decline on their Jobs page.`,
@@ -449,6 +500,15 @@ export function withdrawCurrentOffer(requestId: string): { success: boolean; mes
     sseManager.emit(`teacher:${offer.teacherId}`, {
       type: "offer_withdrawn",
       data: { offerId: offer.id },
+    });
+    createNotification({
+      recipientType: "teacher",
+      recipientId: offer.teacherId,
+      type: "reminder",
+      title: "Offer withdrawn",
+      body: "The agency has withdrawn the job offer.",
+      relatedEntityType: "assignment_offer",
+      relatedEntityId: offer.id,
     });
   }
 
@@ -481,6 +541,28 @@ export function cancelBooking(
   sseManager.emit("agency", {
     type: "booking_cancelled",
     data: { bookingId, coverRequestId: booking.coverRequestId, teacherId: booking.teacherId },
+  });
+
+  const request = db.select().from(coverRequests).where(eq(coverRequests.id, booking.coverRequestId)).get();
+  if (request) {
+    createNotification({
+      recipientType: "school",
+      recipientId: request.schoolId,
+      type: "cancellation",
+      title: "Booking cancelled",
+      body: `The booking for ${request.date} has been cancelled by the agency.`,
+      relatedEntityType: "booking",
+      relatedEntityId: bookingId,
+    });
+  }
+  createNotification({
+    recipientType: "teacher",
+    recipientId: booking.teacherId,
+    type: "cancellation",
+    title: "Booking cancelled",
+    body: "The agency has cancelled this booking. The request is back to pending.",
+    relatedEntityType: "booking",
+    relatedEntityId: bookingId,
   });
 
   return { success: true, message: "Booking cancelled. Request is back to pending." };

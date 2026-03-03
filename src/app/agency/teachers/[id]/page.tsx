@@ -178,11 +178,11 @@ export default async function AgencyTeacherDetailPage({
               <p className="text-sm text-muted-foreground">No booking history.</p>
             ) : (
               <div className="space-y-2">
-                {teacherBookings.map((b, i) => (
-                  <div key={i} className="flex justify-between rounded border p-2 text-sm">
+                {teacherBookings.map((b) => (
+                  <div key={`${b.date}-${b.schoolName}`} className="flex justify-between rounded border p-2 text-sm">
                     <span>{b.schoolName}</span>
                     <span className="text-muted-foreground">
-                      {format(new Date(b.date), "d MMM")} &middot; {b.roleNeeded}{b.subject ? ` (${b.subject})` : ""}
+                      {format(new Date(b.date + "T00:00:00"), "d MMM")} &middot; {b.roleNeeded}{b.subject ? ` (${b.subject})` : ""}
                     </span>
                   </div>
                 ))}

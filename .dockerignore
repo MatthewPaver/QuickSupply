@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.github
+.env*
+!.env.example
+*.db
+*.db-wal
+*.db-shm
+playwright-report
+test-results
+coverage
+e2e
+*.tsbuildinfo
+.DS_Store
+.vercel

@@ -15,11 +15,21 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
-Copy `.env.example` to `.env.local` if you want to override defaults. Optional: set `CRON_SECRET` in production so only your scheduler can call `/api/cron`.
+Copy `.env.example` to `.env.local` if you want to override defaults.
+
+## Production setup
+
+For production (real users, no demo click-to-sign-in):
+
+1. **Environment:** Set `SESSION_SECRET` (e.g. `openssl rand -hex 32`), `CRON_SECRET`, and `NEXT_PUBLIC_DEMO_MODE=false` (or omit it). Set `RESEND_API_KEY` and `FROM_EMAIL` for notification emails; set `NEXT_PUBLIC_APP_URL` to your app URL (e.g. `https://app.quicksupply.com`) for password-reset links.
+2. **Database:** Run `pnpm db:migrate` then `pnpm db:seed`. Seeded users get a default password (see seed output; document it or change it after first login). For multi-instance or serverless hosting, plan a migration from SQLite to Postgres and set `DATABASE_URL` accordingly.
+3. **Deploy:** Deploy to Vercel (or similar); add all env vars in the dashboard. Note: SQLite file storage is not suitable for serverless; use Postgres for production at scale.
+4. **Cron:** Call `/api/cron` with `Authorization: Bearer <CRON_SECRET>` or `?secret=<CRON_SECRET>` to expire offers (e.g. Vercel Cron or GitHub Actions).
+5. **Data deletion:** Users can request account deletion. `DELETE /api/me` (with a valid session) anonymises the current user's PII (name, email, phone set to "deleted") and disables login. Link to this from profile/settings or document for support.
 
 ## Demo Login
 
-Click any user on the login page to instantly sign in. Seeded with:
+When `NEXT_PUBLIC_DEMO_MODE=true` (default in .env.example), click any user on the login page to sign in instantly. When demo mode is off, sign in with email and password (seeded users have a default password printed by `pnpm db:seed`; use "Forgot password?" to set a new one). Seeded with:
 - **5 Liverpool schools** (St. Mary's, Kensington Primary, Broadgreen International, All Saints, Mossley Hill)
 - **12 teachers/TAs** with varied profiles (ratings, compliance, driving, availability patterns)
 - **3 agency staff** (Sarah Mitchell - Admin, James Powell, Emma Rodriguez)

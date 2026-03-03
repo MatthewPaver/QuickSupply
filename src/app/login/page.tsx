@@ -6,7 +6,11 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { School, GraduationCap, LayoutDashboard, Loader2, ArrowLeft } from "lucide-react";
+
+const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 interface DemoUser {
   id: string;
@@ -57,6 +61,82 @@ const roleSubtitle: Record<Role, string> = {
   agent: "Sign in as agency staff",
 };
 
+function EmailPasswordForm() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.role) {
+        const path = roleRedirect[data.role as Role] ?? "/";
+        router.push(path);
+        return;
+      }
+      setError(data?.error ?? "Invalid email or password.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Card className="w-full max-w-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Sign in</CardTitle>
+        <CardDescription className="text-xs">Enter your email and password</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+              className="w-full"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full"
+            />
+          </div>
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Sign in
+          </Button>
+          <p className="text-center text-xs text-muted-foreground">
+            <Link href="/forgot-password" className="underline hover:text-primary">Forgot password?</Link>
+          </p>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -91,6 +171,35 @@ function LoginContent() {
     teacher: demoUsers.filter((u) => u.role === "teacher"),
     agent: demoUsers.filter((u) => u.role === "agent"),
   };
+
+  if (!isDemoMode) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/10 px-4 py-6 sm:py-8">
+        <div className="mb-6 flex flex-col items-center gap-2 sm:mb-8 sm:gap-3">
+          <Image
+            src="/desian-logo.svg"
+            alt="Desian Education"
+            width={100}
+            height={27}
+            className="brightness-0 h-7 w-auto max-w-[100px] sm:h-8 sm:max-w-[112px]"
+            priority
+          />
+          <h1 className="text-xl font-bold text-primary sm:text-2xl">QuickSupply</h1>
+          <p className="text-center text-xs text-muted-foreground sm:text-sm">Sign in to your account</p>
+        </div>
+        <div className="mb-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back
+          </Link>
+        </div>
+        <EmailPasswordForm />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/10 px-4 py-6 sm:py-8">

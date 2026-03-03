@@ -291,6 +291,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
                       key={t.id}
                       type="button"
                       disabled={unavailable}
+                      aria-label={`Request ${t.firstName} ${t.lastName}${unavailable ? " (unavailable)" : ""}`}
                       onClick={() => !unavailable && setPreferredTeacherId(t.id === preferredTeacherId ? "" : t.id)}
                       className={`flex items-center gap-3 rounded-lg border p-3 text-left transition-colors ${
                         unavailable

@@ -43,8 +43,8 @@ export function SmsLogDrawer() {
           {entries.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">No activity yet.</p>
           ) : (
-            entries.map((e, i) => (
-              <div key={i} className="rounded-lg border bg-muted/30 px-3 py-2 text-sm">
+            entries.map((e) => (
+              <div key={e.at} className="rounded-lg border bg-muted/30 px-3 py-2 text-sm">
                 <div className="text-muted-foreground text-xs">
                   {format(new Date(e.at), "d MMM yyyy, HH:mm")}
                 </div>

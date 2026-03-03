@@ -32,7 +32,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json().catch(() => ({}));
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return NextResponse.json({ error: "Body must be a JSON object" }, { status: 400 });
   }
