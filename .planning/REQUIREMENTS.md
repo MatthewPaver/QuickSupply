@@ -108,11 +108,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| RT-01 | Phase 1 | Pending |
-| RT-02 | Phase 1 | Pending |
-| RT-03 | Phase 1 | Pending |
-| RT-04 | Phase 1 | Pending |
-| RT-05 | Phase 1 | Pending |
+| RT-01 | Phase 1 | Complete (pre-existing) |
+| RT-02 | Phase 1 | Complete (pre-existing) |
+| RT-03 | Phase 1 | Complete (pre-existing) |
+| RT-04 | Phase 1 | Complete (pre-existing) |
+| RT-05 | Phase 1 | Complete (pre-existing) |
 | RD-01 | Phase 2 | Pending |
 | RD-02 | Phase 2 | Pending |
 | RD-03 | Phase 2 | Pending |

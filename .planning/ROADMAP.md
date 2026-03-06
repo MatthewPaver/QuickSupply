@@ -6,7 +6,7 @@ QuickSupply is demo-ready but not yet MVP-complete. This roadmap addresses the 2
 
 ## Phases
 
-- [ ] **Phase 1: Real-Time & SSE Integration** - Wire SSE hooks into all portals for live updates, sync countdown timers, add browser notifications
+- [x] **Phase 1: Real-Time & SSE Integration** - Already implemented: SSE hooks in all portals, countdown timers, browser notifications
 - [ ] **Phase 2: Responsive Design & UI Polish** - Mobile-first teacher portal, loading skeletons, empty states, error boundaries
 - [ ] **Phase 3: Agency Tools & Cover Request Enhancements** - SMS drawer, call modal, withdraw offer, auto-refresh, preferred teacher availability
 - [ ] **Phase 4: Notifications & Search** - Notification bell with unread count, filter/search on agency pages
@@ -27,9 +27,9 @@ QuickSupply is demo-ready but not yet MVP-complete. This roadmap addresses the 2
 **Plans**: TBD
 
 Plans:
-- [ ] 01-01: Integrate use-sse hook into agency dashboard with event handlers
-- [ ] 01-02: Integrate use-sse hook into teacher jobs page with countdown sync
-- [ ] 01-03: Integrate use-sse hook into school dashboard and add Browser Notification API
+- [x] 01-01: Integrate use-sse hook into agency dashboard with event handlers (pre-existing)
+- [x] 01-02: Integrate use-sse hook into teacher jobs page with countdown sync (pre-existing)
+- [x] 01-03: Integrate use-sse hook into school dashboard and add Browser Notification API (pre-existing)
 
 ### Phase 2: Responsive Design & UI Polish
 **Goal**: Teacher portal is mobile-first; all portals show polished loading and error states
@@ -103,7 +103,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Real-Time & SSE Integration | 0/3 | Not started | - |
+| 1. Real-Time & SSE Integration | 3/3 | Complete | 2026-03-06 (pre-existing) |
 | 2. Responsive Design & UI Polish | 0/3 | Not started | - |
 | 3. Agency Tools & Cover Request Enhancements | 0/3 | Not started | - |
 | 4. Notifications & Search | 0/2 | Not started | - |
