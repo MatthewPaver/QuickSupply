@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { teachers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
+import { validateBody, teacherProfileSchema } from "@/lib/api-validation";
 
 export async function GET() {
   const session = await getSession();
@@ -32,19 +33,9 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let body: any;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
-
-  if (typeof body.canDrive !== "boolean" || typeof body.maxDistanceMiles !== "number" ||
-      typeof body.emergencyAvailable !== "boolean" || typeof body.contactNightBeforeOnly !== "boolean" ||
-      typeof body.longTermWilling !== "boolean") {
-    return NextResponse.json({ error: "Missing or invalid profile fields" }, { status: 400 });
-  }
+  const parsed = await validateBody(request, teacherProfileSchema);
+  if (!parsed.success) return parsed.response;
+  const { canDrive, maxDistanceMiles, emergencyAvailable, contactNightBeforeOnly, longTermWilling, roleType } = parsed.data;
 
   const setFields: {
     canDrive: boolean;
@@ -54,14 +45,14 @@ export async function PATCH(request: NextRequest) {
     longTermWilling: boolean;
     roleType?: "teacher" | "ta" | "both";
   } = {
-    canDrive: body.canDrive,
-    maxDistanceMiles: body.maxDistanceMiles,
-    emergencyAvailable: body.emergencyAvailable,
-    contactNightBeforeOnly: body.contactNightBeforeOnly,
-    longTermWilling: body.longTermWilling,
+    canDrive,
+    maxDistanceMiles,
+    emergencyAvailable,
+    contactNightBeforeOnly,
+    longTermWilling,
   };
-  if (body.roleType === "teacher" || body.roleType === "ta" || body.roleType === "both") {
-    setFields.roleType = body.roleType;
+  if (roleType) {
+    setFields.roleType = roleType;
   }
   db.update(teachers).set(setFields).where(eq(teachers.id, session.userId)).run();
 

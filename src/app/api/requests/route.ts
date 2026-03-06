@@ -7,6 +7,7 @@ import { getSession } from "@/lib/auth";
 import { sseManager } from "@/lib/sse-manager";
 import { notifyAllAgents } from "@/lib/notifications";
 import { getClientIdentifier, rateLimitApi } from "@/lib/rate-limit";
+import { validateBody, coverRequestSchema } from "@/lib/api-validation";
 
 export async function POST(request: NextRequest) {
   const identifier = getClientIdentifier(request);
@@ -23,18 +24,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden: only schools can create cover requests" }, { status: 403 });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let body: any;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
-  const { schoolId, date, roleNeeded, subject, keyStage, startTime, endTime, notes, preferredTeacherId, isEmergency } = body;
-
-  if (!schoolId || !date || !roleNeeded) {
-    return NextResponse.json({ error: "Missing required fields: schoolId, date, roleNeeded" }, { status: 400 });
-  }
+  const parsed = await validateBody(request, coverRequestSchema);
+  if (!parsed.success) return parsed.response;
+  const { schoolId, date, roleNeeded, subject, keyStage, startTime, endTime, notes, preferredTeacherId, isEmergency } = parsed.data;
   // School cannot create requests for another school
   if (schoolId !== session.userId) {
     return NextResponse.json({ error: "Forbidden: you can only create requests for your own school" }, { status: 403 });

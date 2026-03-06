@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { schoolTeacherReviews, bookings, coverRequests } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { ulid } from "ulid";
+import { validateBody, reviewSchema } from "@/lib/api-validation";
 
 /** POST: add or update a school review for a completed booking. */
 export async function POST(request: NextRequest) {
@@ -12,14 +13,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { bookingId, rating, comment } = body;
-  if (!bookingId || typeof rating !== "number" || rating < 1 || rating > 5) {
-    return NextResponse.json(
-      { error: "Missing bookingId or invalid rating (1-5)" },
-      { status: 400 }
-    );
-  }
+  const parsed = await validateBody(request, reviewSchema);
+  if (!parsed.success) return parsed.response;
+  const { bookingId, rating, comment } = parsed.data;
 
   const booking = db.select().from(bookings).where(eq(bookings.id, bookingId)).get();
   if (!booking) {

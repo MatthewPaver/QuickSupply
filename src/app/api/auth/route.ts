@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSession, destroySession } from "@/lib/auth";
+import { demoLoginSchema } from "@/lib/api-validation";
 import type { UserRole } from "@/types";
 
 /**
@@ -21,12 +22,11 @@ const DEMO_USERS: Record<string, { role: UserRole; name: string }> = {
 };
 
 export async function POST(request: NextRequest) {
-  const body = await request.json().catch(() => ({}));
-  const userId = typeof body?.userId === "string" ? body.userId : null;
-
-  if (!userId) {
+  const parsed = demoLoginSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
     return NextResponse.json({ error: "Missing userId" }, { status: 400 });
   }
+  const { userId } = parsed.data;
 
   const demo = DEMO_USERS[userId];
   if (!demo) {

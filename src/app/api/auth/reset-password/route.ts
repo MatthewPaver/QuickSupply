@@ -8,6 +8,7 @@ import {
   getClientIdentifier,
   rateLimitPasswordResetConfirm,
 } from "@/lib/rate-limit";
+import { validateBody, resetPasswordSchema } from "@/lib/api-validation";
 
 const BCRYPT_ROUNDS = 10;
 
@@ -24,17 +25,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = await request.json().catch(() => ({}));
-  const token = typeof body?.token === "string" ? body.token.trim() : "";
-  const newPassword = typeof body?.newPassword === "string" ? body.newPassword : "";
-
-  if (!token) {
-    return NextResponse.json({ error: "Reset token is required." }, { status: 400 });
-  }
-
-  if (!newPassword || newPassword.length < 8) {
-    return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
-  }
+  const parsed = await validateBody(request, resetPasswordSchema);
+  if (!parsed.success) return parsed.response;
+  const { token, newPassword } = parsed.data;
 
   db.delete(passwordResetTokens)
     .where(lte(passwordResetTokens.expiresAt, new Date()))

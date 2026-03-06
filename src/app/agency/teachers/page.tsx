@@ -1,8 +1,7 @@
 import { db } from "@/lib/db";
 import { teachers } from "@/lib/db/schema";
 import { requireSession } from "@/lib/auth";
-import { Card, CardContent } from "@/components/ui/card";
-import { TeacherRow } from "@/components/agency/teacher-row";
+import { TeachersFilter } from "@/components/agency/teachers-filter";
 
 export default async function AgencyTeachersPage() {
   await requireSession("agent");
@@ -16,15 +15,7 @@ export default async function AgencyTeachersPage() {
         <p className="text-muted-foreground">{allTeachers.length} registered</p>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          <div className="divide-y">
-            {allTeachers.map((t) => (
-              <TeacherRow key={t.id} t={t} />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <TeachersFilter teachers={allTeachers} />
     </div>
   );
 }

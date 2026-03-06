@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { schools, teachers, agents } from "@/lib/db/schema";
 import { createSession } from "@/lib/auth";
 import { getClientIdentifier, rateLimitLogin } from "@/lib/rate-limit";
+import { validateBody, loginSchema } from "@/lib/api-validation";
 import type { UserRole } from "@/types";
 
 /**
@@ -54,13 +55,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Too many attempts. Try again later." }, { status: 429 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const email = typeof body?.email === "string" ? body.email : "";
-  const password = typeof body?.password === "string" ? body.password : "";
-
-  if (!email || !password) {
-    return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
-  }
+  const parsed = await validateBody(request, loginSchema);
+  if (!parsed.success) return parsed.response;
+  const { email, password } = parsed.data;
 
   const user = findUserByEmail(email);
   if (!user) {

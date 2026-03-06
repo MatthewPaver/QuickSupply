@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getClientIdentifier, rateLimitApi } from "@/lib/rate-limit";
 import { startOfferingSequence, manualAssign, cancelBooking, rankTeachersForRequest, withdrawCurrentOffer } from "@/lib/assignment-engine";
+import { validateBody, assignmentActionSchema } from "@/lib/api-validation";
 
 export async function POST(request: NextRequest) {
   const identifier = getClientIdentifier(request);
@@ -14,40 +15,30 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: Record<string, unknown>;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
-  const { action, requestId, teacherId, bookingId, reason } = body as {
-    action?: string;
-    requestId?: string;
-    teacherId?: string;
-    bookingId?: string;
-    reason?: string;
-  };
+  const parsed = await validateBody(request, assignmentActionSchema);
+  if (!parsed.success) return parsed.response;
+  const data = parsed.data;
 
   try {
-    switch (action) {
+    switch (data.action) {
       case "start_offering": {
-        const result = startOfferingSequence(requestId!);
+        const result = startOfferingSequence(data.requestId);
         return NextResponse.json(result);
       }
       case "manual_assign": {
-        const result = manualAssign(requestId!, teacherId!);
+        const result = manualAssign(data.requestId, data.teacherId);
         return NextResponse.json(result);
       }
       case "cancel_booking": {
-        const result = cancelBooking(bookingId!, reason || "Cancelled by agency");
+        const result = cancelBooking(data.bookingId, data.reason || "Cancelled by agency");
         return NextResponse.json(result);
       }
       case "withdraw_offer": {
-        const result = withdrawCurrentOffer(requestId!);
+        const result = withdrawCurrentOffer(data.requestId);
         return NextResponse.json(result);
       }
       case "rank_teachers": {
-        const ranked = rankTeachersForRequest(requestId!);
+        const ranked = rankTeachersForRequest(data.requestId);
         return NextResponse.json(ranked.map((r) => ({
           ...r,
           teacher: {
@@ -63,8 +54,6 @@ export async function POST(request: NextRequest) {
           },
         })));
       }
-      default:
-        return NextResponse.json({ error: "Unknown action" }, { status: 400 });
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Assignment operation failed";

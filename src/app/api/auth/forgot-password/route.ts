@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { schools, teachers, agents, passwordResetTokens } from "@/lib/db/schema";
 import { sendNotificationEmail } from "@/lib/email";
 import { getClientIdentifier, rateLimitPasswordReset } from "@/lib/rate-limit";
+import { validateBody, forgotPasswordSchema } from "@/lib/api-validation";
 import { and, eq, lte, sql } from "drizzle-orm";
 
 type UserRole = "school" | "teacher" | "agent";
@@ -44,12 +45,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(GENERIC_RESPONSE, { status: 200 });
   }
 
-  const body = await request.json().catch(() => ({}));
-  const email = typeof body?.email === "string" ? body.email : "";
-
-  if (!email.trim()) {
-    return NextResponse.json({ error: "Email is required." }, { status: 400 });
-  }
+  const parsed = await validateBody(request, forgotPasswordSchema);
+  if (!parsed.success) return parsed.response;
+  const { email } = parsed.data;
 
   // Opportunistic cleanup so expired tokens do not accumulate between cron runs.
   db.delete(passwordResetTokens)

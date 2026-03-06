@@ -4,6 +4,7 @@ import { teacherAvailability } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { ulid } from "ulid";
+import { validateBody, teacherAvailabilitySchema } from "@/lib/api-validation";
 
 export async function GET() {
   const session = await getSession();
@@ -29,21 +30,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: Record<string, unknown>;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
-
-  const { recurring, unavailableDates } = body as {
-    recurring?: { dayOfWeek: number; isAvailable: boolean }[];
-    unavailableDates?: string[];
-  };
-
-  if (!Array.isArray(recurring) || !Array.isArray(unavailableDates)) {
-    return NextResponse.json({ error: "Missing recurring or unavailableDates arrays" }, { status: 400 });
-  }
+  const parsed = await validateBody(request, teacherAvailabilitySchema);
+  if (!parsed.success) return parsed.response;
+  const { recurring, unavailableDates } = parsed.data;
 
   // Delete existing availability for this teacher
   db.delete(teacherAvailability)

@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { appConfig } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
+import { validateBody, settingsSchema } from "@/lib/api-validation";
 
 /** Allowed config keys and their validation. Unknown keys are rejected. */
 const ALLOWED_KEYS: Record<string, { min: number; max: number }> = {
@@ -32,15 +33,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: Record<string, unknown>;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
-  if (typeof body !== "object" || body === null || Array.isArray(body)) {
-    return NextResponse.json({ error: "Body must be a JSON object" }, { status: 400 });
-  }
+  const parsed = await validateBody(request, settingsSchema);
+  if (!parsed.success) return parsed.response;
+  const body = parsed.data;
 
   for (const [key, value] of Object.entries(body)) {
     const schema = ALLOWED_KEYS[key];

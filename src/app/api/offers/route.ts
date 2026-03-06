@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { assignmentOffers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { handleTeacherResponse } from "@/lib/assignment-engine";
+import { validateBody, offerResponseSchema } from "@/lib/api-validation";
 
 export async function PATCH(request: NextRequest) {
   const identifier = getClientIdentifier(request);
@@ -17,20 +18,9 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: Record<string, unknown>;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
-  }
-  const { offerId, response } = body as { offerId: string; response: string };
-
-  if (!offerId || !response) {
-    return NextResponse.json({ error: "Missing offerId or response" }, { status: 400 });
-  }
-  if (response !== "accepted" && response !== "declined") {
-    return NextResponse.json({ error: "Response must be 'accepted' or 'declined'" }, { status: 400 });
-  }
+  const parsed = await validateBody(request, offerResponseSchema);
+  if (!parsed.success) return parsed.response;
+  const { offerId, response } = parsed.data;
 
   const offer = db.select().from(assignmentOffers).where(eq(assignmentOffers.id, offerId)).get();
   if (!offer || offer.teacherId !== session.userId) {
