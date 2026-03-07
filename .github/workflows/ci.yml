@@ -5,6 +5,9 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -65,6 +68,15 @@ jobs:
 
           curl -fsS http://127.0.0.1:3000/ >/dev/null
           pnpm e2e:routes
+
+      - name: Upload app logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quicksupply-start-log
+          path: /tmp/quicksupply-start.log
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Print app logs on failure
         if: failure()

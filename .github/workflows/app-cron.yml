@@ -1,0 +1,52 @@
+name: App Cron
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-cron
+  cancel-in-progress: true
+
+jobs:
+  trigger-cron-endpoint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Verify cron secrets
+        env:
+          CRON_URL: ${{ secrets.APP_CRON_URL }}
+          CRON_SECRET: ${{ secrets.APP_CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "APP_CRON_URL and/or APP_CRON_SECRET are not configured. Skipping run."
+            exit 0
+          fi
+
+      - name: Trigger cron
+        if: ${{ secrets.APP_CRON_URL != '' && secrets.APP_CRON_SECRET != '' }}
+        env:
+          CRON_URL: ${{ secrets.APP_CRON_URL }}
+          CRON_SECRET: ${{ secrets.APP_CRON_SECRET }}
+        run: |
+          set -euo pipefail
+
+          response_file="$(mktemp)"
+          status_code="$(
+            curl -sS -o "$response_file" -w "%{http_code}" \
+              -H "Authorization: Bearer $CRON_SECRET" \
+              "$CRON_URL"
+          )"
+
+          cat "$response_file"
+          echo
+
+          if [ "$status_code" -lt 200 ] || [ "$status_code" -ge 300 ]; then
+            echo "Cron request failed with HTTP $status_code"
+            exit 1
+          fi
