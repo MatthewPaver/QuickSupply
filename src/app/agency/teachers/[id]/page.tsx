@@ -10,6 +10,8 @@ import { Star, Car, MapPin, Phone, Mail, Ban } from "lucide-react";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import Link from "next/link";
+import { TeacherComplianceForm } from "@/components/agency/teacher-compliance-form";
+import { TeacherCredentialsForm } from "@/components/agency/teacher-credentials-form";
 
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -153,6 +155,22 @@ export default async function AgencyTeacherDetailPage({
             </div>
           </CardContent>
         </Card>
+
+        <TeacherComplianceForm
+          teacherId={id}
+          initialCompliance={{
+            dbsStatus: teacher.dbsStatus,
+            dbsExpiry: teacher.dbsExpiry ?? null,
+            rightToWork: teacher.rightToWork,
+            complianceStatus: teacher.complianceStatus,
+            complianceNotes: teacher.complianceNotes ?? null,
+          }}
+        />
+
+        <TeacherCredentialsForm
+          teacherId={id}
+          currentEmail={teacher.email}
+        />
 
         {blacklisted.length > 0 && (
           <Card>
