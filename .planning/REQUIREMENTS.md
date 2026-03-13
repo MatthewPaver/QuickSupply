@@ -11,9 +11,9 @@ Requirements for the Operability milestone. Phases continue from Phase 5 (v1.0 e
 
 - [x] **TCH-01**: Agency can create a new teacher profile with core fields (name, role, email, phone, address, driving licence)
 - [x] **TCH-02**: Agency can edit an existing teacher's core profile fields
-- [ ] **TCH-03**: Agency can set a teacher's compliance status (DBS check status + expiry date, right-to-work status)
-- [ ] **TCH-04**: Agency can edit a teacher's compliance fields
-- [ ] **TCH-05**: Agency can create login credentials for a new teacher (email + temporary password)
+- [x] **TCH-03**: Agency can set a teacher's compliance status (DBS check status + expiry date, right-to-work status)
+- [x] **TCH-04**: Agency can edit a teacher's compliance fields
+- [x] **TCH-05**: Agency can create login credentials for a new teacher (email + temporary password)
 - [ ] **TCH-06**: Agency can deactivate a teacher account (prevents login and hides from assignment engine)
 - [ ] **TCH-07**: Agency can reactivate a deactivated teacher account
 
@@ -82,9 +82,9 @@ Deferred to future release.
 |-------------|-------|--------|
 | TCH-01 | Phase 6 | Complete |
 | TCH-02 | Phase 6 | Complete |
-| TCH-03 | Phase 6 | Pending |
-| TCH-04 | Phase 6 | Pending |
-| TCH-05 | Phase 6 | Pending |
+| TCH-03 | Phase 6 | Complete |
+| TCH-04 | Phase 6 | Complete |
+| TCH-05 | Phase 6 | Complete |
 | TCH-06 | Phase 6 | Pending |
 | TCH-07 | Phase 6 | Pending |
 | DOC-01 | Phase 6 | Pending |
