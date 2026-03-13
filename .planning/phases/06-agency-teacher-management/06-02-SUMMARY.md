@@ -115,3 +115,14 @@ None - no external service configuration required.
 ---
 *Phase: 06-agency-teacher-management*
 *Completed: 2026-03-13*
+
+## Self-Check: PASSED
+
+- FOUND: src/app/api/agency/teachers/[id]/compliance/route.ts
+- FOUND: src/app/api/agency/teachers/[id]/credentials/route.ts
+- FOUND: src/components/agency/teacher-compliance-form.tsx
+- FOUND: src/components/agency/teacher-credentials-form.tsx
+- FOUND: drizzle/0003_teacher_management.sql
+- FOUND: .planning/phases/06-agency-teacher-management/06-02-SUMMARY.md
+- FOUND: Task commit ce56424
+- FOUND: Task commit 0280866
