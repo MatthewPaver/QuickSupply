@@ -21,7 +21,7 @@
 ### 🚧 v1.1 Operability (In Progress)
 
 - [x] **Phase 6: Agency Teacher Management** (3/3 plans complete)
-- [ ] **Phase 7: Agency School Management** (0 plans)
+- [ ] **Phase 7: Agency School Management** (2 plans)
 - [ ] **Phase 8: Review Submission UI** (0 plans)
 
 ---
@@ -55,7 +55,11 @@ Plans:
   2. Agency staff can open an existing school's profile and save updated fields, with changes reflected immediately
   3. Agency staff can create login credentials (email + temporary password) for a school contact so that school can sign in and submit cover requests
   4. Agency staff can deactivate a school account (preventing login and hiding the school from the cover request flow)
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — Create/edit school forms + API routes (SCH-01, SCH-02)
+- [ ] 07-02-PLAN.md — Login credentials + deactivation (SCH-03, SCH-04)
 
 ### Phase 8: Review Submission UI
 **Goal**: Schools can submit structured reviews on completed bookings, and those reviews immediately update the teacher's rating and feed into assignment engine scoring.
@@ -77,5 +81,5 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 6. Agency Teacher Management | 3/3 | Complete | 2026-03-13 |
-| 7. Agency School Management | 0/0 | Not started | - |
+| 7. Agency School Management | 0/2 | Planned | - |
 | 8. Review Submission UI | 0/0 | Not started | - |
