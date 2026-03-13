@@ -78,8 +78,6 @@ Deferred to future release.
 
 ## Traceability
 
-Populated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | TCH-01 | Phase 6 | Pending |
@@ -89,6 +87,7 @@ Populated during roadmap creation.
 | TCH-05 | Phase 6 | Pending |
 | TCH-06 | Phase 6 | Pending |
 | TCH-07 | Phase 6 | Pending |
+| DOC-01 | Phase 6 | Pending |
 | SCH-01 | Phase 7 | Pending |
 | SCH-02 | Phase 7 | Pending |
 | SCH-03 | Phase 7 | Pending |
@@ -99,7 +98,6 @@ Populated during roadmap creation.
 | RVW-04 | Phase 8 | Pending |
 | RVW-05 | Phase 8 | Pending |
 | RVW-06 | Phase 8 | Pending |
-| DOC-01 | Phase 6 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 18 total
@@ -108,4 +106,4 @@ Populated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-13*
-*Last updated: 2026-03-13 after v1.1 milestone start*
+*Last updated: 2026-03-13 after v1.1 roadmap creation*
