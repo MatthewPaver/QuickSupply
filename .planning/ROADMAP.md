@@ -21,7 +21,7 @@
 ### 🚧 v1.1 Operability (In Progress)
 
 - [x] **Phase 6: Agency Teacher Management** (3/3 plans complete)
-- [ ] **Phase 7: Agency School Management** (2 plans)
+- [x] **Phase 7: Agency School Management** (2 plans) (completed 2026-03-13)
 - [ ] **Phase 8: Review Submission UI** (0 plans)
 
 ---
@@ -81,5 +81,5 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 6. Agency Teacher Management | 3/3 | Complete | 2026-03-13 |
-| 7. Agency School Management | 1/2 | In Progress|  |
+| 7. Agency School Management | 2/2 | Complete   | 2026-03-13 |
 | 8. Review Submission UI | 0/0 | Not started | - |

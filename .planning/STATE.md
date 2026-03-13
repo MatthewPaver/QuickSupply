@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 ## Current Position
 
 Phase: 7 — Agency School Management
-Plan: 01 (complete)
-Status: Plan 07-01 complete — school create/edit forms, phase column migration, and API routes shipped
-Last activity: 2026-03-13 — 07-01 executed (SCH-01, SCH-02 complete)
+Plan: 02 (complete)
+Status: Plan 07-02 complete — school credentials, deactivation/reactivation, login guard, and cover request guard shipped
+Last activity: 2026-03-13 — 07-02 executed (SCH-03, SCH-04 complete)
 
 ```
 v1.1 Progress: [          ] 0% (0/3 phases complete)
@@ -35,6 +35,10 @@ All key decisions logged in PROJECT.md Key Decisions table.
 - 07-01: SchoolForm two-card layout (School Details, Contact Information) matches plan spec
 - 07-01: schools list rows wrapped in Link (not nested <a>) for full-row navigation
 - 07-01: phase column inserted between passwordHash and createdAt in schools table
+- 07-02: School credentials route uses contactEmail field (matching schema field name, not email)
+- 07-02: School isActive guard in login/route.ts added after teacher isActive guard, mirroring 06-03 pattern
+- 07-02: SchoolCredentialsForm uses toast.success for success feedback (newer pattern vs inline message)
+- 07-02: Inactive schools remain visible in list so agency can find and reactivate them
 
 ### Pending Todos
 
@@ -47,5 +51,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-13
-Stopped at: Completed 07-01-PLAN.md — school create/edit forms, phase column migration, and API routes
+Stopped at: Completed 07-02-PLAN.md — school credentials, deactivation/reactivation, login guard, cover request guard
 Resume file: None
