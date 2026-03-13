@@ -22,7 +22,7 @@
 
 - [x] **Phase 6: Agency Teacher Management** (3/3 plans complete)
 - [x] **Phase 7: Agency School Management** (2 plans) (completed 2026-03-13)
-- [ ] **Phase 8: Review Submission UI** (0 plans)
+- [ ] **Phase 8: Review Submission UI** (2 plans)
 
 ---
 
@@ -72,7 +72,11 @@ Plans:
   4. School can indicate whether they would rebook the teacher (yes/no toggle), and that preference is captured with the review
   5. The submitted review (rating, comment, rebook flag) appears on the teacher's agency profile page immediately after submission
   6. The teacher's average rating shown across the platform updates immediately after a new review is submitted, and the updated score feeds into the next assignment engine ranking
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Schema migration, Zod validation, API route, ReviewForm (RVW-01, RVW-02, RVW-03, RVW-04, RVW-06)
+- [ ] 08-02-PLAN.md — Agency teacher detail reviews card + verification checkpoint (RVW-05)
 
 ---
 
@@ -82,4 +86,4 @@ Plans:
 |-------|----------------|--------|-----------|
 | 6. Agency Teacher Management | 3/3 | Complete | 2026-03-13 |
 | 7. Agency School Management | 2/2 | Complete    | 2026-03-13 |
-| 8. Review Submission UI | 0/0 | Not started | - |
+| 8. Review Submission UI | 0/2 | In progress | - |
