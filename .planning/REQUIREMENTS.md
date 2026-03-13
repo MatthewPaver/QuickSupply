@@ -19,8 +19,8 @@ Requirements for the Operability milestone. Phases continue from Phase 5 (v1.0 e
 
 ### Agency School Management
 
-- [ ] **SCH-01**: Agency can create a new school profile (name, address, phase, contact name/email/phone)
-- [ ] **SCH-02**: Agency can edit an existing school's profile fields
+- [x] **SCH-01**: Agency can create a new school profile (name, address, phase, contact name/email/phone)
+- [x] **SCH-02**: Agency can edit an existing school's profile fields
 - [ ] **SCH-03**: Agency can create login credentials for a new school contact (email + temporary password)
 - [ ] **SCH-04**: Agency can deactivate a school account (prevents login and hides from cover request flow)
 
@@ -88,8 +88,8 @@ Deferred to future release.
 | TCH-06 | Phase 6 | Complete |
 | TCH-07 | Phase 6 | Complete |
 | DOC-01 | Phase 6 | Complete |
-| SCH-01 | Phase 7 | Pending |
-| SCH-02 | Phase 7 | Pending |
+| SCH-01 | Phase 7 | Complete |
+| SCH-02 | Phase 7 | Complete |
 | SCH-03 | Phase 7 | Pending |
 | SCH-04 | Phase 7 | Pending |
 | RVW-01 | Phase 8 | Pending |
