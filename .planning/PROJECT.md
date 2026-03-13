@@ -10,10 +10,19 @@ Schools can submit a cover request and have it filled by the best available teac
 
 ## Current State
 
-**Version:** v1.0 MVP — shipped 2026-03-07
+**Version:** v1.1 (in progress)
 **Codebase:** ~10,200 lines TypeScript
 **Stack:** Next.js 16 (App Router), TypeScript, SQLite/Drizzle ORM, Tailwind CSS v4, shadcn/ui
-**Status:** Demo-ready and MVP-complete. All 27/27 v1 requirements satisfied.
+**Status:** v1.0 MVP shipped. Building admin CRUD and review UI for real-world operability.
+
+## Current Milestone: v1.1 — Operability
+
+**Goal:** Make the app operable without seeding — agency can manage their own data, schools can submit real reviews.
+
+**Target features:**
+- Agency admin CRUD for teachers and schools
+- School review submission UI on completed bookings
+- README updated to reflect MVP-complete status
 
 ## Requirements
 
@@ -49,19 +58,27 @@ Schools can submit a cover request and have it filled by the best available teac
 
 ### Active
 
-*(None — planning next milestone. Run `/gsd:new-milestone` to define v1.1 requirements.)*
+- [ ] Agency can create new teacher profiles with all required fields (name, role, email, phone, address, compliance docs)
+- [ ] Agency can edit existing teacher profiles
+- [ ] Agency can create new school profiles (name, address, contact, phase)
+- [ ] Agency can edit existing school profiles
+- [ ] Agency can manage teacher compliance status and expiry dates
+- [ ] School can submit a star rating and written review for a completed booking
+- [ ] Submitted reviews appear on teacher profile and feed into assignment engine scoring
+- [ ] README updated to reflect MVP-complete status and remove outdated Priority checklists
 
 ### Out of Scope
 
 - OAuth/social login — email/password sufficient; custom HMAC session working
-- Real SMS integration (Twilio) — simulated for MVP; production feature later
-- PostgreSQL migration — SQLite sufficient for single-instance demo/pilot
-- Background job runner (BullMQ/Inngest) — cron polling adequate for current scale
-- Multi-day booking support — single-date covers only for v1
+- Real SMS integration (Twilio) — simulated for MVP; production feature v1.2
+- PostgreSQL migration — SQLite sufficient for single-instance demo/pilot; v1.2
+- Background job runner (BullMQ/Inngest) — cron polling adequate for current scale; v1.2
+- Multi-day booking support — single-date covers only; v2.0
 - Drag-and-drop agent-teacher reassignment — simple UI sufficient
-- Dashboard analytics (fill rate, response rates) — enhancement, not MVP
+- Dashboard analytics (fill rate, response rates) — v2.0
 - Activity/audit log timeline — notification log covers basic audit needs
-- Teacher/school CRUD forms — all data seeded for demo; production feature later
+- Teacher/school delete — soft-delete or deactivation only; hard delete too risky
+- Document upload for compliance — file fields only for v1.1; upload infrastructure v1.2
 
 ## Context
 
@@ -69,11 +86,11 @@ Schools can submit a cover request and have it filled by the best available teac
 - **Stack**: Next.js 16 (App Router), TypeScript, SQLite/Drizzle ORM, Tailwind CSS v4, shadcn/ui
 - **Deployment target**: Vercel (or similar); currently SQLite file-based, single-instance
 - **Seed data**: 5 Liverpool schools, 12 teachers/TAs, 3 agency staff, 7 sample requests
-- **Known tech debt**: Review form seeded only (no admin CRUD); README Priority checklists need refresh; no unit tests for Zod schemas or assignment engine scoring
+- **Known tech debt**: No unit tests for Zod schemas or assignment engine scoring
 
 ## Constraints
 
-- **Tech stack**: Next.js 16 + SQLite + Drizzle ORM — established, not changing for v1.1
+- **Tech stack**: Next.js 16 + SQLite + Drizzle ORM — not changing for v1.1
 - **Database**: SQLite single-writer — no concurrent multi-instance deployment
 - **Branding**: Must use Desian Education colours and logo throughout
 - **Demo mode**: Must maintain click-to-sign-in demo mode alongside real auth
@@ -94,4 +111,4 @@ Schools can submit a cover request and have it filled by the best available teac
 | Zod discriminated union for assignment actions | Type-safe per-action field access | ✓ Good |
 
 ---
-*Last updated: 2026-03-13 after v1.0 milestone*
+*Last updated: 2026-03-13 after v1.1 milestone start*
