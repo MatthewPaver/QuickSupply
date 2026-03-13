@@ -14,8 +14,8 @@ Requirements for the Operability milestone. Phases continue from Phase 5 (v1.0 e
 - [x] **TCH-03**: Agency can set a teacher's compliance status (DBS check status + expiry date, right-to-work status)
 - [x] **TCH-04**: Agency can edit a teacher's compliance fields
 - [x] **TCH-05**: Agency can create login credentials for a new teacher (email + temporary password)
-- [ ] **TCH-06**: Agency can deactivate a teacher account (prevents login and hides from assignment engine)
-- [ ] **TCH-07**: Agency can reactivate a deactivated teacher account
+- [x] **TCH-06**: Agency can deactivate a teacher account (prevents login and hides from assignment engine)
+- [x] **TCH-07**: Agency can reactivate a deactivated teacher account
 
 ### Agency School Management
 
@@ -35,7 +35,7 @@ Requirements for the Operability milestone. Phases continue from Phase 5 (v1.0 e
 
 ### Documentation
 
-- [ ] **DOC-01**: README updated to reflect v1.0 MVP-complete status and remove outdated Priority checklists
+- [x] **DOC-01**: README updated to reflect v1.0 MVP-complete status and remove outdated Priority checklists
 
 ## v2 Requirements
 
@@ -85,9 +85,9 @@ Deferred to future release.
 | TCH-03 | Phase 6 | Complete |
 | TCH-04 | Phase 6 | Complete |
 | TCH-05 | Phase 6 | Complete |
-| TCH-06 | Phase 6 | Pending |
-| TCH-07 | Phase 6 | Pending |
-| DOC-01 | Phase 6 | Pending |
+| TCH-06 | Phase 6 | Complete |
+| TCH-07 | Phase 6 | Complete |
+| DOC-01 | Phase 6 | Complete |
 | SCH-01 | Phase 7 | Pending |
 | SCH-02 | Phase 7 | Pending |
 | SCH-03 | Phase 7 | Pending |

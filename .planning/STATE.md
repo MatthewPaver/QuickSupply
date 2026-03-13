@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 ## Current Position
 
 Phase: 6 — Agency Teacher Management
-Plan: 02 (complete)
-Status: Plan 06-02 complete — compliance management and credential-setting UI shipped
-Last activity: 2026-03-13 — 06-02 executed (TCH-03, TCH-04, TCH-05 complete)
+Plan: 03 (complete)
+Status: Plan 06-03 complete — teacher deactivation, assignment engine guard, and README cleanup shipped
+Last activity: 2026-03-13 — 06-03 executed (TCH-06, TCH-07, DOC-01 complete)
 
 ```
 v1.1 Progress: [          ] 0% (0/3 phases complete)
@@ -29,6 +29,9 @@ All key decisions logged in PROJECT.md Key Decisions table.
 - 06-02: dbsExpiry input conditionally rendered only when dbsStatus is 'clear' or 'expired'
 - 06-02: TeacherCredentialsForm performs client-side password confirmation check before API call
 - 06-02: Email conflict in credentials route returns structured fieldErrors on the email key
+- 06-03: Migration path in plan was drizzle/migrations/ but project stores migrations in drizzle/ root — corrected automatically
+- 06-03: isActive guard in login/route.ts added in POST handler (not inside findUserByEmail) to preserve function signature
+- 06-03: Assignment engine isActive filter applied at DB query level, not in JS loop
 
 ### Pending Todos
 
@@ -41,5 +44,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-13
-Stopped at: Completed 06-02-PLAN.md — teacher compliance management and credential-setting UI
+Stopped at: Completed 06-03-PLAN.md — teacher deactivation, assignment engine guard, and README cleanup
 Resume file: None

@@ -20,7 +20,7 @@
 
 ### 🚧 v1.1 Operability (In Progress)
 
-- [ ] **Phase 6: Agency Teacher Management** (3 plans)
+- [x] **Phase 6: Agency Teacher Management** (3/3 plans complete)
 - [ ] **Phase 7: Agency School Management** (0 plans)
 - [ ] **Phase 8: Review Submission UI** (0 plans)
 
@@ -42,9 +42,9 @@
 **Plans**: 3 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Create/edit teacher forms + API routes (TCH-01, TCH-02)
-- [ ] 06-02-PLAN.md — Compliance management + login credentials (TCH-03, TCH-04, TCH-05)
-- [ ] 06-03-PLAN.md — Deactivate/reactivate + README update (TCH-06, TCH-07, DOC-01)
+- [x] 06-01-PLAN.md — Create/edit teacher forms + API routes (TCH-01, TCH-02)
+- [x] 06-02-PLAN.md — Compliance management + login credentials (TCH-03, TCH-04, TCH-05)
+- [x] 06-03-PLAN.md — Deactivate/reactivate + README update (TCH-06, TCH-07, DOC-01)
 
 ### Phase 7: Agency School Management
 **Goal**: Agency staff can create and manage school accounts without developer intervention, enabling real schools to be onboarded to the platform.
@@ -76,6 +76,6 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 6. Agency Teacher Management | 2/3 | In Progress|  |
+| 6. Agency Teacher Management | 3/3 | Complete | 2026-03-13 |
 | 7. Agency School Management | 0/0 | Not started | - |
 | 8. Review Submission UI | 0/0 | Not started | - |
