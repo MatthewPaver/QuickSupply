@@ -18,6 +18,7 @@ type Teacher = {
   canDrive: boolean;
   emergencyAvailable: boolean;
   complianceStatus: "compliant" | "pending" | "expired";
+  isActive: boolean;
 };
 
 interface Props {
@@ -28,11 +29,14 @@ export function TeachersFilter({ teachers }: Props) {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [complianceFilter, setComplianceFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const filtered = useMemo(() => {
     return teachers.filter((t) => {
       if (roleFilter !== "all" && t.roleType !== roleFilter) return false;
       if (complianceFilter !== "all" && t.complianceStatus !== complianceFilter) return false;
+      if (statusFilter === "active" && !t.isActive) return false;
+      if (statusFilter === "inactive" && t.isActive) return false;
       if (search) {
         const q = search.toLowerCase();
         const name = `${t.firstName} ${t.lastName}`.toLowerCase();
@@ -41,7 +45,7 @@ export function TeachersFilter({ teachers }: Props) {
       }
       return true;
     });
-  }, [teachers, search, roleFilter, complianceFilter]);
+  }, [teachers, search, roleFilter, complianceFilter, statusFilter]);
 
   return (
     <>
@@ -75,6 +79,16 @@ export function TeachersFilter({ teachers }: Props) {
             <SelectItem value="compliant">Compliant</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="expired">Expired</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-36">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All teachers</SelectItem>
+            <SelectItem value="active">Active only</SelectItem>
+            <SelectItem value="inactive">Inactive only</SelectItem>
           </SelectContent>
         </Select>
       </div>

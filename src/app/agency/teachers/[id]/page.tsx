@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { TeacherComplianceForm } from "@/components/agency/teacher-compliance-form";
 import { TeacherCredentialsForm } from "@/components/agency/teacher-credentials-form";
+import { TeacherStatusToggle } from "@/components/agency/teacher-status-toggle";
 
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -61,6 +62,12 @@ export default async function AgencyTeacherDetailPage({
 
   return (
     <div className="space-y-6">
+      {!teacher.isActive && (
+        <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          This teacher is deactivated and cannot sign in or receive assignments.
+        </div>
+      )}
+
       <div className="flex items-center gap-4">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
           {teacher.firstName[0]}{teacher.lastName[0]}
@@ -73,9 +80,12 @@ export default async function AgencyTeacherDetailPage({
             {assignedAgent && <span>Agent: {assignedAgent.agentName}</span>}
           </div>
         </div>
-        <Link href={`/agency/teachers/${id}/edit`}>
-          <Button variant="outline" size="sm">Edit Profile</Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href={`/agency/teachers/${id}/edit`}>
+            <Button variant="outline" size="sm">Edit Profile</Button>
+          </Link>
+          <TeacherStatusToggle teacherId={id} isActive={teacher.isActive} />
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">

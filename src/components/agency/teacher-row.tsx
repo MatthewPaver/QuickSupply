@@ -16,6 +16,7 @@ type Teacher = {
   canDrive: boolean;
   emergencyAvailable: boolean;
   complianceStatus: "compliant" | "pending" | "expired";
+  isActive: boolean;
 };
 
 export function TeacherRow({ t }: { t: Teacher }) {
@@ -25,7 +26,7 @@ export function TeacherRow({ t }: { t: Teacher }) {
     <div
       role="button"
       tabIndex={0}
-      className="flex cursor-pointer items-center justify-between px-6 py-4 transition-colors hover:bg-muted/50"
+      className={`flex cursor-pointer items-center justify-between px-6 py-4 transition-colors hover:bg-muted/50 ${!t.isActive ? "opacity-50" : ""}`}
       onClick={() => router.push(`/agency/teachers/${t.id}`)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -47,6 +48,11 @@ export function TeacherRow({ t }: { t: Teacher }) {
             <span className="rounded bg-muted px-2 py-0.5 text-[11px] font-medium capitalize text-muted-foreground">
               {t.roleType}
             </span>
+            {!t.isActive && (
+              <span className="rounded bg-red-100 px-2 py-0.5 text-[11px] font-medium text-red-600">
+                Inactive
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
