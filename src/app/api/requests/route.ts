@@ -32,6 +32,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Forbidden: you can only create requests for your own school" }, { status: 403 });
   }
 
+  // Guard: deactivated schools cannot submit cover requests
+  const schoolRecord = db.select({ isActive: schools.isActive }).from(schools).where(eq(schools.id, session.userId)).get();
+  if (schoolRecord && schoolRecord.isActive === false) {
+    return NextResponse.json({ error: "Your school account is deactivated. Please contact the agency." }, { status: 403 });
+  }
+
   // If preferred teacher is set, validate they exist and their role matches the request
   if (preferredTeacherId) {
     const teacher = db.select().from(teachers).where(eq(teachers.id, preferredTeacherId)).get();

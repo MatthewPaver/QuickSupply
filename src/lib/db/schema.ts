@@ -25,6 +25,7 @@ export const schools = sqliteTable("schools", {
   passwordHash: text("password_hash").notNull(),
   phase: text("phase", { enum: ["primary", "secondary", "all-through", "nursery", "special"] }).notNull().default("primary"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
 });
 
 export const teachers = sqliteTable("teachers", {

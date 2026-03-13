@@ -242,3 +242,14 @@ export const agencyUpdateSchoolSchema = z.object({
   contactEmail: z.string().email().optional(),
   contactPhone: z.string().min(1).max(20).optional(),
 });
+
+// POST /api/agency/schools/[id]/credentials
+export const agencySetSchoolCredentialsSchema = z.object({
+  contactEmail: z.string().email("Valid email is required"),
+  temporaryPassword: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+// PATCH /api/agency/schools/[id]/status
+export const agencySchoolStatusSchema = z.object({
+  isActive: z.boolean(),
+});

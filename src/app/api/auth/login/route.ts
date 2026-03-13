@@ -72,6 +72,14 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Guard: deactivated schools cannot sign in
+  if (user.role === "school") {
+    const schoolRecord = db.select({ isActive: schools.isActive }).from(schools).where(eq(schools.id, user.userId)).get();
+    if (schoolRecord && schoolRecord.isActive === false) {
+      return NextResponse.json({ error: "This school account has been deactivated. Please contact the agency." }, { status: 401 });
+    }
+  }
+
   const valid = bcrypt.compareSync(password, user.passwordHash);
   if (!valid) {
     return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
