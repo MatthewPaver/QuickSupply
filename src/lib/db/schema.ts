@@ -44,6 +44,9 @@ export const teachers = sqliteTable("teachers", {
   agencyRating: real("agency_rating").notNull().default(3.0),
   complianceStatus: text("compliance_status", { enum: ["compliant", "pending", "expired"] }).notNull().default("pending"),
   complianceNotes: text("compliance_notes"),
+  dbsStatus: text("dbs_status", { enum: ["clear", "pending", "expired", "none"] }).notNull().default("none"),
+  dbsExpiry: text("dbs_expiry"),  // ISO date YYYY-MM-DD or null
+  rightToWork: text("right_to_work", { enum: ["verified", "pending", "not_checked"] }).notNull().default("not_checked"),
   longTermWilling: integer("long_term_willing", { mode: "boolean" }).notNull().default(false),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 });

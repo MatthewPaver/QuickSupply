@@ -199,3 +199,18 @@ export const agencyUpdateTeacherSchema = z.object({
   contactNightBeforeOnly: z.boolean().optional(),
   longTermWilling: z.boolean().optional(),
 });
+
+// PATCH /api/agency/teachers/[id]/compliance
+export const agencyUpdateComplianceSchema = z.object({
+  dbsStatus: z.enum(["clear", "pending", "expired", "none"]),
+  dbsExpiry: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD").nullable().optional(),
+  rightToWork: z.enum(["verified", "pending", "not_checked"]),
+  complianceStatus: z.enum(["compliant", "pending", "expired"]),
+  complianceNotes: z.string().max(500).nullable().optional(),
+});
+
+// POST /api/agency/teachers/[id]/credentials
+export const agencySetCredentialsSchema = z.object({
+  email: z.string().email("Valid email is required"),
+  temporaryPassword: z.string().min(8, "Password must be at least 8 characters"),
+});
