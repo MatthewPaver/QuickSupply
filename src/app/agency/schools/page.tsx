@@ -2,7 +2,9 @@ import { db } from "@/lib/db";
 import { schools, coverRequests } from "@/lib/db/schema";
 import { requireSession } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { MapPin, Phone } from "lucide-react";
+import Link from "next/link";
 
 export default async function AgencySchoolsPage() {
   await requireSession("agent");
@@ -17,16 +19,25 @@ export default async function AgencySchoolsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Schools</h1>
-        <p className="text-muted-foreground">{allSchools.length} registered schools</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Schools</h1>
+          <p className="text-muted-foreground">{allSchools.length} registered schools</p>
+        </div>
+        <Link href="/agency/schools/new">
+          <Button>New School</Button>
+        </Link>
       </div>
 
       <Card>
         <CardContent className="p-0">
           <div className="divide-y">
             {allSchools.map((s) => (
-              <div key={s.id} className="flex items-center justify-between px-6 py-4">
+              <Link
+                key={s.id}
+                href={`/agency/schools/${s.id}`}
+                className="flex items-center justify-between px-6 py-4 hover:bg-muted/50 transition-colors"
+              >
                 <div>
                   <div className="font-medium">{s.name}</div>
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -34,15 +45,16 @@ export default async function AgencySchoolsPage() {
                       <MapPin className="h-3 w-3" /> {s.postcode}
                     </span>
                     <span>{s.contactName}</span>
-                    <a href={`tel:${s.contactPhone}`} className="flex items-center gap-1 text-primary hover:underline">
+                    <span className="flex items-center gap-1">
                       <Phone className="h-3 w-3" /> {s.contactPhone}
-                    </a>
+                    </span>
+                    <span className="capitalize text-xs bg-muted px-1.5 py-0.5 rounded">{s.phase}</span>
                   </div>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {requestCounts.get(s.id) || 0} requests
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </CardContent>
