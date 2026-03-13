@@ -20,7 +20,7 @@
 
 ### 🚧 v1.1 Operability (In Progress)
 
-- [ ] **Phase 6: Agency Teacher Management** (0 plans)
+- [ ] **Phase 6: Agency Teacher Management** (3 plans)
 - [ ] **Phase 7: Agency School Management** (0 plans)
 - [ ] **Phase 8: Review Submission UI** (0 plans)
 
@@ -39,7 +39,12 @@
   4. Agency staff can create login credentials (email + temporary password) for a teacher so that teacher can sign in to their portal
   5. Agency staff can deactivate a teacher (preventing login and hiding them from the assignment engine) and later reactivate them
   6. README accurately describes the v1.0 MVP-complete state with no outdated Priority checklists
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Create/edit teacher forms + API routes (TCH-01, TCH-02)
+- [ ] 06-02-PLAN.md — Compliance management + login credentials (TCH-03, TCH-04, TCH-05)
+- [ ] 06-03-PLAN.md — Deactivate/reactivate + README update (TCH-06, TCH-07, DOC-01)
 
 ### Phase 7: Agency School Management
 **Goal**: Agency staff can create and manage school accounts without developer intervention, enabling real schools to be onboarded to the platform.
@@ -71,6 +76,6 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 6. Agency Teacher Management | 0/0 | Not started | - |
+| 6. Agency Teacher Management | 0/3 | Planned | - |
 | 7. Agency School Management | 0/0 | Not started | - |
 | 8. Review Submission UI | 0/0 | Not started | - |
