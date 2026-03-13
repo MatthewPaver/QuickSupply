@@ -214,3 +214,8 @@ export const agencySetCredentialsSchema = z.object({
   email: z.string().email("Valid email is required"),
   temporaryPassword: z.string().min(8, "Password must be at least 8 characters"),
 });
+
+// PATCH /api/agency/teachers/[id]/status
+export const agencyTeacherStatusSchema = z.object({
+  isActive: z.boolean(),
+});

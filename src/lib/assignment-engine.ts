@@ -35,8 +35,8 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
 
   if (!school) return [];
 
-  // Get all teachers
-  const allTeachers = db.select().from(teachers).all();
+  // Get all active teachers (deactivated teachers are ineligible)
+  const allTeachers = db.select().from(teachers).where(eq(teachers.isActive, true)).all();
 
   // Get blacklisted schools
   const blacklisted = db

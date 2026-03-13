@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
 import * as bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { schools, teachers, agents } from "@/lib/db/schema";
@@ -62,6 +62,14 @@ export async function POST(request: NextRequest) {
   const user = findUserByEmail(email);
   if (!user) {
     return NextResponse.json({ error: "Invalid email or password." }, { status: 401 });
+  }
+
+  // Guard: deactivated teachers cannot sign in
+  if (user.role === "teacher") {
+    const teacherRecord = db.select({ isActive: teachers.isActive }).from(teachers).where(eq(teachers.id, user.userId)).get();
+    if (teacherRecord && teacherRecord.isActive === false) {
+      return NextResponse.json({ error: "This account has been deactivated. Please contact your agency." }, { status: 401 });
+    }
   }
 
   const valid = bcrypt.compareSync(password, user.passwordHash);

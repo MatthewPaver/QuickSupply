@@ -49,6 +49,7 @@ export const teachers = sqliteTable("teachers", {
   rightToWork: text("right_to_work", { enum: ["verified", "pending", "not_checked"] }).notNull().default("not_checked"),
   longTermWilling: integer("long_term_willing", { mode: "boolean" }).notNull().default(false),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
 });
 
 export const agents = sqliteTable("agents", {
