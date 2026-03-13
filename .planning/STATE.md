@@ -2,66 +2,37 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-06)
+See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** Schools can submit a cover request and have it filled by the best available teacher through a sequential, real-time assignment workflow managed by the agency.
-**Current focus:** All v1 requirements complete
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 5 of 5 (All Complete)
-Plan: 2 of 2 in current phase
-Status: MVP Complete
-Last activity: 2026-03-06 — All 5 phases complete, 27/27 v1 requirements satisfied
+Phase: — (between milestones)
+Status: v1.0 MVP Shipped
+Last activity: 2026-03-13 — v1.0 milestone archived; 27/27 v1 requirements satisfied
 
-Progress: [██████████] 100%
-
-## Performance Metrics
-
-**Velocity:**
-- Total plans completed: 13 (11 pre-existing + 2 implemented)
-- Average duration: N/A (mostly pre-existing code)
-- Total execution time: ~1 session
-
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 1 | 3/3 | N/A | N/A (pre-existing) |
-| 2 | 3/3 | N/A | N/A (pre-existing) |
-| 3 | 3/3 | N/A | N/A (pre-existing) |
-| 4 | 2/2 | 1 session | N/A (1 pre-existing + 1 new) |
-| 5 | 2/2 | 1 session | N/A (1 pre-existing + 1 new) |
-
-**Recent Trend:**
-- Phases 1-3 were already implemented — no execution needed
-- Phase 4-5: filter/search + Zod validation implemented in one session
-
-*Updated after each plan completion*
+Progress: [██████████] v1.0 Complete
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
-
-- [Phase 4]: Agency filter/search uses client-side components (RequestsFilter, TeachersFilter) receiving serializable data from server pages
-- [Phase 5]: Created centralized `src/lib/api-validation.ts` with `validateBody()` helper returning structured field-level errors
-- [Phase 5]: Zod discriminated union used for assignment actions to get type-safe per-action field access
-- [Phase 5]: Cover request schema validates date not in past and start < end time via Zod `.refine()`
+All key decisions logged in PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
-None — all v1 requirements complete.
+None.
 
 ### Blockers/Concerns
 
-- README Priority 1/2 checklist needs updating — all items now implemented
-- No automated tests for Zod schemas (v2 scope)
+- README Priority 1/2 checklists should be updated to reflect MVP completion
+- No unit tests for Zod schemas or assignment engine scoring algorithm (v1.1 scope)
+- Teacher/school CRUD admin forms not built — all data still seeded (v1.1 scope)
 
 ## Session Continuity
 
-Last session: 2026-03-06
-Stopped at: All phases complete — MVP done
+Last session: 2026-03-13
+Stopped at: v1.0 milestone archived — ready for /gsd:new-milestone
 Resume file: None

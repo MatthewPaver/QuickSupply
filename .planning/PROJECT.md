@@ -8,48 +8,48 @@ A supply teaching workforce scheduling application that connects schools, supply
 
 Schools can submit a cover request and have it filled by the best available teacher through a sequential, real-time assignment workflow managed by the agency.
 
+## Current State
+
+**Version:** v1.0 MVP — shipped 2026-03-07
+**Codebase:** ~10,200 lines TypeScript
+**Stack:** Next.js 16 (App Router), TypeScript, SQLite/Drizzle ORM, Tailwind CSS v4, shadcn/ui
+**Status:** Demo-ready and MVP-complete. All 27/27 v1 requirements satisfied.
+
 ## Requirements
 
 ### Validated
 
-- ✓ Three-portal architecture (school, teacher, agency) with role-based auth — existing
-- ✓ School can submit cover requests with date, time, role, year group, notes, preferred teacher — existing
-- ✓ Sequential assignment engine ranks teachers by score (preferred +200, rating x20, reviews x10, proximity, driving, history) — existing
-- ✓ Teachers receive offers one-at-a-time with configurable countdown timers (7min emergency, 60min standard) — existing
-- ✓ Teachers can accept or decline offers; engine auto-advances on decline/expiry — existing
-- ✓ Agency can manually assign teachers, override bookings, cancel bookings — existing
-- ✓ Real-time updates via SSE across all three portals — existing
-- ✓ Cookie-based session auth with HMAC-SHA256 signing — existing
-- ✓ Password reset flow via email (Resend) — existing
-- ✓ Rate limiting on login (5/15min), API (20/min), password reset (3/15min) — existing
-- ✓ Teacher availability management (recurring patterns + specific dates) — existing
-- ✓ Teacher blacklisting per school — existing
-- ✓ School teacher reviews (star ratings) — existing (seeded, no form)
-- ✓ Notification logging (DB audit trail + email via Resend) — existing
-- ✓ Demo mode with click-to-sign-in for presentations — existing
-- ✓ Sentry error monitoring integration — existing
-- ✓ Desian Education branding (purple #4c0673, blue #1863DC, accent #c879f1) — existing
-- ✓ E2E tests with Playwright — existing
-- ✓ Docker containerization with standalone build — existing
+- ✓ Three-portal architecture (school, teacher, agency) with role-based auth — v1.0
+- ✓ School can submit cover requests with date, time, role, year group, notes, preferred teacher — v1.0
+- ✓ Sequential assignment engine ranks teachers by score (preferred +200, rating x20, reviews x10, proximity, driving, history) — v1.0
+- ✓ Teachers receive offers one-at-a-time with configurable countdown timers (7min emergency, 60min standard) — v1.0
+- ✓ Teachers can accept or decline offers; engine auto-advances on decline/expiry — v1.0
+- ✓ Agency can manually assign teachers, override bookings, cancel bookings — v1.0
+- ✓ Real-time SSE updates across all three portals without page refresh — v1.0
+- ✓ Countdown timers sync with server-side expiry via SSE events — v1.0
+- ✓ Browser OS-level notifications when teacher receives offer with tab unfocused — v1.0
+- ✓ Mobile-first teacher portal with bottom nav bar and large tap targets — v1.0
+- ✓ Loading skeletons, illustrated empty states, error boundaries on all routes — v1.0
+- ✓ Agency SMS log drawer and call simulation modal — v1.0
+- ✓ Preferred teacher availability shown on cover request form — v1.0
+- ✓ Withdraw offer + auto-refresh assignment panel on decline — v1.0
+- ✓ Notification bell with unread count badge across all portals — v1.0
+- ✓ Filter/search on agency requests and teachers pages — v1.0
+- ✓ School teacher review form (star-rating on completed bookings) — v1.0
+- ✓ Centralised Zod validation on all API routes with structured field-level errors — v1.0
+- ✓ Cookie-based session auth with HMAC-SHA256 signing — v1.0
+- ✓ Password reset flow via email (Resend) — v1.0
+- ✓ Rate limiting on login (5/15min), API (20/min), password reset (3/15min) — v1.0
+- ✓ Teacher availability management (recurring patterns + specific dates) — v1.0
+- ✓ Teacher blacklisting per school — v1.0
+- ✓ Notification logging (DB audit trail + email via Resend) — v1.0
+- ✓ Demo mode with click-to-sign-in for presentations — v1.0
+- ✓ E2E tests with Playwright — v1.0
+- ✓ Docker containerization with standalone build — v1.0
 
 ### Active
 
-- [ ] SSE client hook integration for live dashboard updates without refresh
-- [ ] Browser Notification API for OS-level alerts when tab unfocused
-- [ ] Countdown timer sync with SSE events for accuracy
-- [ ] Mobile-responsive teacher portal (bottom nav, larger tap targets)
-- [ ] Loading skeletons on server components
-- [ ] Illustrated empty state components
-- [ ] Error boundaries in each route group
-- [ ] Previous teacher availability indicator on cover request form
-- [ ] Simulated SMS log drawer in agency dashboard
-- [ ] Call simulation modal (animated ringing, connected state, timer)
-- [ ] Notification bell with unread count badge in all portal nav bars
-- [ ] School teacher reviews form (star-rating on completed bookings)
-- [ ] Withdraw active offer button in assignment panel
-- [ ] Auto-refresh assignment panel on teacher decline via SSE
-- [ ] Filter/search on agency list pages (requests, teachers)
-- [ ] Comprehensive Zod validation on all API routes
+*(None — planning next milestone. Run `/gsd:new-milestone` to define v1.1 requirements.)*
 
 ### Out of Scope
 
@@ -67,13 +67,13 @@ Schools can submit a cover request and have it filled by the best available teac
 
 - **Client**: Desian Education (desian.co.uk) — Liverpool-based supply teaching agency
 - **Stack**: Next.js 16 (App Router), TypeScript, SQLite/Drizzle ORM, Tailwind CSS v4, shadcn/ui
-- **Status**: Demo-ready end-to-end. Not yet MVP-complete per README Priority 1 & 2 checklists
 - **Deployment target**: Vercel (or similar); currently SQLite file-based, single-instance
 - **Seed data**: 5 Liverpool schools, 12 teachers/TAs, 3 agency staff, 7 sample requests
+- **Known tech debt**: Review form seeded only (no admin CRUD); README Priority checklists need refresh; no unit tests for Zod schemas or assignment engine scoring
 
 ## Constraints
 
-- **Tech stack**: Next.js 16 + SQLite + Drizzle ORM — established, not changing for this milestone
+- **Tech stack**: Next.js 16 + SQLite + Drizzle ORM — established, not changing for v1.1
 - **Database**: SQLite single-writer — no concurrent multi-instance deployment
 - **Branding**: Must use Desian Education colours and logo throughout
 - **Demo mode**: Must maintain click-to-sign-in demo mode alongside real auth
@@ -89,6 +89,9 @@ Schools can submit a cover request and have it filled by the best available teac
 | SSE over WebSocket | Simpler server-side, sufficient for one-way updates | ✓ Good |
 | Countdown timers (7min/60min) | Business requirement — configurable per request type | ✓ Good |
 | Drizzle ORM over Prisma | Better SQLite support, lighter weight | ✓ Good |
+| Client-side filter components (RequestsFilter, TeachersFilter) | Serialisable data passed from server pages | ✓ Good |
+| Centralised `validateBody()` helper in api-validation.ts | Consistent structured errors across all routes | ✓ Good |
+| Zod discriminated union for assignment actions | Type-safe per-action field access | ✓ Good |
 
 ---
-*Last updated: 2026-03-05 after GSD initialization (brownfield)*
+*Last updated: 2026-03-13 after v1.0 milestone*
