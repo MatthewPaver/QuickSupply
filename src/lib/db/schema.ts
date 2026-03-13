@@ -23,6 +23,7 @@ export const schools = sqliteTable("schools", {
   contactEmail: text("contact_email").notNull(),
   contactPhone: text("contact_phone").notNull(),
   passwordHash: text("password_hash").notNull(),
+  phase: text("phase", { enum: ["primary", "secondary", "all-through", "nursery", "special"] }).notNull().default("primary"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 });
 

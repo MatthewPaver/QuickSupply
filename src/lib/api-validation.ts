@@ -219,3 +219,26 @@ export const agencySetCredentialsSchema = z.object({
 export const agencyTeacherStatusSchema = z.object({
   isActive: z.boolean(),
 });
+
+// POST /api/agency/schools
+export const agencyCreateSchoolSchema = z.object({
+  name: z.string().min(1, "School name is required").max(100),
+  address: z.string().min(1, "Address is required").max(200),
+  postcode: z.string().min(1, "Postcode is required").max(10),
+  phase: z.enum(["primary", "secondary", "all-through", "nursery", "special"]),
+  contactName: z.string().min(1, "Contact name is required").max(100),
+  contactEmail: z.string().email("Valid contact email is required"),
+  contactPhone: z.string().min(1, "Contact phone is required").max(20),
+  temporaryPassword: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+// PATCH /api/agency/schools/[id]
+export const agencyUpdateSchoolSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  address: z.string().min(1).max(200).optional(),
+  postcode: z.string().min(1).max(10).optional(),
+  phase: z.enum(["primary", "secondary", "all-through", "nursery", "special"]).optional(),
+  contactName: z.string().min(1).max(100).optional(),
+  contactEmail: z.string().email().optional(),
+  contactPhone: z.string().min(1).max(20).optional(),
+});
