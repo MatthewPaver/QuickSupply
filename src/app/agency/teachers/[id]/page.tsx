@@ -4,10 +4,12 @@ import { eq } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Star, Car, MapPin, Phone, Mail, Ban } from "lucide-react";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
+import Link from "next/link";
 
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -61,7 +63,7 @@ export default async function AgencyTeacherDetailPage({
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-xl font-bold text-primary">
           {teacher.firstName[0]}{teacher.lastName[0]}
         </div>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold">{teacher.firstName} {teacher.lastName}</h1>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <span className="capitalize">{teacher.roleType}</span>
@@ -69,6 +71,9 @@ export default async function AgencyTeacherDetailPage({
             {assignedAgent && <span>Agent: {assignedAgent.agentName}</span>}
           </div>
         </div>
+        <Link href={`/agency/teachers/${id}/edit`}>
+          <Button variant="outline" size="sm">Edit Profile</Button>
+        </Link>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
