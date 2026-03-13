@@ -36,10 +36,17 @@ export default async function AgencySchoolsPage() {
               <Link
                 key={s.id}
                 href={`/agency/schools/${s.id}`}
-                className="flex items-center justify-between px-6 py-4 hover:bg-muted/50 transition-colors"
+                className={`flex items-center justify-between px-6 py-4 hover:bg-muted/50 transition-colors${!s.isActive ? " opacity-50" : ""}`}
               >
                 <div>
-                  <div className="font-medium">{s.name}</div>
+                  <div className="flex items-center gap-2 font-medium">
+                    {s.name}
+                    {!s.isActive && (
+                      <span className="text-xs font-normal text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                        Inactive
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3 w-3" /> {s.postcode}

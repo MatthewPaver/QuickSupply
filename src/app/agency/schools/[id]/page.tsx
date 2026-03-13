@@ -7,6 +7,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Phone, Mail, User } from "lucide-react";
+import { SchoolCredentialsForm } from "@/components/agency/school-credentials-form";
+import { SchoolStatusToggle } from "@/components/agency/school-status-toggle";
 
 export default async function SchoolDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requireSession("agent");
@@ -18,14 +20,23 @@ export default async function SchoolDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="space-y-6">
+      {!school.isActive && (
+        <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          This school is deactivated. The school contact cannot sign in or submit cover requests.
+        </div>
+      )}
+
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold">{school.name}</h1>
           <p className="text-muted-foreground capitalize">{school.phase} school</p>
         </div>
-        <Link href={`/agency/schools/${id}/edit`}>
-          <Button variant="outline" size="sm">Edit School</Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href={`/agency/schools/${id}/edit`}>
+            <Button variant="outline" size="sm">Edit School</Button>
+          </Link>
+          <SchoolStatusToggle schoolId={id} isActive={school.isActive} />
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -49,14 +60,7 @@ export default async function SchoolDetailPage({ params }: { params: Promise<{ i
         </Card>
       </div>
 
-      <Card>
-        <CardHeader><CardTitle>Management</CardTitle></CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Credential reset and school deactivation options will appear here (plan 07-02).
-          </p>
-        </CardContent>
-      </Card>
+      <SchoolCredentialsForm schoolId={id} currentEmail={school.contactEmail} />
     </div>
   );
 }
