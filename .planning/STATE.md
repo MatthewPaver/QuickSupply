@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-03-13)
 ## Current Position
 
 Phase: 6 — Agency Teacher Management
-Plan: —
-Status: Roadmap created, ready to plan Phase 6
-Last activity: 2026-03-13 — v1.1 roadmap written (Phases 6–8)
+Plan: 01 (complete)
+Status: Plan 06-01 complete — teacher create/edit forms and API routes shipped
+Last activity: 2026-03-13 — 06-01 executed (TCH-01, TCH-02 complete)
 
 ```
 v1.1 Progress: [          ] 0% (0/3 phases complete)
@@ -23,6 +23,9 @@ v1.1 Progress: [          ] 0% (0/3 phases complete)
 ### Decisions
 
 All key decisions logged in PROJECT.md Key Decisions table.
+
+- 06-01: No shadcn Switch component available — used native HTML checkboxes for boolean teacher preference flags
+- 06-01: TeacherForm edit page loads teacher server-side and passes initialData; no client-side fetch on page load
 
 ### Pending Todos
 
@@ -35,5 +38,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-13
-Stopped at: v1.1 roadmap created — ready to plan Phase 6
+Stopped at: Completed 06-01-PLAN.md — teacher create/edit forms and API routes
 Resume file: None
