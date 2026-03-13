@@ -168,3 +168,34 @@ export const settingsSchema = z.record(
   z.string(),
   z.union([z.string(), z.number()])
 );
+
+// POST /api/agency/teachers
+export const agencyCreateTeacherSchema = z.object({
+  firstName: z.string().min(1, "First name is required").max(50),
+  lastName: z.string().min(1, "Last name is required").max(50),
+  email: z.string().email("Valid email is required"),
+  phone: z.string().min(1, "Phone is required").max(20),
+  postcode: z.string().min(1, "Postcode is required").max(10),
+  roleType: z.enum(["teacher", "ta", "both"]),
+  canDrive: z.boolean(),
+  maxDistanceMiles: z.number().min(0).max(100),
+  emergencyAvailable: z.boolean(),
+  contactNightBeforeOnly: z.boolean(),
+  longTermWilling: z.boolean(),
+  temporaryPassword: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+// PATCH /api/agency/teachers/[id]
+export const agencyUpdateTeacherSchema = z.object({
+  firstName: z.string().min(1).max(50).optional(),
+  lastName: z.string().min(1).max(50).optional(),
+  email: z.string().email().optional(),
+  phone: z.string().min(1).max(20).optional(),
+  postcode: z.string().min(1).max(10).optional(),
+  roleType: z.enum(["teacher", "ta", "both"]).optional(),
+  canDrive: z.boolean().optional(),
+  maxDistanceMiles: z.number().min(0).max(100).optional(),
+  emergencyAvailable: z.boolean().optional(),
+  contactNightBeforeOnly: z.boolean().optional(),
+  longTermWilling: z.boolean().optional(),
+});
