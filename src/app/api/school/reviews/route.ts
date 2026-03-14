@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { schoolTeacherReviews, bookings, coverRequests } from "@/lib/db/schema";
+import { schoolTeacherReviews, bookings, coverRequests, teachers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { ulid } from "ulid";
 import { validateBody, reviewSchema } from "@/lib/api-validation";
@@ -15,7 +15,9 @@ export async function POST(request: NextRequest) {
 
   const parsed = await validateBody(request, reviewSchema);
   if (!parsed.success) return parsed.response;
-  const { bookingId, rating, comment } = parsed.data;
+  const { bookingId, rating, comment, wouldRebook } = parsed.data;
+
+  const normalisedComment = comment?.trim() || null;
 
   const booking = db.select().from(bookings).where(eq(bookings.id, bookingId)).get();
   if (!booking) {
@@ -35,22 +37,37 @@ export async function POST(request: NextRequest) {
 
   if (existing) {
     db.update(schoolTeacherReviews)
-      .set({ rating, comment: comment ?? existing.comment, createdAt: new Date() })
+      .set({ rating, comment: normalisedComment ?? existing.comment, wouldRebook: wouldRebook ?? existing.wouldRebook, createdAt: new Date() })
       .where(eq(schoolTeacherReviews.id, existing.id))
       .run();
-    return NextResponse.json({ ok: true });
+  } else {
+    db.insert(schoolTeacherReviews)
+      .values({
+        id: ulid(),
+        schoolId: session.userId,
+        teacherId: booking.teacherId,
+        bookingId: booking.id,
+        rating,
+        comment: normalisedComment,
+        wouldRebook: wouldRebook ?? false,
+        createdAt: new Date(),
+      })
+      .run();
   }
 
-  db.insert(schoolTeacherReviews)
-    .values({
-      id: ulid(),
-      schoolId: session.userId,
-      teacherId: booking.teacherId,
-      bookingId: booking.id,
-      rating,
-      comment: comment ?? null,
-      createdAt: new Date(),
-    })
+  const allReviews = db
+    .select({ rating: schoolTeacherReviews.rating })
+    .from(schoolTeacherReviews)
+    .where(eq(schoolTeacherReviews.teacherId, booking.teacherId))
+    .all();
+
+  const newAvg = allReviews.length > 0
+    ? allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length
+    : 3.0;
+
+  db.update(teachers)
+    .set({ agencyRating: newAvg })
+    .where(eq(teachers.id, booking.teacherId))
     .run();
 
   return NextResponse.json({ ok: true });
