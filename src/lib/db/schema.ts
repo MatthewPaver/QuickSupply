@@ -155,6 +155,7 @@ export const schoolTeacherReviews = sqliteTable("school_teacher_reviews", {
   bookingId: text("booking_id").notNull().references(() => bookings.id),
   rating: integer("rating").notNull(), // 1-5
   comment: text("comment"),
+  wouldRebook: integer("would_rebook", { mode: "boolean" }).notNull().default(false),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 });
 

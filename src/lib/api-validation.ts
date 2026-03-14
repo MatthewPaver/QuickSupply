@@ -137,7 +137,8 @@ export const coverRequestSchema = z.object({
 export const reviewSchema = z.object({
   bookingId: z.string().min(1, "bookingId is required"),
   rating: z.number().int().min(1, "Rating must be 1-5").max(5, "Rating must be 1-5"),
-  comment: z.string().nullable().optional(),
+  comment: z.string().max(500, "Comment must be 500 characters or fewer").nullable().optional(),
+  wouldRebook: z.boolean().optional().default(false),
 });
 
 // PATCH /api/teacher/profile
