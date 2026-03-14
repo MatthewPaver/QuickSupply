@@ -88,6 +88,7 @@ export default async function SchoolHistoryPage() {
                               teacherName={`${booking.teacherFirstName} ${booking.teacherLastName}`}
                               existingRating={review?.rating ?? null}
                               existingComment={review?.comment ?? null}
+                              existingWouldRebook={review?.wouldRebook ?? null}
                             />
                           </>
                         )}
