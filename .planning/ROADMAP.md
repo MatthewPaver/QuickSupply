@@ -86,4 +86,4 @@ Plans:
 |-------|----------------|--------|-----------|
 | 6. Agency Teacher Management | 3/3 | Complete | 2026-03-13 |
 | 7. Agency School Management | 2/2 | Complete    | 2026-03-13 |
-| 8. Review Submission UI | 0/2 | In progress | - |
+| 8. Review Submission UI | 1/2 | In Progress|  |

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Operability
 status: completed
-stopped_at: Completed 07-02-PLAN.md — school credentials, deactivation/reactivation, login guard, cover request guard
-last_updated: "2026-03-13T15:46:11.539Z"
+stopped_at: Completed 08-01-PLAN.md — wouldRebook DB migration, API route with agencyRating recalculation, ReviewForm with textarea and rebook toggle
+last_updated: "2026-03-14T14:02:16.291Z"
 last_activity: 2026-03-13 — 07-02 executed (SCH-03, SCH-04 complete)
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 7
+  completed_plans: 6
 ---
 
 # Project State
@@ -54,6 +54,9 @@ All key decisions logged in PROJECT.md Key Decisions table.
 - 07-02: School isActive guard in login/route.ts added after teacher isActive guard, mirroring 06-03 pattern
 - 07-02: SchoolCredentialsForm uses toast.success for success feedback (newer pattern vs inline message)
 - 07-02: Inactive schools remain visible in list so agency can find and reactivate them
+- [Phase 08-01]: Applied 0003-0006 pending DB migrations directly via sqlite3 — drizzle journal was out of sync with actual migration files
+- [Phase 08-01]: Used JS reduce for agencyRating mean calculation instead of drizzle avg() aggregator
+- [Phase 08-01]: wouldRebook defaults to false on submit when user makes no selection
 
 ### Pending Todos
 
@@ -65,6 +68,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-13
-Stopped at: Completed 07-02-PLAN.md — school credentials, deactivation/reactivation, login guard, cover request guard
+Last session: 2026-03-14T14:02:16.288Z
+Stopped at: Completed 08-01-PLAN.md — wouldRebook DB migration, API route with agencyRating recalculation, ReviewForm with textarea and rebook toggle
 Resume file: None
