@@ -223,6 +223,41 @@ export default async function AgencyTeacherDetailPage({
             )}
           </CardContent>
         </Card>
+
+        {reviews.length > 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">School Reviews</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {reviews.map((review) => (
+                  <div key={review.id} className="rounded border p-3 text-sm space-y-1">
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <Star
+                          key={i}
+                          className={`h-3 w-3 ${i <= review.rating ? "fill-amber-400 text-amber-400" : "text-muted"}`}
+                        />
+                      ))}
+                      {review.wouldRebook && (
+                        <Badge variant="outline" className="ml-2 border-green-300 text-green-700 text-xs">
+                          Would rebook
+                        </Badge>
+                      )}
+                    </div>
+                    {review.comment && (
+                      <p className="text-muted-foreground">{review.comment}</p>
+                    )}
+                    <div className="text-xs text-muted-foreground">
+                      {format(new Date(review.createdAt), "d MMM yyyy")}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
