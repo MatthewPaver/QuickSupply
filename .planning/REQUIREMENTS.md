@@ -30,7 +30,7 @@ Requirements for the Operability milestone. Phases continue from Phase 5 (v1.0 e
 - [x] **RVW-02**: School can submit a 1-5 star rating for a completed booking
 - [x] **RVW-03**: School can optionally add a written comment (max 500 chars) to the review
 - [x] **RVW-04**: School can indicate whether they would rebook the teacher (yes/no)
-- [ ] **RVW-05**: Submitted review appears on the teacher's agency profile showing rating, comment, and rebook flag
+- [x] **RVW-05**: Submitted review appears on the teacher's agency profile showing rating, comment, and rebook flag
 - [x] **RVW-06**: New reviews immediately update the teacher's average rating used in assignment engine scoring
 
 ### Documentation
@@ -96,7 +96,7 @@ Deferred to future release.
 | RVW-02 | Phase 8 | Complete |
 | RVW-03 | Phase 8 | Complete |
 | RVW-04 | Phase 8 | Complete |
-| RVW-05 | Phase 8 | Pending |
+| RVW-05 | Phase 8 | Complete |
 | RVW-06 | Phase 8 | Complete |
 
 **Coverage:**

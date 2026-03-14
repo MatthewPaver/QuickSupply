@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1–5 (shipped 2026-03-07) — [archive](.planning/milestones/v1.0-ROADMAP.md)
-- 🚧 **v1.1 Operability** — Phases 6–8 (in progress)
+- ✅ **v1.1 Operability** — Phases 6–8 (completed 2026-03-14)
 
 ## Phases
 
@@ -22,7 +22,7 @@
 
 - [x] **Phase 6: Agency Teacher Management** (3/3 plans complete)
 - [x] **Phase 7: Agency School Management** (2 plans) (completed 2026-03-13)
-- [ ] **Phase 8: Review Submission UI** (2 plans)
+- [x] **Phase 8: Review Submission UI** (2/2 plans complete) (completed 2026-03-14)
 
 ---
 
@@ -58,8 +58,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Create/edit school forms + API routes (SCH-01, SCH-02)
-- [ ] 07-02-PLAN.md — Login credentials + deactivation (SCH-03, SCH-04)
+- [x] 07-01-PLAN.md — Create/edit school forms + API routes (SCH-01, SCH-02)
+- [x] 07-02-PLAN.md — Login credentials + deactivation (SCH-03, SCH-04)
 
 ### Phase 8: Review Submission UI
 **Goal**: Schools can submit structured reviews on completed bookings, and those reviews immediately update the teacher's rating and feed into assignment engine scoring.
@@ -75,8 +75,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Schema migration, Zod validation, API route, ReviewForm (RVW-01, RVW-02, RVW-03, RVW-04, RVW-06)
-- [ ] 08-02-PLAN.md — Agency teacher detail reviews card + verification checkpoint (RVW-05)
+- [x] 08-01-PLAN.md — Schema migration, Zod validation, API route, ReviewForm (RVW-01, RVW-02, RVW-03, RVW-04, RVW-06)
+- [x] 08-02-PLAN.md — Agency teacher detail reviews card + verification checkpoint (RVW-05)
 
 ---
 
@@ -86,4 +86,4 @@ Plans:
 |-------|----------------|--------|-----------|
 | 6. Agency Teacher Management | 3/3 | Complete | 2026-03-13 |
 | 7. Agency School Management | 2/2 | Complete    | 2026-03-13 |
-| 8. Review Submission UI | 1/2 | In Progress|  |
+| 8. Review Submission UI | 2/2 | Complete | 2026-03-14 |
