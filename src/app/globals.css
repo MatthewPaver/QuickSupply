@@ -90,6 +90,48 @@
   --radius: 0.625rem;
 }
 
+/*
+ * Dark mode — Desian branded dark palette.
+ * Applied via next-themes class strategy (.dark on <html>).
+ */
+.dark {
+  --background: oklch(0.145 0.01 247);
+  --foreground: oklch(0.95 0.01 247);
+  --card: oklch(0.18 0.01 247);
+  --card-foreground: oklch(0.95 0.01 247);
+  --popover: oklch(0.18 0.01 247);
+  --popover-foreground: oklch(0.95 0.01 247);
+  /* Desian purple — slightly brighter for dark backgrounds */
+  --primary: oklch(0.55 0.156 303.438);
+  --primary-foreground: oklch(0.985 0.002 247.858);
+  /* Desian blue — lifted for contrast on dark */
+  --secondary: oklch(0.65 0.215 262.881);
+  --secondary-foreground: oklch(0.95 0.01 247);
+  --muted: oklch(0.22 0.01 247);
+  --muted-foreground: oklch(0.6 0.01 247);
+  /* Accent — dark purple tint */
+  --accent: oklch(0.25 0.05 303.438);
+  --accent-foreground: oklch(0.95 0.01 247);
+  --destructive: oklch(0.65 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0.002 247.858);
+  --border: oklch(0.28 0.01 247);
+  --input: oklch(0.28 0.01 247);
+  --ring: oklch(0.55 0.156 303.438);
+  --chart-1: oklch(0.55 0.156 303.438);
+  --chart-2: oklch(0.65 0.215 262.881);
+  --chart-3: oklch(0.75 0.1 303.438);
+  --chart-4: oklch(0.685 0.169 237.323);
+  --chart-5: oklch(0.769 0.131 303.438);
+  --sidebar: oklch(0.16 0.01 247);
+  --sidebar-foreground: oklch(0.95 0.01 247);
+  --sidebar-primary: oklch(0.55 0.156 303.438);
+  --sidebar-primary-foreground: oklch(0.985 0.002 247.858);
+  --sidebar-accent: oklch(0.25 0.05 303.438);
+  --sidebar-accent-foreground: oklch(0.95 0.01 247);
+  --sidebar-border: oklch(0.28 0.01 247);
+  --sidebar-ring: oklch(0.55 0.156 303.438);
+}
+
 @layer base {
   * {
     @apply border-border;

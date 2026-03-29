@@ -1,0 +1,18 @@
+{
+  "name": "QuickSupply",
+  "short_name": "QS",
+  "description": "Supply teaching workforce scheduling by Desian Education",
+  "display": "standalone",
+  "theme_color": "#4c0673",
+  "background_color": "#ffffff",
+  "start_url": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/desian-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

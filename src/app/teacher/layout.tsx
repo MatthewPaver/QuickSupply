@@ -7,6 +7,7 @@ import { TeacherDesktopNav } from "@/components/teacher/teacher-desktop-nav";
 import { PageSkeleton } from "@/components/shared/page-skeleton";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { SignOutButton } from "@/components/shared/sign-out-button";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 /** Async: resolves session then renders header right (name + logout). */
 async function TeacherAuthHeader() {
@@ -37,11 +38,12 @@ export default function TeacherLayout({
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 sm:h-16">
           <Link href="/teacher/dashboard" className="flex shrink-0 items-center gap-2">
-            <Image src="/desian-logo.svg" alt="Desian" width={80} height={22} className="brightness-0 h-6 w-auto" />
+            <Image src="/desian-logo.svg" alt="Desian" width={80} height={22} className="brightness-0 dark:invert h-6 w-auto" />
             <span className="hidden text-sm font-semibold text-primary sm:inline">QuickSupply</span>
           </Link>
           <TeacherDesktopNav />
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <NotificationBell />
             <Suspense fallback={<span className="text-muted-foreground">...</span>}>
               <TeacherAuthHeader />
