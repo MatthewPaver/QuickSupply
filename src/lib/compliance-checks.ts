@@ -163,8 +163,11 @@ export function expireDocuments(now = new Date()): number {
  * Recalculate a teacher's complianceStatus based on their required documents
  * (DBS and right_to_work). If any required document is expired (or missing a
  * verified copy), the teacher is marked "expired".
+ *
+ * This is the SINGLE source of truth for compliance calculation.
+ * Used by both the cron expiry job and the verification API route.
  */
-function recalculateComplianceStatus(teacherId: string): void {
+export function recalculateComplianceStatus(teacherId: string): void {
   const requiredTypes = ["dbs", "right_to_work"] as const;
 
   // Get all non-archived documents for this teacher

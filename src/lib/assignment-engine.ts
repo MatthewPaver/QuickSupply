@@ -682,10 +682,14 @@ export function checkExpiredOffers(): number {
     .filter((o) => o.expiresAt <= now);
 
   for (const offer of expired) {
-    db.update(assignmentOffers)
+    // Conditional update: only expire if still pending (prevents race with teacher acceptance)
+    const result = db.update(assignmentOffers)
       .set({ status: "expired" })
-      .where(eq(assignmentOffers.id, offer.id))
+      .where(and(eq(assignmentOffers.id, offer.id), eq(assignmentOffers.status, "pending")))
       .run();
+
+    // If no rows updated, the teacher already accepted/declined — skip auto-advance
+    if (result.changes === 0) continue;
 
     sseManager.emit("agency", {
       type: "offer_expired",

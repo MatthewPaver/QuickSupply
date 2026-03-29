@@ -168,24 +168,25 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // Insert invoice
-  db.insert(invoices)
-    .values({
-      id: invoiceId,
-      schoolId,
-      periodStart,
-      periodEnd,
-      totalPayAmount,
-      totalChargeAmount,
-      status: "draft",
-      createdAt: now,
-    })
-    .run();
+  // Insert invoice and line items in a transaction to prevent partial writes
+  db.transaction((tx) => {
+    tx.insert(invoices)
+      .values({
+        id: invoiceId,
+        schoolId,
+        periodStart,
+        periodEnd,
+        totalPayAmount,
+        totalChargeAmount,
+        status: "draft",
+        createdAt: now,
+      })
+      .run();
 
-  // Insert line items
-  for (const li of lineItems) {
-    db.insert(invoiceLineItems).values(li).run();
-  }
+    for (const li of lineItems) {
+      tx.insert(invoiceLineItems).values(li).run();
+    }
+  });
 
   return NextResponse.json(
     { success: true, id: invoiceId, lineItemCount: lineItems.length },

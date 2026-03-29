@@ -7,6 +7,7 @@ import { complianceDocuments, teachers } from "@/lib/db/schema";
 import { validateBody } from "@/lib/api-validation";
 import { createNotification } from "@/lib/notifications";
 import { logActivity } from "@/lib/activity-log";
+import { recalculateComplianceStatus } from "@/lib/compliance-checks";
 
 const verifyRejectSchema = z.discriminatedUnion("action", [
   z.object({
@@ -122,40 +123,6 @@ export async function PATCH(
   });
 
   return NextResponse.json({ success: true });
-}
-
-function recalculateComplianceStatus(teacherId: string): void {
-  // A teacher is compliant only if they have a verified DBS AND a verified right_to_work document
-  const verifiedDbs = db
-    .select({ id: complianceDocuments.id })
-    .from(complianceDocuments)
-    .where(
-      and(
-        eq(complianceDocuments.teacherId, teacherId),
-        eq(complianceDocuments.documentType, "dbs"),
-        eq(complianceDocuments.status, "verified")
-      )
-    )
-    .get();
-
-  const verifiedRtw = db
-    .select({ id: complianceDocuments.id })
-    .from(complianceDocuments)
-    .where(
-      and(
-        eq(complianceDocuments.teacherId, teacherId),
-        eq(complianceDocuments.documentType, "right_to_work"),
-        eq(complianceDocuments.status, "verified")
-      )
-    )
-    .get();
-
-  const newStatus = verifiedDbs && verifiedRtw ? "compliant" : "pending";
-
-  db.update(teachers)
-    .set({ complianceStatus: newStatus })
-    .where(eq(teachers.id, teacherId))
-    .run();
 }
 
 function formatDocType(type: string): string {
