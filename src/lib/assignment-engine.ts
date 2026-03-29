@@ -405,10 +405,16 @@ export function handleTeacherResponse(
   if (!request) return { success: false, message: "Request not found." };
 
   if (response === "accepted") {
-    db.update(assignmentOffers)
+    // Conditional update to prevent double-accept race condition
+    const result = db.update(assignmentOffers)
       .set({ status: "accepted", responseAt: new Date() })
-      .where(eq(assignmentOffers.id, offerId))
+      .where(and(eq(assignmentOffers.id, offerId), eq(assignmentOffers.status, "pending")))
       .run();
+
+    // If no rows were updated, another request already changed the status
+    if (result.changes === 0) {
+      return { success: false, message: "Offer is no longer active." };
+    }
 
     const bookingId = ulid();
     db.insert(bookings)

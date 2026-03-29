@@ -54,30 +54,51 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "A timesheet has already been submitted for this booking" }, { status: 409 });
   }
 
-  // Calculate total hours
+  // Calculate total hours with validation
   const [ah, am] = arrivalTime.split(":").map(Number);
   const [dh, dm] = departureTime.split(":").map(Number);
-  const totalMinutes = (dh * 60 + dm) - (ah * 60 + am) - breakMinutes;
+  const arrivalMinutes = ah * 60 + am;
+  const departureMinutes = dh * 60 + dm;
+
+  if (departureMinutes <= arrivalMinutes) {
+    return NextResponse.json({ error: "Departure time must be after arrival time" }, { status: 400 });
+  }
+
+  const totalMinutesBeforeBreak = departureMinutes - arrivalMinutes;
+  if (breakMinutes >= totalMinutesBeforeBreak) {
+    return NextResponse.json({ error: "Break duration cannot exceed total time" }, { status: 400 });
+  }
+
+  const totalMinutes = totalMinutesBeforeBreak - breakMinutes;
   const totalHours = Math.round((totalMinutes / 60) * 100) / 100;
 
   const now = new Date();
   const id = ulid();
 
-  db.insert(timesheets)
-    .values({
-      id,
-      bookingId,
-      teacherId: session.userId,
-      arrivalTime,
-      departureTime,
-      breakMinutes,
-      totalHours,
-      status: "submitted",
-      submittedAt: now,
-      notes: notes ?? null,
-      createdAt: now,
-    })
-    .run();
+  // Use unique constraint check — if a concurrent request already inserted, this will fail
+  try {
+    db.insert(timesheets)
+      .values({
+        id,
+        bookingId,
+        teacherId: session.userId,
+        arrivalTime,
+        departureTime,
+        breakMinutes,
+        totalHours,
+        status: "submitted",
+        submittedAt: now,
+        notes: notes ?? null,
+        createdAt: now,
+      })
+      .run();
+  } catch (err) {
+    // Handle unique constraint violation (concurrent duplicate submission)
+    if (err instanceof Error && err.message.includes("UNIQUE constraint")) {
+      return NextResponse.json({ error: "A timesheet has already been submitted for this booking" }, { status: 409 });
+    }
+    throw err;
+  }
 
   // Get cover request details for the notification
   const coverRequest = db

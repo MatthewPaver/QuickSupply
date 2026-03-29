@@ -12,7 +12,11 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const statusFilter = searchParams.get("status") ?? "submitted";
+  const validStatuses = ["submitted", "approved", "disputed", "paid", "all"] as const;
+  const rawStatus = searchParams.get("status") ?? "submitted";
+  const statusFilter = validStatuses.includes(rawStatus as typeof validStatuses[number])
+    ? rawStatus
+    : "submitted";
 
   let query = db
     .select({

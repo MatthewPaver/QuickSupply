@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFile } from "fs/promises";
+import { readFile, stat } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 import { getSession } from "@/lib/auth";
@@ -10,6 +10,8 @@ const MIME_TYPES: Record<string, string> = {
   jpeg: "image/jpeg",
   png: "image/png",
 };
+
+const MAX_SERVE_SIZE = 15 * 1024 * 1024; // 15MB safety limit
 
 /** GET: Serve an uploaded compliance file. */
 export async function GET(request: NextRequest) {
@@ -23,33 +25,36 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "path query parameter is required" }, { status: 400 });
   }
 
-  // Security: only serve files from the compliance uploads directory
-  if (!filePath.startsWith("uploads/compliance/")) {
+  // Canonical path traversal defense: compare resolved absolute paths
+  const resolvedBase = path.resolve(process.cwd(), "uploads", "compliance");
+  const resolvedPath = path.resolve(process.cwd(), filePath);
+
+  if (!resolvedPath.startsWith(resolvedBase + path.sep)) {
     return NextResponse.json({ error: "Invalid file path" }, { status: 403 });
   }
 
-  // Prevent path traversal
-  const normalised = path.normalize(filePath);
-  if (normalised.includes("..") || !normalised.startsWith("uploads/compliance/")) {
-    return NextResponse.json({ error: "Invalid file path" }, { status: 403 });
-  }
-
-  const fullPath = path.join(process.cwd(), normalised);
-  if (!existsSync(fullPath)) {
+  if (!existsSync(resolvedPath)) {
     return NextResponse.json({ error: "File not found" }, { status: 404 });
   }
 
-  const ext = path.extname(fullPath).slice(1).toLowerCase();
+  // Check file size before reading into memory
+  const fileStat = await stat(resolvedPath);
+  if (fileStat.size > MAX_SERVE_SIZE) {
+    return NextResponse.json({ error: "File too large" }, { status: 413 });
+  }
+
+  const ext = path.extname(resolvedPath).slice(1).toLowerCase();
   const contentType = MIME_TYPES[ext] ?? "application/octet-stream";
 
-  const buffer = await readFile(fullPath);
+  const buffer = await readFile(resolvedPath);
 
   return new NextResponse(buffer, {
     status: 200,
     headers: {
       "Content-Type": contentType,
-      "Content-Disposition": `inline; filename="${path.basename(fullPath)}"`,
+      "Content-Disposition": `attachment; filename="${path.basename(resolvedPath)}"`,
       "Cache-Control": "private, max-age=3600",
+      "X-Content-Type-Options": "nosniff",
     },
   });
 }

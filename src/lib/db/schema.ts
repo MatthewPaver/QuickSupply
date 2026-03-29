@@ -277,7 +277,7 @@ export const timesheets = sqliteTable(
     createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   },
   (table) => [
-    index("timesheets_booking_id_idx").on(table.bookingId),
+    uniqueIndex("timesheets_booking_id_unique").on(table.bookingId),
     index("timesheets_teacher_id_idx").on(table.teacherId),
     index("timesheets_status_idx").on(table.status),
   ]
