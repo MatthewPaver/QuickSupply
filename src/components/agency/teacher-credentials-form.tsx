@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface Props {
   teacherId: string;
@@ -67,13 +68,12 @@ export function TeacherCredentialsForm({ teacherId, currentEmail }: Props) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
             <Label htmlFor="credentialEmail">Email</Label>
-            <input
+            <Input
               id="credentialEmail"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
             />
             {fieldErrors.email && (
               <p className="text-xs text-destructive">{fieldErrors.email.join(", ")}</p>
@@ -82,7 +82,7 @@ export function TeacherCredentialsForm({ teacherId, currentEmail }: Props) {
 
           <div className="space-y-1">
             <Label htmlFor="temporaryPassword">New Temporary Password</Label>
-            <input
+            <Input
               id="temporaryPassword"
               type="password"
               value={temporaryPassword}
@@ -90,7 +90,6 @@ export function TeacherCredentialsForm({ teacherId, currentEmail }: Props) {
               placeholder="New temporary password"
               required
               minLength={8}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
             />
             {fieldErrors.temporaryPassword && (
               <p className="text-xs text-destructive">{fieldErrors.temporaryPassword.join(", ")}</p>
@@ -99,14 +98,13 @@ export function TeacherCredentialsForm({ teacherId, currentEmail }: Props) {
 
           <div className="space-y-1">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <input
+            <Input
               id="confirmPassword"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm new password"
               required
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
             />
             {fieldErrors.confirmPassword && (
               <p className="text-xs text-destructive">{fieldErrors.confirmPassword.join(", ")}</p>
@@ -118,7 +116,7 @@ export function TeacherCredentialsForm({ teacherId, currentEmail }: Props) {
           )}
 
           {successMessage && (
-            <p className="text-xs text-green-600">{successMessage}</p>
+            <p className="text-xs text-emerald-600">{successMessage}</p>
           )}
 
           <Button type="submit" size="sm" disabled={submitting}>

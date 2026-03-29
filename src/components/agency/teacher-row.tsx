@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Star, Car, Phone, MapPin } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
 
@@ -20,20 +20,10 @@ type Teacher = {
 };
 
 export function TeacherRow({ t }: { t: Teacher }) {
-  const router = useRouter();
-
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      className={`flex cursor-pointer items-center justify-between px-6 py-4 transition-colors hover:bg-muted/50 ${!t.isActive ? "opacity-50" : ""}`}
-      onClick={() => router.push(`/agency/teachers/${t.id}`)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          router.push(`/agency/teachers/${t.id}`);
-        }
-      }}
+    <Link
+      href={`/agency/teachers/${t.id}`}
+      className={`flex items-center justify-between px-6 py-4 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${!t.isActive ? "opacity-50" : ""}`}
     >
       <div className="flex items-center gap-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
@@ -49,7 +39,7 @@ export function TeacherRow({ t }: { t: Teacher }) {
               {t.roleType}
             </span>
             {!t.isActive && (
-              <span className="rounded bg-red-100 px-2 py-0.5 text-[11px] font-medium text-red-600">
+              <span className="rounded bg-destructive/10 px-2 py-0.5 text-[11px] font-medium text-destructive">
                 Inactive
               </span>
             )}
@@ -67,16 +57,17 @@ export function TeacherRow({ t }: { t: Teacher }) {
               </span>
             )}
             {t.emergencyAvailable && (
-              <span className="rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-600">Emergency OK</span>
+              <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[11px] font-medium text-destructive">Emergency OK</span>
             )}
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+      <div className="flex items-center gap-3" onClick={(e) => e.preventDefault()}>
         <a
           href={`tel:${t.phone}`}
           aria-label={`Call ${t.firstName} ${t.lastName}`}
           className="rounded-md p-1 text-primary transition-colors hover:bg-primary/10"
+          onClick={(e) => e.stopPropagation()}
         >
           <Phone className="h-4 w-4" />
         </a>
@@ -90,6 +81,6 @@ export function TeacherRow({ t }: { t: Teacher }) {
           }
         />
       </div>
-    </div>
+    </Link>
   );
 }

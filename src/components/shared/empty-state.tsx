@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, Briefcase, Inbox } from "lucide-react";
+import { FileText, Briefcase, Inbox, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const emptyStateIcons = {
   "file-text": FileText,
   briefcase: Briefcase,
   inbox: Inbox,
+  "clipboard-list": ClipboardList,
 } as const;
 
 export type EmptyStateIconName = keyof typeof emptyStateIcons;

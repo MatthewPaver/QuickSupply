@@ -48,6 +48,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
   const [isEmergency, setIsEmergency] = useState(false);
   // Teacher IDs that are unavailable on the selected date (for previous-teacher list)
   const [unavailableOnDate, setUnavailableOnDate] = useState<Set<string>>(new Set());
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [showRequiredHint, setShowRequiredHint] = useState(false);
 
   // Only show previous teachers who match the selected role (teacher/TA/both)
@@ -75,6 +76,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
       setUnavailableOnDate(new Set());
       return;
     }
+    setCheckingAvailability(true);
     const dateStr = format(date, "yyyy-MM-dd");
     Promise.all(
       eligiblePreviousTeachers.map((t) =>
@@ -87,6 +89,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
       )
     ).then((results) => {
       setUnavailableOnDate(new Set(results.filter((id): id is string => id != null)));
+      setCheckingAvailability(false);
     });
   }, [date, eligiblePreviousTeachers]);
 
@@ -184,7 +187,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
               </label>
             </div>
             {isEmergency && (
-              <div className="mt-3 flex items-center gap-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+              <div className="mt-3 flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
                 Same-day or urgent — shorter response window applies
               </div>
@@ -251,7 +254,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
               />
             </div>
             {!timeValid && startTime && endTime && (
-              <p className="mt-2 text-xs text-red-600">End time must be after start time.</p>
+              <p className="mt-2 text-xs text-destructive">End time must be after start time.</p>
             )}
           </CardContent>
         </Card>
@@ -265,6 +268,12 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
             <p className="text-xs text-muted-foreground mb-3">
               Optionally select a teacher who has previously worked at your school (only those who match the role above are shown). The agency can try to offer them first.
             </p>
+            {checkingAvailability && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Checking availability...
+              </div>
+            )}
             {eligiblePreviousTeachers.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 rounded-lg border border-dashed bg-muted/30 text-center">
                 {previousTeachers.length === 0
@@ -361,7 +370,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
             </Button>
           </div>
           {showRequiredHint && !canSubmit && (
-            <p className="mt-2 text-xs text-red-600">Please select both a date and role before submitting.</p>
+            <p className="mt-2 text-xs text-destructive">Please select both a date and role before submitting.</p>
           )}
         </div>
       </div>

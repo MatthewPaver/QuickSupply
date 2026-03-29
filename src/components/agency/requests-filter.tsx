@@ -118,7 +118,7 @@ export function RequestsFilter({ requests, schoolMap, offerMap }: Props) {
                           {" "}&middot; {format(new Date(req.date), "EEE d MMM yyyy")} &middot; {req.startTime} - {req.endTime}
                         </div>
                         {offer && (
-                          <div className="text-sm text-blue-600">
+                          <div className="text-sm text-secondary">
                             Offering to: {offer.teacherFirstName} {offer.teacherLastName}
                           </div>
                         )}

@@ -144,7 +144,7 @@ export function SchoolForm({ mode, initialData, schoolId }: Props) {
               aria-invalid={!!fieldError("name")}
             />
             {fieldError("name") && (
-              <p className="text-xs text-red-600">{fieldError("name")}</p>
+              <p className="text-xs text-destructive">{fieldError("name")}</p>
             )}
           </div>
 
@@ -157,7 +157,7 @@ export function SchoolForm({ mode, initialData, schoolId }: Props) {
               aria-invalid={!!fieldError("address")}
             />
             {fieldError("address") && (
-              <p className="text-xs text-red-600">{fieldError("address")}</p>
+              <p className="text-xs text-destructive">{fieldError("address")}</p>
             )}
           </div>
 
@@ -175,7 +175,7 @@ export function SchoolForm({ mode, initialData, schoolId }: Props) {
                 UK postcode — used for distance calculations
               </p>
               {fieldError("postcode") && (
-                <p className="text-xs text-red-600">{fieldError("postcode")}</p>
+                <p className="text-xs text-destructive">{fieldError("postcode")}</p>
               )}
             </div>
 
@@ -197,7 +197,7 @@ export function SchoolForm({ mode, initialData, schoolId }: Props) {
                 </SelectContent>
               </Select>
               {fieldError("phase") && (
-                <p className="text-xs text-red-600">{fieldError("phase")}</p>
+                <p className="text-xs text-destructive">{fieldError("phase")}</p>
               )}
             </div>
           </div>
@@ -219,7 +219,7 @@ export function SchoolForm({ mode, initialData, schoolId }: Props) {
               aria-invalid={!!fieldError("contactName")}
             />
             {fieldError("contactName") && (
-              <p className="text-xs text-red-600">{fieldError("contactName")}</p>
+              <p className="text-xs text-destructive">{fieldError("contactName")}</p>
             )}
           </div>
 
@@ -234,7 +234,7 @@ export function SchoolForm({ mode, initialData, schoolId }: Props) {
                 aria-invalid={!!fieldError("contactEmail")}
               />
               {fieldError("contactEmail") && (
-                <p className="text-xs text-red-600">{fieldError("contactEmail")}</p>
+                <p className="text-xs text-destructive">{fieldError("contactEmail")}</p>
               )}
             </div>
 
@@ -248,7 +248,7 @@ export function SchoolForm({ mode, initialData, schoolId }: Props) {
                 aria-invalid={!!fieldError("contactPhone")}
               />
               {fieldError("contactPhone") && (
-                <p className="text-xs text-red-600">{fieldError("contactPhone")}</p>
+                <p className="text-xs text-destructive">{fieldError("contactPhone")}</p>
               )}
             </div>
           </div>
@@ -268,7 +268,7 @@ export function SchoolForm({ mode, initialData, schoolId }: Props) {
                 School contact uses this to sign in
               </p>
               {fieldError("temporaryPassword") && (
-                <p className="text-xs text-red-600">{fieldError("temporaryPassword")}</p>
+                <p className="text-xs text-destructive">{fieldError("temporaryPassword")}</p>
               )}
             </div>
           )}

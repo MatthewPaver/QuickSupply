@@ -153,7 +153,7 @@ export default function TeacherAvailabilityPage() {
                 unavailable: unavailableDates,
               }}
               modifiersClassNames={{
-                unavailable: "bg-red-100 text-red-700",
+                unavailable: "bg-destructive/10 text-destructive",
               }}
             />
           </CardContent>

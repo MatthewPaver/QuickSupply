@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { Loader2, Car, Moon, AlertTriangle, Clock, Shield } from "lucide-react";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { DocumentUploadForm } from "@/components/teacher/document-upload-form";
 
 /** Role type options for teacher/TA as per script: Teacher, TA, Both */
 const ROLE_TYPES = [
@@ -36,6 +37,7 @@ export default function TeacherProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
+  const [distanceError, setDistanceError] = useState("");
 
   useEffect(() => {
     loadProfile();
@@ -176,13 +178,21 @@ export default function TeacherProfilePage() {
                   const val = parseInt(e.target.value, 10);
                   if (!isNaN(val) && val >= 1 && val <= 50) {
                     setProfile({ ...profile, maxDistanceMiles: val });
+                    setDistanceError("");
                   } else if (e.target.value === "") {
                     setProfile({ ...profile, maxDistanceMiles: 1 });
+                    setDistanceError("");
+                  } else {
+                    setDistanceError("Distance must be between 1 and 50 miles");
                   }
                 }}
                 min={1}
                 max={50}
+                aria-invalid={!!distanceError}
               />
+              {distanceError && (
+                <p className="text-xs text-destructive">{distanceError}</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -193,21 +203,21 @@ export default function TeacherProfilePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <ToggleOption
-              icon={<AlertTriangle className="h-5 w-5 text-red-500" />}
+              icon={<AlertTriangle className="h-5 w-5 text-destructive" />}
               label="Available for same-day emergencies"
               description="You can be contacted for urgent last-minute cover"
               checked={profile.emergencyAvailable}
               onChange={(v) => setProfile({ ...profile, emergencyAvailable: v })}
             />
             <ToggleOption
-              icon={<Moon className="h-5 w-5 text-blue-500" />}
+              icon={<Moon className="h-5 w-5 text-secondary" />}
               label="Contact night before only"
               description="Only contact you the evening before, not earlier"
               checked={profile.contactNightBeforeOnly}
               onChange={(v) => setProfile({ ...profile, contactNightBeforeOnly: v })}
             />
             <ToggleOption
-              icon={<Clock className="h-5 w-5 text-purple-500" />}
+              icon={<Clock className="h-5 w-5 text-primary" />}
               label="Willing for long-term placements"
               description="Open to multi-day or ongoing assignments"
               checked={profile.longTermWilling}
@@ -221,6 +231,16 @@ export default function TeacherProfilePage() {
         {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
         Save Preferences
       </Button>
+
+      <div className="space-y-6 pt-2">
+        <div>
+          <h2 className="text-xl font-bold">Compliance Documents</h2>
+          <p className="text-muted-foreground">Upload and track your compliance documents</p>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <DocumentUploadForm />
+        </div>
+      </div>
     </div>
   );
 }
@@ -245,7 +265,7 @@ function ToggleOption({
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`flex w-full items-center gap-3 rounded-lg border-2 p-3 text-left transition-colors ${
+      className={`flex w-full items-center gap-3 rounded-lg border-2 p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
         checked
           ? "border-primary bg-primary/5"
           : "border-muted hover:border-muted-foreground/30"

@@ -120,9 +120,9 @@ export default async function TeacherDashboard() {
         </CardHeader>
         <CardContent>
           {todayBooking ? (
-            <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950/30">
-              <div className="font-medium text-green-800 dark:text-green-200">{todayBooking.schoolName}</div>
-              <div className="text-sm text-green-700 dark:text-green-300">
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
+              <div className="font-medium text-emerald-800 dark:text-emerald-200">{todayBooking.schoolName}</div>
+              <div className="text-sm text-emerald-700 dark:text-emerald-300">
                 {todayBooking.startTime} - {todayBooking.endTime} &middot;{" "}
                 <span className="capitalize">{todayBooking.roleNeeded}</span>
                 {todayBooking.subject && <span> - {todayBooking.subject}</span>}

@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { teachers } from "@/lib/db/schema";
+import { teachers, teacherSubjects } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { notFound } from "next/navigation";
@@ -15,6 +15,13 @@ export default async function EditTeacherPage({
   const teacher = db.select().from(teachers).where(eq(teachers.id, id)).get();
   if (!teacher) notFound();
 
+  const subjects = db
+    .select({ subject: teacherSubjects.subject })
+    .from(teacherSubjects)
+    .where(eq(teacherSubjects.teacherId, id))
+    .all()
+    .map((s) => s.subject);
+
   return (
     <div className="space-y-6">
       <div>
@@ -26,6 +33,7 @@ export default async function EditTeacherPage({
       <TeacherForm
         mode="edit"
         teacherId={id}
+        initialSubjects={subjects}
         initialData={{
           firstName: teacher.firstName,
           lastName: teacher.lastName,

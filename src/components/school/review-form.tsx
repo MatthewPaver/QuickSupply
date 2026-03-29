@@ -113,14 +113,14 @@ export function ReviewForm({ bookingId, teacherName, existingRating, existingCom
         <button
           type="button"
           onClick={() => setWouldRebook(true)}
-          className={`rounded px-3 py-1 border text-xs font-medium ${wouldRebook === true ? "bg-green-600 text-white border-green-600" : "border-input hover:bg-accent"}`}
+          className={`rounded px-3 py-1 border text-xs font-medium ${wouldRebook === true ? "bg-primary text-primary-foreground border-primary" : "border-input hover:bg-accent"}`}
         >
           Yes
         </button>
         <button
           type="button"
           onClick={() => setWouldRebook(false)}
-          className={`rounded px-3 py-1 border text-xs font-medium ${wouldRebook === false ? "bg-red-600 text-white border-red-600" : "border-input hover:bg-accent"}`}
+          className={`rounded px-3 py-1 border text-xs font-medium ${wouldRebook === false ? "bg-destructive text-white border-destructive" : "border-input hover:bg-accent"}`}
         >
           No
         </button>

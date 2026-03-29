@@ -14,6 +14,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+
+const SUBJECT_OPTIONS = [
+  "English",
+  "Mathematics",
+  "Science",
+  "History",
+  "Geography",
+  "MFL",
+  "Art",
+  "Music",
+  "PE",
+  "Computing",
+  "RE",
+  "PSHE",
+  "DT",
+  "Drama",
+  "Early Years",
+] as const;
 
 type TeacherFormValues = {
   firstName: string;
@@ -28,12 +47,14 @@ type TeacherFormValues = {
   contactNightBeforeOnly: boolean;
   longTermWilling: boolean;
   temporaryPassword?: string;
+  subjects: string[];
 };
 
 interface Props {
   mode: "create" | "edit";
   initialData?: Partial<TeacherFormValues>;
   teacherId?: string;
+  initialSubjects?: string[];
 }
 
 type FieldErrors = Record<string, string[]>;
@@ -51,13 +72,15 @@ const DEFAULTS: TeacherFormValues = {
   contactNightBeforeOnly: false,
   longTermWilling: false,
   temporaryPassword: "",
+  subjects: [],
 };
 
-export function TeacherForm({ mode, initialData, teacherId }: Props) {
+export function TeacherForm({ mode, initialData, teacherId, initialSubjects }: Props) {
   const router = useRouter();
   const [values, setValues] = useState<TeacherFormValues>({
     ...DEFAULTS,
     ...initialData,
+    subjects: initialSubjects ?? initialData?.subjects ?? [],
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
@@ -123,6 +146,16 @@ export function TeacherForm({ mode, initialData, teacherId }: Props) {
         return;
       }
 
+      // Save subjects separately
+      const subjectTeacherId = mode === "create" ? data.id : teacherId;
+      if (subjectTeacherId) {
+        await fetch(`/api/agency/teachers/${subjectTeacherId}/subjects`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subjects: values.subjects }),
+        });
+      }
+
       toast.success(mode === "create" ? "Teacher created" : "Teacher updated");
 
       if (mode === "create") {
@@ -152,7 +185,7 @@ export function TeacherForm({ mode, initialData, teacherId }: Props) {
                 aria-invalid={!!fieldError("firstName")}
               />
               {fieldError("firstName") && (
-                <p className="text-xs text-red-600">{fieldError("firstName")}</p>
+                <p className="text-xs text-destructive">{fieldError("firstName")}</p>
               )}
             </div>
             <div className="space-y-1.5">
@@ -164,7 +197,7 @@ export function TeacherForm({ mode, initialData, teacherId }: Props) {
                 aria-invalid={!!fieldError("lastName")}
               />
               {fieldError("lastName") && (
-                <p className="text-xs text-red-600">{fieldError("lastName")}</p>
+                <p className="text-xs text-destructive">{fieldError("lastName")}</p>
               )}
             </div>
           </div>
@@ -181,7 +214,7 @@ export function TeacherForm({ mode, initialData, teacherId }: Props) {
                 aria-invalid={!!fieldError("email")}
               />
               {fieldError("email") && (
-                <p className="text-xs text-red-600">{fieldError("email")}</p>
+                <p className="text-xs text-destructive">{fieldError("email")}</p>
               )}
             </div>
             <div className="space-y-1.5">
@@ -194,7 +227,7 @@ export function TeacherForm({ mode, initialData, teacherId }: Props) {
                 aria-invalid={!!fieldError("phone")}
               />
               {fieldError("phone") && (
-                <p className="text-xs text-red-600">{fieldError("phone")}</p>
+                <p className="text-xs text-destructive">{fieldError("phone")}</p>
               )}
             </div>
           </div>
@@ -214,7 +247,7 @@ export function TeacherForm({ mode, initialData, teacherId }: Props) {
                 UK postcode — used for distance calculations
               </p>
               {fieldError("postcode") && (
-                <p className="text-xs text-red-600">{fieldError("postcode")}</p>
+                <p className="text-xs text-destructive">{fieldError("postcode")}</p>
               )}
             </div>
             <div className="space-y-1.5">
@@ -235,7 +268,7 @@ export function TeacherForm({ mode, initialData, teacherId }: Props) {
                 </SelectContent>
               </Select>
               {fieldError("roleType") && (
-                <p className="text-xs text-red-600">{fieldError("roleType")}</p>
+                <p className="text-xs text-destructive">{fieldError("roleType")}</p>
               )}
             </div>
           </div>
@@ -256,10 +289,49 @@ export function TeacherForm({ mode, initialData, teacherId }: Props) {
               aria-invalid={!!fieldError("maxDistanceMiles")}
             />
             {fieldError("maxDistanceMiles") && (
-              <p className="text-xs text-red-600">
+              <p className="text-xs text-destructive">
                 {fieldError("maxDistanceMiles")}
               </p>
             )}
+          </div>
+
+          {/* Subject Specializations */}
+          <div className="space-y-2">
+            <Label>Subject Specializations</Label>
+            <div className="flex flex-wrap gap-2">
+              {SUBJECT_OPTIONS.map((subject) => {
+                const isSelected = values.subjects.includes(subject);
+                return (
+                  <button
+                    key={subject}
+                    type="button"
+                    onClick={() => {
+                      setValues((prev) => ({
+                        ...prev,
+                        subjects: isSelected
+                          ? prev.subjects.filter((s) => s !== subject)
+                          : [...prev.subjects, subject],
+                      }));
+                    }}
+                    className="focus-visible:ring-[3px] focus-visible:ring-ring/50 rounded-md"
+                  >
+                    <Badge
+                      variant={isSelected ? "default" : "outline"}
+                      className={`cursor-pointer transition-colors ${
+                        isSelected
+                          ? ""
+                          : "hover:bg-primary/10"
+                      }`}
+                    >
+                      {subject}
+                    </Badge>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Click to toggle subjects this teacher can cover
+            </p>
           </div>
 
           {/* Boolean flags */}
@@ -323,7 +395,7 @@ export function TeacherForm({ mode, initialData, teacherId }: Props) {
                 Teacher uses this to sign in
               </p>
               {fieldError("temporaryPassword") && (
-                <p className="text-xs text-red-600">
+                <p className="text-xs text-destructive">
                   {fieldError("temporaryPassword")}
                 </p>
               )}

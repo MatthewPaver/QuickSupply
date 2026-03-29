@@ -172,55 +172,14 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
   // Filled state
   if (requestStatus === "filled" && bookingId) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Assignment</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="rounded-lg bg-green-50 border border-green-200 p-4 text-center">
-            <p className="text-green-800 font-medium">This request has been filled.</p>
-          </div>
-          <Button
-            variant="destructive"
-            className="w-full"
-            onClick={() => setCancelDialogOpen(true)}
-          >
-            <XCircle className="mr-2 h-4 w-4" />
-            Cancel Booking
-          </Button>
-
-          <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Cancel Booking</DialogTitle>
-                <DialogDescription>
-                  The school will NOT be notified. You should call the teacher to inform them.
-                </DialogDescription>
-              </DialogHeader>
-              <Textarea
-                placeholder="Reason for cancellation..."
-                value={cancelReason}
-                onChange={(e) => setCancelReason(e.target.value)}
-              />
-              <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
-                  Keep Booking
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={handleCancelBooking}
-                  disabled={actionLoading === "cancel"}
-                >
-                  {actionLoading === "cancel" ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
-                  Confirm Cancellation
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </CardContent>
-      </Card>
+      <FilledRequestCard
+        cancelDialogOpen={cancelDialogOpen}
+        setCancelDialogOpen={setCancelDialogOpen}
+        cancelReason={cancelReason}
+        setCancelReason={setCancelReason}
+        onCancelBooking={handleCancelBooking}
+        isCancelling={actionLoading === "cancel"}
+      />
     );
   }
 
@@ -321,86 +280,15 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
         ) : (
           <div className="space-y-2.5">
             {ranked.map((r, idx) => (
-              <div
+              <RankedTeacherItem
                 key={r.teacher.id}
-                className="flex items-center justify-between rounded-lg border bg-background p-3 transition-colors hover:bg-muted/30"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                    {idx + 1}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold">
-                        {r.teacher.firstName} {r.teacher.lastName}
-                      </span>
-                      {r.isPreferred && (
-                        <Badge variant="outline" className="border-pink-300 bg-pink-50 text-pink-700 text-xs">
-                          <Heart className="mr-1 h-3 w-3" /> Preferred
-                        </Badge>
-                      )}
-                      {r.previouslyWorkedAtSchool && (
-                        <Badge variant="outline" className="text-xs">Previous</Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Star className="h-3 w-3 text-amber-500" />
-                        {r.teacher.agencyRating.toFixed(1)}
-                      </span>
-                      {r.schoolReviewAvg && (
-                        <span className="flex items-center gap-1">
-                          School: {r.schoolReviewAvg.toFixed(1)}
-                        </span>
-                      )}
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {r.distanceMiles.toFixed(1)}mi
-                      </span>
-                      {r.teacher.canDrive && (
-                        <span className="flex items-center gap-1">
-                          <Car className="h-3 w-3" /> Drives
-                        </span>
-                      )}
-                      <span className="capitalize">{r.teacher.roleType}</span>
-                      {r.teacher.complianceStatus === "compliant" ? (
-                        <Shield className="h-3 w-3 text-green-500" aria-label="Compliant" />
-                      ) : (
-                        <ShieldAlert className="h-3 w-3 text-red-500" aria-label="Not compliant" />
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="rounded bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground">
-                    {r.score.toFixed(0)} pts
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label={`Call ${r.teacher.firstName} ${r.teacher.lastName}`}
-                    onClick={() => setCallModal({ name: `${r.teacher.firstName} ${r.teacher.lastName}`, phone: r.teacher.phone })}
-                  >
-                    <Phone className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label={`Assign ${r.teacher.firstName} ${r.teacher.lastName}`}
-                    onClick={() => handleManualAssign(r.teacher.id)}
-                    disabled={actionLoading !== null}
-                  >
-                    {actionLoading === r.teacher.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <>
-                        <UserCheck className="mr-1 h-4 w-4" />
-                        Assign
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
+                ranked={r}
+                rank={idx + 1}
+                onCall={(name, phone) => setCallModal({ name, phone })}
+                onAssign={handleManualAssign}
+                isAssigning={actionLoading === r.teacher.id}
+                actionsDisabled={actionLoading !== null}
+              />
             ))}
           </div>
         )}
@@ -414,5 +302,208 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
         />
       )}
     </Card>
+  );
+}
+
+/* ---------------------------------------------------------------------------
+ * Sub-components
+ * ------------------------------------------------------------------------- */
+
+interface FilledRequestCardProps {
+  cancelDialogOpen: boolean;
+  setCancelDialogOpen: (open: boolean) => void;
+  cancelReason: string;
+  setCancelReason: (reason: string) => void;
+  onCancelBooking: () => void;
+  isCancelling: boolean;
+}
+
+function FilledRequestCard({
+  cancelDialogOpen,
+  setCancelDialogOpen,
+  cancelReason,
+  setCancelReason,
+  onCancelBooking,
+  isCancelling,
+}: FilledRequestCardProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Assignment</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-4 text-center">
+          <p className="text-emerald-800 font-medium">This request has been filled.</p>
+        </div>
+        <Button
+          variant="destructive"
+          className="w-full"
+          onClick={() => setCancelDialogOpen(true)}
+        >
+          <XCircle className="mr-2 h-4 w-4" />
+          Cancel Booking
+        </Button>
+
+        <CancelBookingDialog
+          open={cancelDialogOpen}
+          onOpenChange={setCancelDialogOpen}
+          cancelReason={cancelReason}
+          setCancelReason={setCancelReason}
+          onConfirm={onCancelBooking}
+          isCancelling={isCancelling}
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+interface CancelBookingDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  cancelReason: string;
+  setCancelReason: (reason: string) => void;
+  onConfirm: () => void;
+  isCancelling: boolean;
+}
+
+function CancelBookingDialog({
+  open,
+  onOpenChange,
+  cancelReason,
+  setCancelReason,
+  onConfirm,
+  isCancelling,
+}: CancelBookingDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Cancel Booking</DialogTitle>
+          <DialogDescription>
+            The school will NOT be notified. You should call the teacher to inform them.
+          </DialogDescription>
+        </DialogHeader>
+        <Textarea
+          placeholder="Reason for cancellation..."
+          value={cancelReason}
+          onChange={(e) => setCancelReason(e.target.value)}
+        />
+        <div className="flex gap-2 justify-end">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Keep Booking
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={onConfirm}
+            disabled={isCancelling}
+          >
+            {isCancelling ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
+            Confirm Cancellation
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface RankedTeacherItemProps {
+  ranked: RankedTeacher;
+  rank: number;
+  onCall: (name: string, phone: string) => void;
+  onAssign: (teacherId: string) => void;
+  isAssigning: boolean;
+  actionsDisabled: boolean;
+}
+
+function RankedTeacherItem({
+  ranked: r,
+  rank,
+  onCall,
+  onAssign,
+  isAssigning,
+  actionsDisabled,
+}: RankedTeacherItemProps) {
+  return (
+    <div
+      className="flex items-center justify-between rounded-lg border bg-background p-3 transition-colors hover:bg-muted/30"
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+          {rank}
+        </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold">
+              {r.teacher.firstName} {r.teacher.lastName}
+            </span>
+            {r.isPreferred && (
+              <Badge variant="outline" className="border-pink-300 bg-pink-50 text-pink-700 text-xs">
+                <Heart className="mr-1 h-3 w-3" /> Preferred
+              </Badge>
+            )}
+            {r.previouslyWorkedAtSchool && (
+              <Badge variant="outline" className="text-xs">Previous</Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Star className="h-3 w-3 text-amber-500" />
+              {r.teacher.agencyRating.toFixed(1)}
+            </span>
+            {r.schoolReviewAvg && (
+              <span className="flex items-center gap-1">
+                School: {r.schoolReviewAvg.toFixed(1)}
+              </span>
+            )}
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {r.distanceMiles.toFixed(1)}mi
+            </span>
+            {r.teacher.canDrive && (
+              <span className="flex items-center gap-1">
+                <Car className="h-3 w-3" /> Drives
+              </span>
+            )}
+            <span className="capitalize">{r.teacher.roleType}</span>
+            {r.teacher.complianceStatus === "compliant" ? (
+              <Shield className="h-3 w-3 text-emerald-500" aria-label="Compliant" />
+            ) : (
+              <ShieldAlert className="h-3 w-3 text-destructive" aria-label="Not compliant" />
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="rounded bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground">
+          {r.score.toFixed(0)} pts
+        </span>
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label={`Call ${r.teacher.firstName} ${r.teacher.lastName}`}
+          onClick={() => onCall(`${r.teacher.firstName} ${r.teacher.lastName}`, r.teacher.phone)}
+        >
+          <Phone className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          aria-label={`Assign ${r.teacher.firstName} ${r.teacher.lastName}`}
+          onClick={() => onAssign(r.teacher.id)}
+          disabled={actionsDisabled}
+        >
+          {isAssigning ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              <UserCheck className="mr-1 h-4 w-4" />
+              Assign
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }

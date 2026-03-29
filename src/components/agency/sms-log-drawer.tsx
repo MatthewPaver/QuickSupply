@@ -34,7 +34,7 @@ export function SmsLogDrawer() {
       </SheetTrigger>
       <SheetContent className="w-full sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>SMS log (simulated)</SheetTitle>
+          <SheetTitle>SMS Log</SheetTitle>
         </SheetHeader>
         <p className="text-sm text-muted-foreground mt-1">
           Messages that would have been sent to teachers.

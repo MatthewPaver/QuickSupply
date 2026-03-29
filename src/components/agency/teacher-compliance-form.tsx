@@ -5,6 +5,16 @@ import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface Props {
   teacherId: string;
@@ -74,16 +84,16 @@ export function TeacherComplianceForm({ teacherId, initialCompliance }: Props) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
             <Label htmlFor="complianceStatus">Overall Compliance Status</Label>
-            <select
-              id="complianceStatus"
-              value={complianceStatus}
-              onChange={(e) => setComplianceStatus(e.target.value as typeof complianceStatus)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="compliant">Compliant</option>
-              <option value="pending">Pending</option>
-              <option value="expired">Expired</option>
-            </select>
+            <Select value={complianceStatus} onValueChange={(v) => setComplianceStatus(v as typeof complianceStatus)}>
+              <SelectTrigger id="complianceStatus">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="compliant">Compliant</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="expired">Expired</SelectItem>
+              </SelectContent>
+            </Select>
             {fieldErrors.complianceStatus && (
               <p className="text-xs text-destructive">{fieldErrors.complianceStatus.join(", ")}</p>
             )}
@@ -91,17 +101,17 @@ export function TeacherComplianceForm({ teacherId, initialCompliance }: Props) {
 
           <div className="space-y-1">
             <Label htmlFor="dbsStatus">DBS Status</Label>
-            <select
-              id="dbsStatus"
-              value={dbsStatus}
-              onChange={(e) => setDbsStatus(e.target.value as typeof dbsStatus)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="none">None</option>
-              <option value="clear">Clear</option>
-              <option value="pending">Pending</option>
-              <option value="expired">Expired</option>
-            </select>
+            <Select value={dbsStatus} onValueChange={(v) => setDbsStatus(v as typeof dbsStatus)}>
+              <SelectTrigger id="dbsStatus">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="clear">Clear</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="expired">Expired</SelectItem>
+              </SelectContent>
+            </Select>
             {fieldErrors.dbsStatus && (
               <p className="text-xs text-destructive">{fieldErrors.dbsStatus.join(", ")}</p>
             )}
@@ -110,12 +120,11 @@ export function TeacherComplianceForm({ teacherId, initialCompliance }: Props) {
           {showDbsExpiry && (
             <div className="space-y-1">
               <Label htmlFor="dbsExpiry">DBS Expiry Date</Label>
-              <input
+              <Input
                 id="dbsExpiry"
                 type="date"
                 value={dbsExpiry}
                 onChange={(e) => setDbsExpiry(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
               />
               {fieldErrors.dbsExpiry && (
                 <p className="text-xs text-destructive">{fieldErrors.dbsExpiry.join(", ")}</p>
@@ -125,16 +134,16 @@ export function TeacherComplianceForm({ teacherId, initialCompliance }: Props) {
 
           <div className="space-y-1">
             <Label htmlFor="rightToWork">Right to Work</Label>
-            <select
-              id="rightToWork"
-              value={rightToWork}
-              onChange={(e) => setRightToWork(e.target.value as typeof rightToWork)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="not_checked">Not Checked</option>
-              <option value="pending">Pending</option>
-              <option value="verified">Verified</option>
-            </select>
+            <Select value={rightToWork} onValueChange={(v) => setRightToWork(v as typeof rightToWork)}>
+              <SelectTrigger id="rightToWork">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="not_checked">Not Checked</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="verified">Verified</SelectItem>
+              </SelectContent>
+            </Select>
             {fieldErrors.rightToWork && (
               <p className="text-xs text-destructive">{fieldErrors.rightToWork.join(", ")}</p>
             )}
@@ -142,14 +151,14 @@ export function TeacherComplianceForm({ teacherId, initialCompliance }: Props) {
 
           <div className="space-y-1">
             <Label htmlFor="complianceNotes">Compliance Notes</Label>
-            <textarea
+            <Textarea
               id="complianceNotes"
               value={complianceNotes}
               onChange={(e) => setComplianceNotes(e.target.value)}
               maxLength={500}
               rows={3}
               placeholder="Optional notes..."
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+              className="resize-none"
             />
             {fieldErrors.complianceNotes && (
               <p className="text-xs text-destructive">{fieldErrors.complianceNotes.join(", ")}</p>
@@ -161,7 +170,7 @@ export function TeacherComplianceForm({ teacherId, initialCompliance }: Props) {
           )}
 
           {successMessage && (
-            <p className="text-xs text-green-600">{successMessage}</p>
+            <p className="text-xs text-emerald-600">{successMessage}</p>
           )}
 
           <Button type="submit" size="sm" disabled={submitting}>

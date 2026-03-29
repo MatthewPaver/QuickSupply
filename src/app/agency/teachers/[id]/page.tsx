@@ -1,12 +1,12 @@
 import { db } from "@/lib/db";
-import { teachers, teacherAvailability, teacherBlacklistedSchools, bookings, coverRequests, schools, agentTeacherAssignments, agents, schoolTeacherReviews } from "@/lib/db/schema";
+import { teachers, teacherAvailability, teacherBlacklistedSchools, bookings, coverRequests, schools, agentTeacherAssignments, agents, schoolTeacherReviews, teacherSubjects, assignmentOffers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { Star, Car, MapPin, Phone, Mail, Ban } from "lucide-react";
+import { Star, Car, MapPin, Phone, Mail, Ban, BookOpen, TrendingUp, Building2 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import Link from "next/link";
@@ -51,6 +51,71 @@ export default async function AgencyTeacherDetailPage({
   const reviews = db.select().from(schoolTeacherReviews).where(eq(schoolTeacherReviews.teacherId, id)).all();
   const avgRating = reviews.length > 0 ? reviews.reduce((a, r) => a + r.rating, 0) / reviews.length : null;
 
+  // Subject specializations
+  const subjects = db
+    .select({ subject: teacherSubjects.subject })
+    .from(teacherSubjects)
+    .where(eq(teacherSubjects.teacherId, id))
+    .all()
+    .map((s) => s.subject);
+
+  // School affinity data — group reviews by school
+  const reviewsWithSchools = db
+    .select({
+      schoolId: schoolTeacherReviews.schoolId,
+      schoolName: schools.name,
+      rating: schoolTeacherReviews.rating,
+      wouldRebook: schoolTeacherReviews.wouldRebook,
+    })
+    .from(schoolTeacherReviews)
+    .innerJoin(schools, eq(schoolTeacherReviews.schoolId, schools.id))
+    .where(eq(schoolTeacherReviews.teacherId, id))
+    .all();
+
+  const schoolAffinityMap = new Map<string, { schoolName: string; ratings: number[]; rebooks: boolean[] }>();
+  for (const r of reviewsWithSchools) {
+    const entry = schoolAffinityMap.get(r.schoolId) ?? { schoolName: r.schoolName, ratings: [], rebooks: [] };
+    entry.ratings.push(r.rating);
+    entry.rebooks.push(r.wouldRebook);
+    schoolAffinityMap.set(r.schoolId, entry);
+  }
+
+  const schoolAffinities = Array.from(schoolAffinityMap.entries()).map(([schoolId, data]) => {
+    const avgRat = data.ratings.reduce((a, b) => a + b, 0) / data.ratings.length;
+    const rebookRate = data.rebooks.filter(Boolean).length / data.rebooks.length;
+    const affinity = (avgRat / 5) * 0.7 + rebookRate * 0.3;
+    return {
+      schoolId,
+      schoolName: data.schoolName,
+      avgRating: avgRat,
+      rebookPct: rebookRate * 100,
+      affinityScore: affinity,
+      reviewCount: data.ratings.length,
+    };
+  }).sort((a, b) => b.affinityScore - a.affinityScore);
+
+  // Performance metrics
+  const allOffers = db
+    .select({ status: assignmentOffers.status })
+    .from(assignmentOffers)
+    .where(eq(assignmentOffers.teacherId, id))
+    .all();
+
+  const acceptedOffers = allOffers.filter((o) => o.status === "accepted").length;
+  const declinedOffers = allOffers.filter((o) => o.status === "declined").length;
+  const totalResponded = acceptedOffers + declinedOffers;
+  const acceptanceRate = totalResponded > 0 ? (acceptedOffers / totalResponded) * 100 : null;
+
+  const allBookings = db
+    .select({ cancelledAt: bookings.cancelledAt })
+    .from(bookings)
+    .where(eq(bookings.teacherId, id))
+    .all();
+
+  const totalBookings = allBookings.length;
+  const cancelledBookings = allBookings.filter((b) => b.cancelledAt !== null).length;
+  const cancellationRate = totalBookings > 0 ? (cancelledBookings / totalBookings) * 100 : null;
+
   const assignedAgent = db
     .select({ agentName: agents.name })
     .from(agentTeacherAssignments)
@@ -63,7 +128,7 @@ export default async function AgencyTeacherDetailPage({
   return (
     <div className="space-y-6">
       {!teacher.isActive && (
-        <div className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
           This teacher is deactivated and cannot sign in or receive assignments.
         </div>
       )}
@@ -116,23 +181,38 @@ export default async function AgencyTeacherDetailPage({
             </div>
             {avgRating && (
               <div className="flex items-center gap-2">
-                <Star className="h-4 w-4 text-blue-500" />
+                <Star className="h-4 w-4 text-secondary" />
                 <span>School reviews: {avgRating.toFixed(1)} / 5.0 ({reviews.length} reviews)</span>
               </div>
             )}
             {teacher.emergencyAvailable && (
-              <Badge variant="outline" className="border-red-300 text-red-700">Emergency Available</Badge>
+              <Badge variant="outline" className="border-destructive/30 text-destructive">Emergency Available</Badge>
             )}
             {teacher.contactNightBeforeOnly && (
               <Badge variant="outline" className="border-amber-300 text-amber-700">Night Before Only</Badge>
             )}
             {teacher.longTermWilling && (
-              <Badge variant="outline" className="border-blue-300 text-blue-700">Long-term Willing</Badge>
+              <Badge variant="outline" className="border-secondary/30 text-secondary">Long-term Willing</Badge>
             )}
             {teacher.complianceNotes && (
               <div className="border-t pt-3">
                 <span className="text-muted-foreground">Compliance Notes:</span>
                 <p className="mt-1">{teacher.complianceNotes}</p>
+              </div>
+            )}
+            {subjects.length > 0 && (
+              <div className="border-t pt-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <BookOpen className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Subject Specializations</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {subjects.map((subject) => (
+                    <Badge key={subject} variant="secondary" className="text-xs">
+                      {subject}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             )}
           </CardContent>
@@ -154,8 +234,8 @@ export default async function AgencyTeacherDetailPage({
                       idx === 0 || idx === 6
                         ? "bg-gray-100 text-gray-400"
                         : isAvailable
-                        ? "bg-green-100 text-green-700 border border-green-200"
-                        : "bg-red-100 text-red-700 border border-red-200"
+                        ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                        : "bg-destructive/10 text-destructive border border-destructive/20"
                     }`}
                   >
                     {day}
@@ -182,11 +262,83 @@ export default async function AgencyTeacherDetailPage({
           currentEmail={teacher.email}
         />
 
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" /> Performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Acceptance Rate</span>
+              <span className="font-medium">
+                {acceptanceRate !== null
+                  ? `${acceptanceRate.toFixed(0)}% (${acceptedOffers}/${totalResponded})`
+                  : "No offers yet"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Cancellation Rate</span>
+              <span className="font-medium">
+                {cancellationRate !== null
+                  ? `${cancellationRate.toFixed(0)}% (${cancelledBookings}/${totalBookings})`
+                  : "No bookings yet"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Total Bookings</span>
+              <span className="font-medium">{totalBookings}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Total Offers Received</span>
+              <span className="font-medium">{allOffers.length}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {schoolAffinities.length > 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Building2 className="h-4 w-4" /> School Affinity
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {schoolAffinities.map((sa) => (
+                  <div key={sa.schoolId} className="rounded border p-3 text-sm space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">{sa.schoolName}</span>
+                      <Badge
+                        variant="outline"
+                        className={`text-xs ${
+                          sa.affinityScore >= 0.7
+                            ? "border-emerald-300 text-emerald-700"
+                            : sa.affinityScore >= 0.4
+                            ? "border-amber-300 text-amber-700"
+                            : "border-destructive/30 text-destructive"
+                        }`}
+                      >
+                        Affinity: {(sa.affinityScore * 100).toFixed(0)}%
+                      </Badge>
+                    </div>
+                    <div className="flex gap-4 text-xs text-muted-foreground">
+                      <span>Avg Rating: {sa.avgRating.toFixed(1)}/5</span>
+                      <span>Rebook: {sa.rebookPct.toFixed(0)}%</span>
+                      <span>{sa.reviewCount} review{sa.reviewCount !== 1 ? "s" : ""}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {blacklisted.length > 0 && (
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
-                <Ban className="h-4 w-4 text-red-500" /> Blacklisted Schools
+                <Ban className="h-4 w-4 text-destructive" /> Blacklisted Schools
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -241,7 +393,7 @@ export default async function AgencyTeacherDetailPage({
                         />
                       ))}
                       {review.wouldRebook && (
-                        <Badge variant="outline" className="ml-2 border-green-300 text-green-700 text-xs">
+                        <Badge variant="outline" className="ml-2 border-emerald-300 text-emerald-700 text-xs">
                           Would rebook
                         </Badge>
                       )}

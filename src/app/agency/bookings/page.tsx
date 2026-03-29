@@ -57,9 +57,9 @@ export default async function AgencyBookingsPage() {
                   </div>
                 </div>
                 {b.cancelledAt ? (
-                  <Badge variant="outline" className="border-red-300 bg-red-50 text-red-700">Cancelled</Badge>
+                  <Badge variant="outline" className="border-destructive/30 bg-destructive/10 text-destructive">Cancelled</Badge>
                 ) : (
-                  <Badge variant="outline" className="border-green-300 bg-green-50 text-green-700">Confirmed</Badge>
+                  <Badge variant="outline" className="border-emerald-300 bg-emerald-50 text-emerald-700">Confirmed</Badge>
                 )}
               </div>
             ))}

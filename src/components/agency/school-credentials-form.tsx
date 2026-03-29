@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface Props {
   schoolId: string;
@@ -66,13 +67,12 @@ export function SchoolCredentialsForm({ schoolId, currentEmail }: Props) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
             <Label htmlFor="schoolContactEmail">Contact Email</Label>
-            <input
+            <Input
               id="schoolContactEmail"
               type="email"
               value={contactEmail}
               onChange={(e) => setContactEmail(e.target.value)}
               required
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
             />
             {fieldErrors.contactEmail && (
               <p className="text-xs text-destructive">{fieldErrors.contactEmail.join(", ")}</p>
@@ -81,7 +81,7 @@ export function SchoolCredentialsForm({ schoolId, currentEmail }: Props) {
 
           <div className="space-y-1">
             <Label htmlFor="schoolTemporaryPassword">Temporary Password</Label>
-            <input
+            <Input
               id="schoolTemporaryPassword"
               type="password"
               value={temporaryPassword}
@@ -89,7 +89,6 @@ export function SchoolCredentialsForm({ schoolId, currentEmail }: Props) {
               placeholder="New temporary password"
               required
               minLength={8}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
             />
             {fieldErrors.temporaryPassword && (
               <p className="text-xs text-destructive">{fieldErrors.temporaryPassword.join(", ")}</p>
@@ -98,14 +97,13 @@ export function SchoolCredentialsForm({ schoolId, currentEmail }: Props) {
 
           <div className="space-y-1">
             <Label htmlFor="schoolConfirmPassword">Confirm Password</Label>
-            <input
+            <Input
               id="schoolConfirmPassword"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm password"
               required
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
             />
             {fieldErrors.confirmPassword && (
               <p className="text-xs text-destructive">{fieldErrors.confirmPassword.join(", ")}</p>

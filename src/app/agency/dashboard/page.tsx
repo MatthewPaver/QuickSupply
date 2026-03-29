@@ -72,28 +72,28 @@ export default async function AgencyDashboard() {
         <Card className="qs-pop">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Being Offered</CardTitle>
-            <ArrowRight className="h-4 w-4 text-blue-500" />
+            <ArrowRight className="h-4 w-4 text-secondary" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-600">{offering.length}</div>
+            <div className="text-3xl font-bold text-secondary">{offering.length}</div>
           </CardContent>
         </Card>
         <Card className="qs-pop">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Filled Today</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CheckCircle className="h-4 w-4 text-emerald-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">{filledToday.length}</div>
+            <div className="text-3xl font-bold text-emerald-600">{filledToday.length}</div>
           </CardContent>
         </Card>
         <Card className="qs-pop">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Emergencies</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-500" />
+            <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-red-600">{emergencies.length}</div>
+            <div className="text-3xl font-bold text-destructive">{emergencies.length}</div>
           </CardContent>
         </Card>
       </div>
@@ -137,7 +137,7 @@ export default async function AgencyDashboard() {
                           {" "}&middot; {format(new Date(req.date + "T00:00:00"), "EEE d MMM")} &middot; {req.startTime}
                         </div>
                         {activeOffer && (
-                          <div className="text-sm text-blue-600">
+                          <div className="text-sm text-secondary">
                             Offering to: {activeOffer.teacherFirstName} {activeOffer.teacherLastName}
                           </div>
                         )}
@@ -166,7 +166,7 @@ export default async function AgencyDashboard() {
               </div>
               <div className="flex justify-between">
                 <span>Compliant</span>
-                <span className="font-medium text-green-600">
+                <span className="font-medium text-emerald-600">
                   {allTeachers.filter((t) => t.complianceStatus === "compliant").length}
                 </span>
               </div>
@@ -178,7 +178,7 @@ export default async function AgencyDashboard() {
               </div>
               <div className="flex justify-between">
                 <span>Expired compliance</span>
-                <span className="font-medium text-red-600">
+                <span className="font-medium text-destructive">
                   {allTeachers.filter((t) => t.complianceStatus === "expired").length}
                 </span>
               </div>

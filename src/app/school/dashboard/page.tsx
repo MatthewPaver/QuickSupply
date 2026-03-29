@@ -97,7 +97,7 @@ export default async function SchoolDashboard() {
         <Card className="qs-pop">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Filled Today</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CheckCircle className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{filledToday.length}</div>
@@ -148,7 +148,7 @@ export default async function SchoolDashboard() {
                     <div className="text-sm text-muted-foreground">
                       {format(new Date(req.date + "T00:00:00"), "EEE, d MMM yyyy")} &middot; {req.startTime} - {req.endTime}
                       {req.isEmergency && (
-                        <span className="ml-2 text-xs font-semibold text-red-600">EMERGENCY</span>
+                        <span className="ml-2 text-xs font-semibold text-destructive">EMERGENCY</span>
                       )}
                     </div>
                     {req.status === "offering" && offeringToMap.get(req.id) && (

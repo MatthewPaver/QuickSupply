@@ -81,19 +81,19 @@ export default async function SchoolRequestsPage() {
                           <span className="text-xs rounded bg-muted px-2 py-0.5">{req.keyStage}</span>
                         )}
                         {req.isEmergency && (
-                          <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded">EMERGENCY</span>
+                          <span className="text-xs font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded">EMERGENCY</span>
                         )}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {format(new Date(req.date + "T00:00:00"), "EEEE, d MMMM yyyy")} &middot; {req.startTime} - {req.endTime}
                       </div>
                       {req.status === "filled" && booking && req.preferredTeacherId && (
-                        <div className="text-sm text-green-700">
+                        <div className="text-sm text-emerald-700">
                           Assigned: {booking.teacherFirstName} {booking.teacherLastName}
                         </div>
                       )}
                       {req.status === "filled" && !req.preferredTeacherId && (
-                        <div className="text-sm text-green-700">Cover Arranged</div>
+                        <div className="text-sm text-emerald-700">Cover Arranged</div>
                       )}
                       {req.notes && (
                         <div className="text-xs text-muted-foreground italic">{req.notes}</div>

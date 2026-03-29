@@ -31,7 +31,7 @@ export function AgencyMobileNav({ sessionName }: AgencyMobileNavProps) {
         </SheetTrigger>
         <SheetContent side="left" className="w-64 p-0" showCloseButton={true}>
           <div className="flex h-16 items-center gap-2 border-b px-4">
-            <Image src="/desian-logo.svg" alt="Desian" width={72} height={20} className="brightness-0 h-5 w-auto" />
+            <Image src="/desian-logo.svg" alt="Desian" width={72} height={20} className="brightness-0 dark:invert h-5 w-auto" />
             <span className="text-sm font-semibold text-primary">QuickSupply</span>
           </div>
           <nav className="flex flex-1 flex-col gap-1.5 p-3">
@@ -62,7 +62,7 @@ export function AgencyMobileNav({ sessionName }: AgencyMobileNavProps) {
         </SheetContent>
       </Sheet>
       <Link href="/agency/dashboard" className="flex items-center gap-2">
-        <Image src="/desian-logo.svg" alt="Desian" width={72} height={20} className="brightness-0 h-5 w-auto" />
+        <Image src="/desian-logo.svg" alt="Desian" width={72} height={20} className="brightness-0 dark:invert h-5 w-auto" />
         <span className="text-sm font-semibold text-primary">QuickSupply</span>
       </Link>
       <NotificationBell />
