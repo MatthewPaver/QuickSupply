@@ -330,6 +330,55 @@ export const complianceDocuments = sqliteTable(
   ]
 );
 
+export const requestTemplates = sqliteTable("request_templates", {
+  id: text("id").primaryKey(),
+  schoolId: text("school_id").notNull().references(() => schools.id),
+  name: text("name").notNull(),
+  roleNeeded: text("role_needed", { enum: ["teacher", "ta"] }).notNull(),
+  subject: text("subject"),
+  keyStage: text("key_stage"),
+  startTime: text("start_time").notNull(),
+  endTime: text("end_time").notNull(),
+  notes: text("notes"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
+export const activityLog = sqliteTable(
+  "activity_log",
+  {
+    id: text("id").primaryKey(),
+    actorId: text("actor_id").notNull(),
+    actorRole: text("actor_role", { enum: ["school", "teacher", "agent"] }).notNull(),
+    action: text("action", {
+      enum: [
+        "offer_sent",
+        "offer_accepted",
+        "offer_declined",
+        "offer_expired",
+        "booking_created",
+        "booking_cancelled",
+        "teacher_created",
+        "teacher_updated",
+        "school_created",
+        "compliance_updated",
+        "timesheet_approved",
+        "timesheet_disputed",
+        "invoice_generated",
+        "settings_changed",
+      ],
+    }).notNull(),
+    entityType: text("entity_type").notNull(),
+    entityId: text("entity_id").notNull(),
+    details: text("details"), // JSON-encoded
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => [
+    index("activity_log_actor_id_idx").on(table.actorId),
+    index("activity_log_action_idx").on(table.action),
+    index("activity_log_created_at_idx").on(table.createdAt),
+  ]
+);
+
 export const appConfig = sqliteTable("app_config", {
   key: text("key").primaryKey(),
   value: text("value").notNull(), // JSON-encoded

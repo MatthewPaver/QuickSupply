@@ -16,6 +16,7 @@ import { ulid } from "ulid";
 import { haversineDistance } from "@/lib/distance";
 import { sseManager } from "@/lib/sse-manager";
 import { createNotification, notifyAllAgents } from "@/lib/notifications";
+import { logActivity } from "@/lib/activity-log";
 import type { RankedTeacher } from "@/types";
 
 interface RankingWeights {
@@ -383,6 +384,12 @@ export function offerToNextTeacher(
     relatedEntityId: offerId,
   });
 
+  logActivity("system", "agent", "offer_sent", "assignment_offer", offerId, {
+    teacherId: teacher.id,
+    teacherName: `${teacher.firstName} ${teacher.lastName}`,
+    requestId,
+  });
+
   return { offerId, message: `Offer sent to ${teacher.firstName} ${teacher.lastName}` };
 }
 
@@ -442,6 +449,13 @@ export function handleTeacherResponse(
       relatedEntityId: offer.coverRequestId,
     });
     notifyAllAgents("filled", "Request filled", `${schoolRow?.name ?? "A school"} – ${request.date} filled by ${teacherName}.`, "cover_request", offer.coverRequestId);
+
+    logActivity(offer.teacherId, "teacher", "booking_created", "booking", bookingId, {
+      coverRequestId: offer.coverRequestId,
+      teacherName,
+      schoolName: schoolRow?.name ?? "Unknown",
+      date: request.date,
+    });
 
     return { success: true, message: "Job accepted and booking confirmed." };
   }

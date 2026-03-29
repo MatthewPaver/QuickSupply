@@ -85,6 +85,13 @@
       "when": 1774656234571,
       "tag": "0011_calm_warlock",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1774742400000,
+      "tag": "0012_request_templates",
+      "breakpoints": true
     }
   ]
 }

@@ -5,9 +5,9 @@ import { requireSession } from "@/lib/auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { FileText, Plus, CheckCircle, Clock } from "lucide-react";
+import { FileText, Plus, CheckCircle, Clock, CalendarDays } from "lucide-react";
 import Link from "next/link";
-import { format } from "date-fns";
+import { format, startOfWeek, endOfWeek } from "date-fns";
 import { EmptyState } from "@/components/shared/empty-state";
 import { SchoolLiveRefresh } from "@/components/school/school-live-refresh";
 
@@ -48,6 +48,13 @@ export default async function SchoolDashboard() {
     (r) => r.status === "filled" && r.date === todayStr
   );
   const totalFilled = requests.filter((r) => r.status === "filled").length;
+
+  // This-week stats
+  const weekStart = format(startOfWeek(now, { weekStartsOn: 1 }), "yyyy-MM-dd");
+  const weekEnd = format(endOfWeek(now, { weekStartsOn: 1 }), "yyyy-MM-dd");
+  const thisWeekRequests = requests.filter((r) => r.date >= weekStart && r.date <= weekEnd);
+  const thisWeekFilled = thisWeekRequests.filter((r) => r.status === "filled").length;
+  const thisWeekPending = thisWeekRequests.filter((r) => r.status === "pending" || r.status === "offering").length;
 
   // For Recent History: who covered each filled request?
   const filledRequestIds = requests.filter((r) => r.status === "filled").map((r) => r.id);
@@ -113,6 +120,30 @@ export default async function SchoolDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* This Week Summary */}
+      <Card className="qs-pop border-primary/20 bg-primary/[0.03]">
+        <CardHeader className="flex flex-row items-center gap-2 pb-2">
+          <CalendarDays className="h-4 w-4 text-primary" />
+          <CardTitle className="text-sm font-semibold">This Week</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold text-primary">{thisWeekRequests.length}</div>
+              <div className="text-xs text-muted-foreground">Requests</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-emerald-600">{thisWeekFilled}</div>
+              <div className="text-xs text-muted-foreground">Filled</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-amber-600">{thisWeekPending}</div>
+              <div className="text-xs text-muted-foreground">Pending</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Active Requests */}
       <Card>

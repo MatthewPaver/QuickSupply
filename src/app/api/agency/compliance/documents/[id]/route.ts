@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { complianceDocuments, teachers } from "@/lib/db/schema";
 import { validateBody } from "@/lib/api-validation";
 import { createNotification } from "@/lib/notifications";
+import { logActivity } from "@/lib/activity-log";
 
 const verifyRejectSchema = z.discriminatedUnion("action", [
   z.object({
@@ -113,6 +114,12 @@ export async function PATCH(
 
   // Recalculate teacher compliance status
   recalculateComplianceStatus(doc.teacherId);
+
+  logActivity(session.userId, "agent", "compliance_updated", "compliance_document", id, {
+    teacherId: doc.teacherId,
+    documentType: doc.documentType,
+    action: parsed.data.action,
+  });
 
   return NextResponse.json({ success: true });
 }

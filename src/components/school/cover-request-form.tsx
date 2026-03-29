@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Loader2, AlertTriangle, User } from "lucide-react";
 import { toast } from "sonner";
 import { format, isToday, isBefore, startOfDay } from "date-fns";
+import { TemplateSelector } from "@/components/school/template-selector";
 
 interface PreviousTeacher {
   id: string;
@@ -36,6 +37,7 @@ const YEAR_GROUPS = ["EYFS", "Year 1", "Year 2", "Year 3", "Year 4", "Year 5", "
 
 export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [roleNeeded, setRoleNeeded] = useState<string>("");
@@ -50,6 +52,21 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
   const [unavailableOnDate, setUnavailableOnDate] = useState<Set<string>>(new Set());
   const [checkingAvailability, setCheckingAvailability] = useState(false);
   const [showRequiredHint, setShowRequiredHint] = useState(false);
+
+  // Pre-fill from query params (e.g. "Repeat" button on history page)
+  useEffect(() => {
+    const role = searchParams.get("role");
+    const ks = searchParams.get("keyStage");
+    const start = searchParams.get("start");
+    const end = searchParams.get("end");
+    const n = searchParams.get("notes");
+
+    if (role && (role === "teacher" || role === "ta")) setRoleNeeded(role);
+    if (ks) setKeyStage(ks);
+    if (start && /^\d{2}:\d{2}$/.test(start)) setStartTime(start);
+    if (end && /^\d{2}:\d{2}$/.test(end)) setEndTime(end);
+    if (n) setNotes(n);
+  }, [searchParams]);
 
   // Only show previous teachers who match the selected role (teacher/TA/both)
   const eligiblePreviousTeachers = useMemo(() => {
@@ -141,6 +158,29 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-6">
+        {/* Template Selector */}
+        <Card className="qs-pop">
+          <CardContent className="px-4 py-3">
+            <TemplateSelector
+              onSelect={(t) => {
+                setRoleNeeded(t.roleNeeded);
+                if (t.keyStage) setKeyStage(t.keyStage);
+                setStartTime(t.startTime);
+                setEndTime(t.endTime);
+                if (t.notes) setNotes(t.notes);
+                toast.success(`Loaded template "${t.name}"`);
+              }}
+              currentValues={{
+                roleNeeded,
+                keyStage,
+                startTime,
+                endTime,
+                notes,
+              }}
+            />
+          </CardContent>
+        </Card>
+
         <Card className="qs-pop border-primary/20 bg-primary/[0.03]">
           <CardContent className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">Step 1</span>

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { db } from "@/lib/db";
 import { bookings, teachers, coverRequests } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -28,10 +29,12 @@ export default async function NewRequestPage() {
         <h1 className="text-2xl font-bold">New Cover Request</h1>
         <p className="text-muted-foreground">Submit a request for supply cover</p>
       </div>
-      <CoverRequestForm
-        schoolId={session.userId}
-        previousTeachers={previousTeachers}
-      />
+      <Suspense>
+        <CoverRequestForm
+          schoolId={session.userId}
+          previousTeachers={previousTeachers}
+        />
+      </Suspense>
     </div>
   );
 }

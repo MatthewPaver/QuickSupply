@@ -10,6 +10,7 @@ import {
   UserCog,
   Settings,
   ShieldCheck,
+  Activity,
 } from "lucide-react";
 
 export const agencyNavItems = [
@@ -22,6 +23,7 @@ export const agencyNavItems = [
   { href: "/agency/timesheets", label: "Timesheets", icon: ClipboardList },
   { href: "/agency/invoices", label: "Invoices", icon: Receipt },
   { href: "/agency/compliance", label: "Compliance", icon: ShieldCheck },
+  { href: "/agency/activity", label: "Activity", icon: Activity },
   { href: "/agency/agents", label: "Agents", icon: UserCog },
   { href: "/agency/settings", label: "Settings", icon: Settings },
 ];

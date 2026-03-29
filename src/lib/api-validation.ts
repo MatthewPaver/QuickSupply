@@ -133,6 +133,17 @@ export const coverRequestSchema = z.object({
   { message: "Start time must be before end time", path: ["endTime"] }
 );
 
+// POST /api/school/templates
+export const createTemplateSchema = z.object({
+  name: z.string().min(1, "Template name is required").max(100),
+  roleNeeded: z.enum(["teacher", "ta"], { message: "roleNeeded must be 'teacher' or 'ta'" }),
+  subject: z.string().nullable().optional(),
+  keyStage: z.string().nullable().optional(),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/, "startTime must be HH:MM"),
+  endTime: z.string().regex(/^\d{2}:\d{2}$/, "endTime must be HH:MM"),
+  notes: z.string().nullable().optional(),
+});
+
 // POST /api/school/reviews
 export const reviewSchema = z.object({
   bookingId: z.string().min(1, "bookingId is required"),

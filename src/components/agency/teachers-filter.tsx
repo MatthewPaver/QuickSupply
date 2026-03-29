@@ -4,13 +4,16 @@ import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { TeacherRow } from "@/components/agency/teacher-row";
+import { BulkTeacherActions } from "@/components/agency/bulk-teacher-actions";
 import { Search } from "lucide-react";
 
 type Teacher = {
   id: string;
   firstName: string;
   lastName: string;
+  email: string;
   phone: string;
   postcode: string;
   roleType: string;
@@ -30,6 +33,7 @@ export function TeachersFilter({ teachers }: Props) {
   const [roleFilter, setRoleFilter] = useState("all");
   const [complianceFilter, setComplianceFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const filtered = useMemo(() => {
     return teachers.filter((t) => {
@@ -47,9 +51,31 @@ export function TeachersFilter({ teachers }: Props) {
     });
   }, [teachers, search, roleFilter, complianceFilter, statusFilter]);
 
+  const filteredIds = useMemo(() => new Set(filtered.map((t) => t.id)), [filtered]);
+  const visibleSelectedIds = selectedIds.filter((id) => filteredIds.has(id));
+  const allVisibleSelected = filtered.length > 0 && visibleSelectedIds.length === filtered.length;
+
+  function toggleSelectAll() {
+    if (allVisibleSelected) {
+      setSelectedIds((prev) => prev.filter((id) => !filteredIds.has(id)));
+    } else {
+      setSelectedIds((prev) => {
+        const existing = new Set(prev);
+        for (const t of filtered) existing.add(t.id);
+        return Array.from(existing);
+      });
+    }
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  }
+
   return (
     <>
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -91,6 +117,7 @@ export function TeachersFilter({ teachers }: Props) {
             <SelectItem value="inactive">Inactive only</SelectItem>
           </SelectContent>
         </Select>
+        <BulkTeacherActions selectedIds={visibleSelectedIds} teachers={teachers} />
       </div>
 
       <Card>
@@ -101,8 +128,32 @@ export function TeachersFilter({ teachers }: Props) {
             </div>
           ) : (
             <div className="divide-y">
+              {/* Select-all header */}
+              <div className="flex items-center gap-3 px-6 py-2 bg-muted/30">
+                <Checkbox
+                  checked={allVisibleSelected}
+                  onCheckedChange={toggleSelectAll}
+                  aria-label="Select all visible teachers"
+                />
+                <span className="text-xs text-muted-foreground">
+                  {visibleSelectedIds.length > 0
+                    ? `${visibleSelectedIds.length} selected`
+                    : "Select all"}
+                </span>
+              </div>
               {filtered.map((t) => (
-                <TeacherRow key={t.id} t={t} />
+                <div key={t.id} className="flex items-center">
+                  <div className="pl-6 flex items-center">
+                    <Checkbox
+                      checked={selectedIds.includes(t.id)}
+                      onCheckedChange={() => toggleSelect(t.id)}
+                      aria-label={`Select ${t.firstName} ${t.lastName}`}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <TeacherRow t={t} />
+                  </div>
+                </div>
               ))}
             </div>
           )}

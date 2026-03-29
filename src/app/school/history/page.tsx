@@ -3,9 +3,12 @@ import { coverRequests, bookings, teachers, schoolTeacherReviews } from "@/lib/d
 import { eq, desc, sql } from "drizzle-orm";
 import { requireSession } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ReviewForm } from "@/components/school/review-form";
+import { RefreshCw } from "lucide-react";
+import Link from "next/link";
 import { format } from "date-fns";
 
 export default async function SchoolHistoryPage() {
@@ -93,7 +96,19 @@ export default async function SchoolHistoryPage() {
                           </>
                         )}
                       </div>
-                      <StatusBadge status={req.status} />
+                      <div className="flex items-center gap-2 shrink-0">
+                        {req.status === "filled" && (
+                          <Link
+                            href={`/school/requests/new?role=${encodeURIComponent(req.roleNeeded)}${req.keyStage ? `&keyStage=${encodeURIComponent(req.keyStage)}` : ""}&start=${encodeURIComponent(req.startTime)}&end=${encodeURIComponent(req.endTime)}${req.notes ? `&notes=${encodeURIComponent(req.notes)}` : ""}`}
+                          >
+                            <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-xs">
+                              <RefreshCw className="h-3.5 w-3.5" />
+                              Repeat
+                            </Button>
+                          </Link>
+                        )}
+                        <StatusBadge status={req.status} />
+                      </div>
                     </div>
                   </div>
                 );

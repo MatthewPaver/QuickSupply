@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { timesheets, teachers } from "@/lib/db/schema";
 import { validateBody } from "@/lib/api-validation";
 import { createNotification } from "@/lib/notifications";
+import { logActivity } from "@/lib/activity-log";
 import { sseManager } from "@/lib/sse-manager";
 
 const timesheetActionSchema = z.discriminatedUnion("action", [
@@ -97,6 +98,11 @@ export async function PATCH(
         teacherName,
       },
     });
+
+    logActivity(session.userId, "agent", "timesheet_approved", "timesheet", id, {
+      teacherId: timesheet.teacherId,
+      teacherName,
+    });
   } else {
     db.update(timesheets)
       .set({
@@ -129,6 +135,12 @@ export async function PATCH(
         teacherName,
         reason: parsed.data.reason,
       },
+    });
+
+    logActivity(session.userId, "agent", "timesheet_disputed", "timesheet", id, {
+      teacherId: timesheet.teacherId,
+      teacherName,
+      reason: parsed.data.reason,
     });
   }
 
