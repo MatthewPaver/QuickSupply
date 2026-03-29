@@ -88,6 +88,50 @@ export const teacherAvailability = sqliteTable("teacher_availability", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 });
 
+export const teacherSubjects = sqliteTable(
+  "teacher_subjects",
+  {
+    teacherId: text("teacher_id").notNull().references(() => teachers.id),
+    subject: text("subject").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.teacherId, table.subject] }),
+  ]
+);
+
+export const pushSubscriptions = sqliteTable(
+  "push_subscriptions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    userRole: text("user_role", { enum: ["school", "teacher", "agent"] }).notNull(),
+    endpoint: text("endpoint").notNull(),
+    p256dhKey: text("p256dh_key").notNull(),
+    authKey: text("auth_key").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => [
+    uniqueIndex("push_subscriptions_user_endpoint_unique").on(table.userId, table.userRole, table.endpoint),
+  ]
+);
+
+export const notificationPreferences = sqliteTable(
+  "notification_preferences",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    userRole: text("user_role", { enum: ["school", "teacher", "agent"] }).notNull(),
+    category: text("category", {
+      enum: ["offers", "booking_confirmations", "cancellations", "reminders", "timesheets"],
+    }).notNull(),
+    pushEnabled: integer("push_enabled", { mode: "boolean" }).notNull().default(true),
+    inAppEnabled: integer("in_app_enabled", { mode: "boolean" }).notNull().default(true),
+  },
+  (table) => [
+    uniqueIndex("notification_prefs_user_category_unique").on(table.userId, table.userRole, table.category),
+  ]
+);
+
 export const teacherBlacklistedSchools = sqliteTable(
   "teacher_blacklisted_schools",
   {
@@ -175,6 +219,114 @@ export const notificationLog = sqliteTable(
   },
   (table) => [
     index("notification_log_read_created_at_idx").on(table.read, table.createdAt),
+  ]
+);
+
+export const payRates = sqliteTable(
+  "pay_rates",
+  {
+    id: text("id").primaryKey(),
+    roleType: text("role_type", { enum: ["teacher", "ta"] }).notNull(),
+    schoolId: text("school_id").references(() => schools.id),
+    payRate: integer("pay_rate").notNull(),
+    chargeRate: integer("charge_rate").notNull(),
+    effectiveFrom: text("effective_from").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => [
+    index("pay_rates_role_school_idx").on(table.roleType, table.schoolId),
+    index("pay_rates_effective_from_idx").on(table.effectiveFrom),
+  ]
+);
+
+export const invoices = sqliteTable(
+  "invoices",
+  {
+    id: text("id").primaryKey(),
+    schoolId: text("school_id").notNull().references(() => schools.id),
+    periodStart: text("period_start").notNull(),
+    periodEnd: text("period_end").notNull(),
+    totalPayAmount: integer("total_pay_amount").notNull().default(0),
+    totalChargeAmount: integer("total_charge_amount").notNull().default(0),
+    status: text("status", { enum: ["draft", "sent", "paid"] }).notNull().default("draft"),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => [
+    index("invoices_school_id_idx").on(table.schoolId),
+    index("invoices_status_idx").on(table.status),
+  ]
+);
+
+export const timesheets = sqliteTable(
+  "timesheets",
+  {
+    id: text("id").primaryKey(),
+    bookingId: text("booking_id").notNull().references(() => bookings.id),
+    teacherId: text("teacher_id").notNull().references(() => teachers.id),
+    arrivalTime: text("arrival_time").notNull(),
+    departureTime: text("departure_time").notNull(),
+    breakMinutes: integer("break_minutes").notNull().default(0),
+    totalHours: real("total_hours").notNull(),
+    status: text("status", {
+      enum: ["submitted", "approved", "disputed", "paid"],
+    }).notNull().default("submitted"),
+    submittedAt: integer("submitted_at", { mode: "timestamp" }).notNull(),
+    approvedAt: integer("approved_at", { mode: "timestamp" }),
+    disputeReason: text("dispute_reason"),
+    notes: text("notes"),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => [
+    index("timesheets_booking_id_idx").on(table.bookingId),
+    index("timesheets_teacher_id_idx").on(table.teacherId),
+    index("timesheets_status_idx").on(table.status),
+  ]
+);
+
+export const invoiceLineItems = sqliteTable(
+  "invoice_line_items",
+  {
+    id: text("id").primaryKey(),
+    invoiceId: text("invoice_id").notNull().references(() => invoices.id),
+    timesheetId: text("timesheet_id").notNull().references(() => timesheets.id),
+    description: text("description").notNull(),
+    hours: real("hours").notNull(),
+    payRate: integer("pay_rate").notNull(),
+    chargeRate: integer("charge_rate").notNull(),
+    payAmount: integer("pay_amount").notNull(),
+    chargeAmount: integer("charge_amount").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => [
+    index("invoice_line_items_invoice_id_idx").on(table.invoiceId),
+  ]
+);
+
+export const complianceDocuments = sqliteTable(
+  "compliance_documents",
+  {
+    id: text("id").primaryKey(),
+    teacherId: text("teacher_id").notNull().references(() => teachers.id),
+    documentType: text("document_type", {
+      enum: ["dbs", "right_to_work", "qualification", "reference"],
+    }).notNull(),
+    fileName: text("file_name").notNull(),
+    filePath: text("file_path").notNull(),
+    status: text("status", {
+      enum: ["pending_verification", "verified", "rejected", "expired"],
+    }).notNull().default("pending_verification"),
+    expiryDate: text("expiry_date"),
+    rejectionReason: text("rejection_reason"),
+    uploadedAt: integer("uploaded_at", { mode: "timestamp" }).notNull(),
+    verifiedAt: integer("verified_at", { mode: "timestamp" }),
+    verifiedBy: text("verified_by").references(() => agents.id),
+    archivedAt: integer("archived_at", { mode: "timestamp" }),
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  },
+  (table) => [
+    index("compliance_documents_teacher_id_idx").on(table.teacherId),
+    index("compliance_documents_status_idx").on(table.status),
+    index("compliance_documents_expiry_date_idx").on(table.expiryDate),
   ]
 );
 

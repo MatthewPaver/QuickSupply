@@ -57,6 +57,34 @@
       "when": 1773496535000,
       "tag": "0007_review_rebook",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1774654829650,
+      "tag": "0008_optimal_red_hulk",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1774655199917,
+      "tag": "0009_handy_lizard",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1774655718178,
+      "tag": "0010_nasty_deathbird",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1774656234571,
+      "tag": "0011_calm_warlock",
+      "breakpoints": true
     }
   ]
 }

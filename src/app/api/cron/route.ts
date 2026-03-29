@@ -4,6 +4,10 @@ import {
   cleanupExpiredPasswordResetTokens,
   cleanupOldReadNotifications,
 } from "@/lib/maintenance";
+import {
+  checkExpiringDocuments,
+  expireDocuments,
+} from "@/lib/compliance-checks";
 
 // Cron should be called by a scheduler (e.g. Vercel Cron, GitHub Actions) or internally.
 // In production, protect with a shared secret so arbitrary clients cannot trigger it.
@@ -32,10 +36,14 @@ export async function GET(request: NextRequest) {
   const deletedReadNotifications = cleanupOldReadNotifications(
     getNotificationRetentionDays()
   );
+  const expiredDocuments = expireDocuments();
+  const expiryAlertsSent = checkExpiringDocuments();
 
   return NextResponse.json({
     expiredOffers,
     deletedResetTokens,
     deletedReadNotifications,
+    expiredDocuments,
+    expiryAlertsSent,
   });
 }

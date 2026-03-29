@@ -8,6 +8,7 @@ import {
   teacherAvailability,
   teacherBlacklistedSchools,
   schoolTeacherReviews,
+  teacherSubjects,
   appConfig,
 } from "@/lib/db/schema";
 import { eq, and, sql } from "drizzle-orm";
@@ -16,6 +17,45 @@ import { haversineDistance } from "@/lib/distance";
 import { sseManager } from "@/lib/sse-manager";
 import { createNotification, notifyAllAgents } from "@/lib/notifications";
 import type { RankedTeacher } from "@/types";
+
+interface RankingWeights {
+  preferred: number;
+  rating: number;
+  review: number;
+  distance: number;
+  drive: number;
+  familiarity: number;
+  subjectMatch: number;
+}
+
+const DEFAULT_WEIGHTS: RankingWeights = {
+  preferred: 200,
+  rating: 20,
+  review: 10,
+  distance: 30,
+  drive: 25,
+  familiarity: 15,
+  subjectMatch: 30,
+};
+
+function loadRankingWeights(): RankingWeights {
+  const row = db.select().from(appConfig).where(eq(appConfig.key, "ranking_weights")).get();
+  if (!row) return DEFAULT_WEIGHTS;
+  try {
+    const parsed = JSON.parse(row.value);
+    return {
+      preferred: typeof parsed.preferred === "number" ? parsed.preferred : DEFAULT_WEIGHTS.preferred,
+      rating: typeof parsed.rating === "number" ? parsed.rating : DEFAULT_WEIGHTS.rating,
+      review: typeof parsed.review === "number" ? parsed.review : DEFAULT_WEIGHTS.review,
+      distance: typeof parsed.distance === "number" ? parsed.distance : DEFAULT_WEIGHTS.distance,
+      drive: typeof parsed.drive === "number" ? parsed.drive : DEFAULT_WEIGHTS.drive,
+      familiarity: typeof parsed.familiarity === "number" ? parsed.familiarity : DEFAULT_WEIGHTS.familiarity,
+      subjectMatch: typeof parsed.subjectMatch === "number" ? parsed.subjectMatch : DEFAULT_WEIGHTS.subjectMatch,
+    };
+  } catch {
+    return DEFAULT_WEIGHTS;
+  }
+}
 
 function getConfigValue(key: string, fallback: number): number {
   const row = db.select().from(appConfig).where(eq(appConfig.key, key)).get();
@@ -34,6 +74,9 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
     .get();
 
   if (!school) return [];
+
+  // Load configurable weights
+  const weights = loadRankingWeights();
 
   // Get all active teachers (deactivated teachers are ineligible)
   const allTeachers = db.select().from(teachers).where(eq(teachers.isActive, true)).all();
@@ -59,7 +102,7 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
   const dayOfWeek = new Date(request.date + "T00:00:00").getDay();
   const allAvailability = db.select().from(teacherAvailability).all();
 
-  // Get school review averages per teacher
+  // Get school review averages per teacher (for this school)
   const reviews = db.select().from(schoolTeacherReviews).where(eq(schoolTeacherReviews.schoolId, request.schoolId)).all();
   const reviewAvgMap = new Map<string, number>();
   const reviewCounts = new Map<string, { sum: number; count: number }>();
@@ -71,6 +114,20 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
   });
   reviewCounts.forEach((v, k) => reviewAvgMap.set(k, v.sum / v.count));
 
+  // Get all reviews per teacher for affinity scoring
+  const allReviews = db.select().from(schoolTeacherReviews).all();
+  const teacherAffinityMap = new Map<string, Map<string, { ratings: number[]; rebooks: boolean[] }>>();
+  for (const r of allReviews) {
+    if (!teacherAffinityMap.has(r.teacherId)) {
+      teacherAffinityMap.set(r.teacherId, new Map());
+    }
+    const schoolMap = teacherAffinityMap.get(r.teacherId)!;
+    const entry = schoolMap.get(r.schoolId) ?? { ratings: [], rebooks: [] };
+    entry.ratings.push(r.rating);
+    entry.rebooks.push(r.wouldRebook);
+    schoolMap.set(r.schoolId, entry);
+  }
+
   // Get teachers who previously worked at this school
   const previousWorkers = db
     .select({ teacherId: bookings.teacherId })
@@ -80,6 +137,16 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
     .all()
     .map((b) => b.teacherId);
   const previousSet = new Set(previousWorkers);
+
+  // Get teacher subjects for subject matching
+  const allTeacherSubjects = db.select().from(teacherSubjects).all();
+  const teacherSubjectsMap = new Map<string, Set<string>>();
+  for (const ts of allTeacherSubjects) {
+    if (!teacherSubjectsMap.has(ts.teacherId)) {
+      teacherSubjectsMap.set(ts.teacherId, new Set());
+    }
+    teacherSubjectsMap.get(ts.teacherId)!.add(ts.subject.toLowerCase());
+  }
 
   // Already offered for this request (declined/expired - skip them for re-ranking)
   const pastOffers = db
@@ -161,18 +228,35 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
     // Filter: beyond teacher's max travel distance
     if (distanceMiles > teacher.maxDistanceMiles) continue;
 
-    // Score
+    // Score using configurable weights
     let score = 0;
     const isPreferred = request.preferredTeacherId === teacher.id;
     const schoolReviewAvg = reviewAvgMap.get(teacher.id) || null;
     const previouslyWorked = previousSet.has(teacher.id);
 
-    if (isPreferred) score += 200;
-    score += teacher.agencyRating * 20;
-    if (schoolReviewAvg) score += schoolReviewAvg * 10;
-    score += Math.min(30, 30 / Math.max(distanceMiles, 0.5));
-    if (teacher.canDrive) score += 25;
-    if (previouslyWorked) score += 15;
+    if (isPreferred) score += weights.preferred;
+    score += teacher.agencyRating * weights.rating;
+    if (schoolReviewAvg) score += schoolReviewAvg * weights.review;
+    score += Math.min(weights.distance, weights.distance / Math.max(distanceMiles, 0.5));
+    if (teacher.canDrive) score += weights.drive;
+    if (previouslyWorked) score += weights.familiarity;
+
+    // Subject matching
+    if (request.subject && request.subject.trim() !== "") {
+      const teacherSubs = teacherSubjectsMap.get(teacher.id);
+      if (teacherSubs && teacherSubs.has(request.subject.toLowerCase())) {
+        score += weights.subjectMatch;
+      }
+    }
+
+    // School affinity from reviews
+    const teacherSchoolReviews = teacherAffinityMap.get(teacher.id)?.get(request.schoolId);
+    if (teacherSchoolReviews && teacherSchoolReviews.ratings.length > 0) {
+      const avgRat = teacherSchoolReviews.ratings.reduce((a, b) => a + b, 0) / teacherSchoolReviews.ratings.length;
+      const rebookRate = teacherSchoolReviews.rebooks.filter(Boolean).length / teacherSchoolReviews.rebooks.length;
+      const affinityScore = (avgRat / 5) * 0.7 + rebookRate * 0.3;
+      score += affinityScore * weights.review;
+    }
 
     ranked.push({
       teacher,
@@ -211,7 +295,7 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
         const previouslyWorked = previousSet.has(preferred.id);
         ranked.unshift({
           teacher: preferred,
-          score: 200,
+          score: weights.preferred,
           distanceMiles,
           schoolReviewAvg,
           previouslyWorkedAtSchool: previouslyWorked,

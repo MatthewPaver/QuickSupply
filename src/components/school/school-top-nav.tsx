@@ -1,6 +1,6 @@
 "use client";
 
-import { School, FileText, Clock, History } from "lucide-react";
+import { School, FileText, Clock, History, BarChart3 } from "lucide-react";
 import { ActiveLinkButton } from "@/components/shared/active-link-button";
 
 export function SchoolTopNav() {
@@ -10,6 +10,7 @@ export function SchoolTopNav() {
       <ActiveLinkButton href="/school/requests/new" label="New Request" icon={FileText} />
       <ActiveLinkButton href="/school/requests" label="All Requests" icon={Clock} exact />
       <ActiveLinkButton href="/school/history" label="History" icon={History} />
+      <ActiveLinkButton href="/school/analytics" label="Analytics" icon={BarChart3} />
     </nav>
   );
 }

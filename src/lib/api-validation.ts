@@ -254,3 +254,39 @@ export const agencySetSchoolCredentialsSchema = z.object({
 export const agencySchoolStatusSchema = z.object({
   isActive: z.boolean(),
 });
+
+// PUT /api/agency/teachers/[id]/subjects
+export const teacherSubjectsSchema = z.object({
+  subjects: z.array(z.string().min(1)).max(15),
+});
+
+// PUT /api/agency/settings/ranking-weights
+export const rankingWeightsSchema = z.object({
+  preferred: z.number().min(0).max(1000),
+  rating: z.number().min(0).max(1000),
+  review: z.number().min(0).max(1000),
+  distance: z.number().min(0).max(1000),
+  drive: z.number().min(0).max(1000),
+  familiarity: z.number().min(0).max(1000),
+  subjectMatch: z.number().min(0).max(1000),
+});
+
+// POST /api/teacher/timesheets
+export const timesheetSubmitSchema = z.object({
+  bookingId: z.string().min(1, "bookingId is required"),
+  arrivalTime: z.string().regex(/^\d{2}:\d{2}$/, "arrivalTime must be HH:MM"),
+  departureTime: z.string().regex(/^\d{2}:\d{2}$/, "departureTime must be HH:MM"),
+  breakMinutes: z.number().int().min(0, "Break minutes cannot be negative"),
+  notes: z.string().max(500, "Notes must be 500 characters or fewer").nullable().optional(),
+}).refine(
+  (data) => data.departureTime > data.arrivalTime,
+  { message: "Departure time must be after arrival time", path: ["departureTime"] }
+).refine(
+  (data) => {
+    const [ah, am] = data.arrivalTime.split(":").map(Number);
+    const [dh, dm] = data.departureTime.split(":").map(Number);
+    const totalMinutes = (dh * 60 + dm) - (ah * 60 + am);
+    return data.breakMinutes <= totalMinutes;
+  },
+  { message: "Break cannot exceed total working time", path: ["breakMinutes"] }
+);

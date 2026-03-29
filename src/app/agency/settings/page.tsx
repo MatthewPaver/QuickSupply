@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Settings, Loader2 } from "lucide-react";
+import { Settings, Loader2, PoundSterling, ChevronRight, SlidersHorizontal } from "lucide-react";
 
 export default function AgencySettingsPage() {
   const [morningWindow, setMorningWindow] = useState("7");
@@ -107,6 +108,44 @@ export default function AgencySettingsPage() {
               </Button>
             </>
           )}
+        </CardContent>
+      </Card>
+      <Card className="max-w-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <PoundSterling className="h-4 w-4" />
+            Pay Rates
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-3">
+            Manage pay and charge rates for teachers and teaching assistants.
+          </p>
+          <Button asChild variant="outline" className="w-full justify-between">
+            <Link href="/agency/settings/pay-rates">
+              Manage Pay Rates
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+      <Card className="max-w-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <SlidersHorizontal className="h-4 w-4" />
+            Ranking Weights
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-3">
+            Configure how teachers are scored and ranked when matching to cover requests.
+          </p>
+          <Button asChild variant="outline" className="w-full justify-between">
+            <Link href="/agency/settings/ranking">
+              Configure Ranking Weights
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     </div>

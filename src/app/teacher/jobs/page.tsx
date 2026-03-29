@@ -6,10 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { toast } from "sonner";
-import { Check, X, Loader2, Clock, AlertTriangle } from "lucide-react";
+import { Check, X, Loader2, Clock, AlertTriangle, ClipboardList } from "lucide-react";
+import { format } from "date-fns";
 import { EmptyState } from "@/components/shared/empty-state";
+import { TimesheetForm } from "@/components/teacher/timesheet-form";
 import { useSSE } from "@/hooks/use-sse";
 import type { SSEEvent } from "@/types";
+
+interface PendingTimesheetBooking {
+  bookingId: string;
+  date: string;
+  schoolName: string;
+  startTime: string;
+  endTime: string;
+}
 
 interface Offer {
   offerId: string;
@@ -34,6 +44,8 @@ export default function TeacherJobsPage() {
   const [countdown, setCountdown] = useState<Record<string, string>>({});
   const [teacherId, setTeacherId] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<{ offerId: string; response: "accepted" | "declined" } | null>(null);
+  const [pendingTimesheets, setPendingTimesheets] = useState<PendingTimesheetBooking[]>([]);
+  const [pendingTimesheetsLoading, setPendingTimesheetsLoading] = useState(true);
 
   const loadOffers = useCallback(async () => {
     try {
@@ -82,6 +94,23 @@ export default function TeacherJobsPage() {
   useEffect(() => {
     loadOffers();
   }, [loadOffers]);
+
+  useEffect(() => {
+    async function loadPendingTimesheets() {
+      try {
+        const res = await fetch("/api/teacher/bookings-pending-timesheet", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setPendingTimesheets(Array.isArray(data) ? data : []);
+        }
+      } catch {
+        // Silently fail — not critical
+      } finally {
+        setPendingTimesheetsLoading(false);
+      }
+    }
+    loadPendingTimesheets();
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
@@ -155,17 +184,38 @@ export default function TeacherJobsPage() {
       </div>
 
       {loading && pendingOffers.length === 0 && (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="space-y-4">
+          {[1, 2].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <div className="h-6 w-48 animate-pulse rounded bg-muted" />
+                    <div className="h-4 w-36 animate-pulse rounded bg-muted" />
+                  </div>
+                  <div className="h-6 w-24 animate-pulse rounded bg-muted" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="h-4 w-28 animate-pulse rounded bg-muted" />
+                  <div className="h-4 w-28 animate-pulse rounded bg-muted" />
+                </div>
+                <div className="h-10 w-full animate-pulse rounded-lg bg-muted" />
+                <div className="flex gap-3">
+                  <div className="h-11 flex-1 animate-pulse rounded-md bg-muted" />
+                  <div className="h-11 flex-1 animate-pulse rounded-md bg-muted" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
 
       {!loading && pendingOffers.length === 0 && (
-        <Card className="border-dashed">
-          <CardContent className="py-5 text-sm text-muted-foreground">
-            No active offers right now. If the agency has just sent you an offer, refresh the page.
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon="inbox"
+          title="No active offers"
+          description="No active offers right now. If the agency has just sent you an offer, refresh the page."
+        />
       )}
 
       {/* Active Offers */}
@@ -181,17 +231,13 @@ export default function TeacherJobsPage() {
                       <div>
                         <h3 className="text-xl font-semibold">{offer.schoolName}</h3>
                         <div className="mt-0.5 text-sm text-muted-foreground">
-                          {new Date(offer.date + "T00:00:00").toLocaleDateString("en-GB", {
-                            weekday: "long",
-                            day: "numeric",
-                            month: "long",
-                          })}
+                          {format(new Date(offer.date + "T00:00:00"), "EEEE d MMMM")}
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <Badge variant="outline" className={isExpired
-                          ? "border-red-200 bg-red-50 text-red-700"
-                          : "border-blue-200 bg-blue-50 text-blue-700"
+                          ? "border-destructive/30 bg-destructive/10 text-destructive"
+                          : "border-secondary/30 bg-secondary/10 text-secondary"
                         }>
                           {isExpired ? "Expired" : "Pending response"}
                         </Badge>
@@ -227,13 +273,17 @@ export default function TeacherJobsPage() {
                     </div>
 
                     {/* Countdown */}
-                    <div className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 ${
+                    <div
+                      role="timer"
+                      aria-live="polite"
+                      aria-label={isExpired ? "Offer expired" : `Time remaining: ${countdown[offer.offerId] || "calculating"}`}
+                      className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 ${
                       isExpired
-                        ? "border-red-200 bg-red-50/80"
+                        ? "border-destructive/30 bg-destructive/10"
                         : "border-amber-200 bg-amber-50/80"
                     }`}>
-                      <Clock className={`h-4 w-4 ${isExpired ? "text-red-700" : "text-amber-700"}`} />
-                      <span className={`text-sm font-semibold ${isExpired ? "text-red-800" : "text-amber-800"}`}>
+                      <Clock className={`h-4 w-4 ${isExpired ? "text-destructive" : "text-amber-700"}`} />
+                      <span className={`text-sm font-semibold ${isExpired ? "text-destructive" : "text-amber-800"}`}>
                         {isExpired ? "This offer has expired" : `Time remaining: ${countdown[offer.offerId] || "..."}`}
                       </span>
                     </div>
@@ -279,7 +329,7 @@ export default function TeacherJobsPage() {
                         </Button>
                         <Button
                           variant="outline"
-                          className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                          className="flex-1 border-destructive/30 text-destructive hover:bg-destructive/10"
                           size="lg"
                           onClick={() => setConfirmAction({ offerId: offer.offerId, response: "declined" })}
                           disabled={actionLoading !== null || isExpired}
@@ -320,7 +370,7 @@ export default function TeacherJobsPage() {
                   <div>
                     <div className="text-sm font-semibold">{offer.schoolName}</div>
                     <div className="text-xs text-muted-foreground">
-                      {new Date(offer.date + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" })} &middot;{" "}
+                      {format(new Date(offer.date + "T00:00:00"), "d MMM")} &middot;{" "}
                       <span className="capitalize">{offer.roleNeeded}</span>
                       {offer.subject && <span> - {offer.subject}</span>}
                     </div>
@@ -332,6 +382,32 @@ export default function TeacherJobsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Pending Timesheets */}
+      {!pendingTimesheetsLoading && pendingTimesheets.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ClipboardList className="h-4 w-4" />
+              Timesheets to Submit
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {pendingTimesheets.map((booking) => (
+                <TimesheetForm
+                  key={booking.bookingId}
+                  bookingId={booking.bookingId}
+                  date={format(new Date(booking.date + "T00:00:00"), "EEEE d MMMM yyyy")}
+                  schoolName={booking.schoolName}
+                  startTime={booking.startTime}
+                  endTime={booking.endTime}
+                />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
