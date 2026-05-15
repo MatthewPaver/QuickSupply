@@ -2,6 +2,19 @@
 
 Supply teaching workforce scheduling app. Connects schools, supply teachers/TAs, and the agency in a real-time sequential assignment workflow.
 
+## Status
+
+`MVP application`
+
+QuickSupply is a product-style scheduling system with seeded demo data, multi-portal workflows, real-time updates, and production hardening notes.
+
+## Portfolio Signal
+
+- Three-sided workflow across schools, teachers/TAs, and agency staff
+- Sequential assignment engine with ranking, timeouts, decline handling, and agency override
+- Server-Sent Events for live operational updates
+- Production notes for auth, cron, email, rate limiting, data deletion, and SQLite-to-Postgres migration
+
 ## Quick Start
 
 ```bash
