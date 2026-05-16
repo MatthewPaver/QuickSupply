@@ -8,6 +8,17 @@ Supply teaching workforce scheduling app. Connects schools, supply teachers/TAs,
 
 QuickSupply is a product-style scheduling system with seeded demo data, multi-portal workflows, real-time updates, and production hardening notes.
 
+## Portfolio Quick Read
+
+| Section | Where to look |
+|:---|:---|
+| What it solves | Coordinates school cover requests, teacher availability, agency assignment, and live booking status |
+| Quick start | [Quick Start](#quick-start) |
+| Screenshot | [Portfolio Store](https://matthewpaver.github.io/MatthewPaver/store/) |
+| Architecture | [Architecture](#architecture) |
+| Tests | `pnpm test` and `pnpm e2e` |
+| Tech stack | `Next.js` `TypeScript` `Drizzle` `SQLite` `SSE` `Playwright` |
+
 ## Portfolio Signal
 
 - Three-sided workflow across schools, teachers/TAs, and agency staff
