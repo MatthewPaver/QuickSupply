@@ -1,35 +1,36 @@
-# QuickSupply by Desian Education
+# QuickSupply
 
-Supply teaching workforce scheduling app. Connects schools, supply teachers/TAs, and the agency in a real-time sequential assignment workflow.
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Drizzle](https://img.shields.io/badge/Drizzle-ORM-C5F74F)
+![Playwright](https://img.shields.io/badge/Playwright-E2E-45BA4B)
 
-## Status
+Supply-cover scheduling prototype for schools, teachers/TAs, and agency staff.
 
-`MVP application`
+QuickSupply models the awkward part of school cover: requests arrive at short notice, eligibility matters, offers should go out in the right order, and every portal needs to stay current without someone chasing status in messages.
 
-QuickSupply is a product-style scheduling system with seeded demo data, multi-portal workflows, real-time updates, and production hardening notes.
+## Quick Read
 
-## Portfolio Quick Read
-
-| Section | Where to look |
+| Area | Detail |
 |:---|:---|
-| What it solves | Coordinates school cover requests, teacher availability, agency assignment, and live booking status |
-| Quick start | [Quick Start](#quick-start) |
-| Screenshot | [Portfolio Store](https://matthewpaver.github.io/MatthewPaver/store/) |
-| Architecture | [Architecture](#architecture) |
-| Tests | `pnpm test` and `pnpm e2e` |
-| Tech stack | `Next.js` `TypeScript` `Drizzle` `SQLite` `SSE` `Playwright` |
+| What it is | Three-sided booking workflow for school cover |
+| Who uses it | Schools, supply teachers/TAs, and agency coordinators |
+| What to inspect | Sequential assignment engine, live status updates, seeded demo data |
+| Portfolio view | [Idea Store](https://matthewpaver.github.io/MatthewPaver/store/) |
+| Tests | `pnpm test`, `pnpm e2e`, `pnpm e2e:routes` |
+| Stack | `Next.js` `TypeScript` `Drizzle` `SQLite` `SSE` `Playwright` |
 
-## Portfolio Signal
+## What To Notice
 
-- Three-sided workflow across schools, teachers/TAs, and agency staff
-- Sequential assignment engine with ranking, timeouts, decline handling, and agency override
-- Server-Sent Events for live operational updates
-- Production notes for auth, cron, email, rate limiting, data deletion, and SQLite-to-Postgres migration
+- The workflow is not a simple CRUD app. It handles ranked offers, decline paths, timeouts, manual override, cancellation, and booking state.
+- The product is split into real user surfaces: a school portal, teacher portal, and agency dashboard.
+- Server-Sent Events push operational changes to the right audience: agency, teacher, or school.
+- The seeded dataset is built for demos: Liverpool schools, varied teacher profiles, compliance flags, availability, and requests in different states.
+- The production notes cover the unglamorous but important bits: auth, cron, email, rate limiting, retention, and moving from SQLite to Postgres.
 
 ## Quick Start
 
 ```bash
-# Requires Node.js 22+ and pnpm
 nvm use 22
 pnpm install
 pnpm db:migrate
@@ -37,138 +38,117 @@ pnpm db:seed
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000).
 
-Copy `.env.example` to `.env.local` if you want to override defaults.
-
-## Production setup
-
-For production (real users, no demo click-to-sign-in):
-
-1. **Environment:** Set `SESSION_SECRET` (e.g. `openssl rand -hex 32`), `CRON_SECRET`, and `NEXT_PUBLIC_DEMO_MODE=false` (or omit it). Set `RESEND_API_KEY` and `FROM_EMAIL` for notification emails; set `NEXT_PUBLIC_APP_URL` to your app URL (e.g. `https://app.quicksupply.com`) for password-reset links. For distributed production rate limiting, also set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` (otherwise rate limiting is in-memory per instance).
-2. **Database:** Run `pnpm db:migrate` then `pnpm db:seed`. Seeded users get a default password (see seed output; document it or change it after first login). For multi-instance or serverless hosting, plan a migration from SQLite to Postgres and set `DATABASE_URL` accordingly.
-3. **Deploy:** Deploy to Vercel (or similar); add all env vars in the dashboard. Note: SQLite file storage is not suitable for serverless; use Postgres for production at scale.
-4. **Cron:** Call `/api/cron` with `Authorization: Bearer <CRON_SECRET>` or `?secret=<CRON_SECRET>` to expire offers, remove expired password-reset tokens, and prune old read notifications (configurable via `NOTIFICATION_RETENTION_DAYS`, default 30). This repo includes a scheduled GitHub Actions workflow (`.github/workflows/app-cron.yml`) that can do this automatically when `APP_CRON_URL` and `APP_CRON_SECRET` are set in repository secrets.
-5. **Data deletion:** Users can request account deletion. `DELETE /api/me` (with a valid session) anonymises the current user's PII (name, email, phone set to "deleted") and disables login. Link to this from profile/settings or document for support.
+Copy `.env.example` to `.env.local` if you want to override local defaults.
 
 ## Demo Login
 
-When `NEXT_PUBLIC_DEMO_MODE=true` (default in .env.example), click any user on the login page to sign in instantly. When demo mode is off, sign in with email and password (seeded users have a default password printed by `pnpm db:seed`; use "Forgot password?" to set a new one). Seeded with:
-- **5 Liverpool schools** (St. Mary's, Kensington Primary, Broadgreen International, All Saints, Mossley Hill)
-- **12 teachers/TAs** with varied profiles (ratings, compliance, driving, availability patterns)
-- **3 agency staff** (Sarah Mitchell - Admin, James Powell, Emma Rodriguez)
-- **7 cover requests** in various states (pending, offering, filled, cancelled)
+When `NEXT_PUBLIC_DEMO_MODE=true`, the login page lets you click straight into seeded users. When demo mode is off, sign in with email and password. Seeded passwords are printed by `pnpm db:seed`; password reset is available from the login screen.
+
+Seed data includes:
+
+- 5 Liverpool schools
+- 12 teachers/TAs with ratings, compliance, driving, and availability differences
+- 3 agency staff
+- 7 cover requests across pending, offering, filled, and cancelled states
+
+## Architecture
+
+```text
+School request
+    |
+    v
+Assignment engine
+    |
+    +--> Rank eligible teachers
+    +--> Offer one candidate at a time
+    +--> Advance on decline or timeout
+    +--> Allow agency override
+    |
+    v
+Booking + live updates
+```
+
+### Three Portals
+
+| Portal | Purpose |
+|:---|:---|
+| `/school/*` | Create cover requests, request preferred teachers, track status |
+| `/teacher/*` | Manage availability, accept or decline timed offers |
+| `/agency/*` | Coordinate requests, assign teachers, override bookings |
+
+### Core Logic
+
+`src/lib/assignment-engine.ts` ranks eligible teachers using preferred-teacher status, agency rating, school reviews, proximity, driving ability, and previous work history. Offers are sequential, not broadcast, so the workflow behaves like a real agency process rather than a notification blast.
+
+`src/lib/sse-manager.ts` handles live channels for `agency`, `teacher:{id}`, and `school:{id}`. Offer expiry is checked through `/api/cron`.
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 15 (App Router, TypeScript) |
-| Database | SQLite via Drizzle ORM |
-| UI | shadcn/ui + Tailwind CSS v4 |
-| Real-time | Server-Sent Events (SSE) |
-| Notifications | Sonner toasts + Browser Notification API |
+|:---|:---|
+| App | Next.js 15, App Router, TypeScript |
+| Data | SQLite, Drizzle ORM |
+| UI | Tailwind CSS v4, shadcn/ui |
+| Live updates | Server-Sent Events |
+| Testing | Playwright, route smoke tests |
+| Notifications | In-app notifications, Sonner, Browser Notification API |
 
-## Architecture
-
-### Three Portals
-
-- **School Portal** (`/school/*`) - Submit cover requests, request preferred teachers, track status
-- **Teacher Portal** (`/teacher/*`) - Manage availability, accept/decline job offers with countdown timer
-- **Agency Dashboard** (`/agency/*`) - Command centre: manage all requests, assign teachers, override bookings
-
-### Sequential Assignment Engine (`src/lib/assignment-engine.ts`)
-
-The core business logic:
-1. **Ranks eligible teachers** by score (preferred teacher +200, agency rating x20, school reviews x10, proximity, driving ability, previous work history)
-2. **Offers sequentially** - one teacher at a time, NOT broadcast
-3. **Auto-advances** on decline or timeout (7 min emergency, 60 min standard - configurable)
-4. **Agency can override** at any point: manual assign, withdraw offer, cancel booking
-
-### Database (12 tables)
-
-Schema in `src/lib/db/schema.ts`. Key tables: schools, teachers, agents, cover_requests, assignment_offers, bookings, teacher_availability, teacher_blacklisted_schools, school_teacher_reviews, notification_log, app_config
-
-### Real-time (SSE)
-
-Three channels: `agency`, `teacher:{id}`, `school:{id}`. Events flow from server actions through the SSE manager to connected clients. Offer expiry checked every 30s via `/api/cron` polling.
-
-## Project Structure
-
-```
-src/
-  app/
-    page.tsx              # Landing page (portal selector)
-    login/                # Quick-login with demo users
-    school/               # School portal pages
-    teacher/              # Teacher portal pages
-    agency/               # Agency dashboard pages
-    api/                  # REST + SSE endpoints
-  components/
-    ui/                   # shadcn/ui components
-    school/               # School-specific components
-    teacher/              # Teacher-specific components
-    agency/               # Agency-specific components (assignment panel)
-    shared/               # Status badges, etc
-  lib/
-    db/schema.ts          # Drizzle ORM schema
-    db/index.ts           # Database connection
-    assignment-engine.ts  # Sequential assignment algorithm
-    sse-manager.ts        # SSE pub/sub
-    auth.ts               # Cookie session auth
-    distance.ts           # Haversine distance calculation
-  types/index.ts          # Shared TypeScript types
-scripts/
-  seed.ts                 # Demo data seeder
-  reset-db.ts             # Database reset
-```
-
-## Scripts
+## Useful Commands
 
 ```bash
-pnpm dev           # Start dev server (Turbopack)
+pnpm dev           # Start dev server
 pnpm build         # Production build
 pnpm db:generate   # Generate Drizzle migrations
 pnpm db:migrate    # Apply migrations
 pnpm db:seed       # Seed demo data
 pnpm db:reset      # Delete database file
-pnpm db:studio     # Open Drizzle Studio (DB browser)
-pnpm setup         # Migrate + seed (first-time setup)
-pnpm e2e:routes    # Smoke-test all screens (run with dev server up)
-pnpm e2e           # Playwright E2E (starts dev server if needed, or run pnpm dev first)
+pnpm db:studio     # Open Drizzle Studio
+pnpm setup         # Migrate + seed
+pnpm e2e:routes    # Smoke-test all screens
+pnpm e2e           # Playwright E2E
 pnpm e2e:ui        # Playwright UI mode
 ```
 
----
+## Production Notes
 
-## Status: v1.0 MVP Complete
+For real users, disable demo mode and set:
 
-QuickSupply v1.0 shipped 2026-03-07. All core workflow features are in production:
-- Real-time sequential offer engine with SSE push
+- `SESSION_SECRET`
+- `CRON_SECRET`
+- `NEXT_PUBLIC_DEMO_MODE=false`
+- `RESEND_API_KEY`
+- `FROM_EMAIL`
+- `NEXT_PUBLIC_APP_URL`
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` for distributed rate limiting
+
+Run `pnpm db:migrate` and `pnpm db:seed` before first use. SQLite is fine for the local demo; use Postgres for multi-instance or serverless production.
+
+`/api/cron` expires offers, removes expired password-reset tokens, and prunes old read notifications. The included GitHub Actions workflow can call it when `APP_CRON_URL` and `APP_CRON_SECRET` are set.
+
+## Status
+
+`v1.0 MVP complete`
+
+Shipped core workflow:
+
 - School, teacher, and agency portals
-- Booking management with cancellation
-- School-to-teacher review system
-- Agency teacher management (create, edit, compliance, deactivate)
-- Notification system with email + in-app
-- Rate limiting and input validation on all endpoints
+- Real-time sequential offer engine
+- Booking management and cancellation
+- School-to-teacher reviews
+- Agency teacher management
+- Email and in-app notifications
+- Endpoint validation and rate limiting
 - Password reset flow
 
-### v1.1 Operability (in progress)
+`v1.1 operability` is in progress: agency school management, review submission UI, and tooling improvements.
 
-- Agency school management (create, edit, deactivate schools)
-- Review submission UI for schools
-- README and tooling improvements
+## Branding
 
-See `.planning/ROADMAP.md` for the full v1.1 plan.
+Desian Education:
 
-### MCP & tooling
-
-- **Sentry MCP** — Configure `NEXT_PUBLIC_SENTRY_DSN` for error tracking and Seer analysis.
-- **SQLite MCP** — Point at `./quicksupply.db` for ad-hoc queries without Drizzle Studio.
-- **Route check script** — `pnpm e2e:routes` smoke-tests all screens. Run with `pnpm dev` up.
-
-### Branding (Desian Education — [desian.co.uk](https://www.desian.co.uk))
-- **Desian purple** `#4c0673` — primary (buttons, links, headings, logo treatment)
-- **Desian blue** `#1863DC` — secondary brand (`--desian-blue` / `bg-desian-blue`)
-- **Desian light purple** `#c879f1` — accent (highlights, gradients)
-- **Logo:** `public/desian-logo.svg`
+- Purple `#4c0673`
+- Blue `#1863DC`
+- Accent `#c879f1`
+- Logo: `public/desian-logo.svg`
