@@ -48,6 +48,10 @@ yarn-error.log*
 # Local demo captures
 *.mov
 
+# Personal / local assistant tooling
+CLAUDE.md
+.claude/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

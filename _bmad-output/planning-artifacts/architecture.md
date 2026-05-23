@@ -794,3 +794,147 @@ Drizzle's query builder API remains identical across dialects — application co
 ---
 
 *This document reflects the architecture as implemented. It should be updated as the system evolves, particularly when migrating from SQLite to PostgreSQL or adopting multi-instance deployment.*
+
+---
+
+## V2 Addendum — Sprint 7-8 Additions
+
+*Added: 2026-03-29*
+
+The following sections document the V2 features, tables, and API routes added after the initial Sprint 1-6 delivery.
+
+---
+
+### A1. V2 Data Architecture
+
+Ten new tables were added to support V2 features. All follow existing conventions (ULID primary keys, integer timestamps, text enums).
+
+| Table | Purpose | Key Columns |
+|---|---|---|
+| **`timesheets`** | Teacher-submitted time records per booking | `booking_id` (unique), `teacher_id`, `arrival_time`, `departure_time`, `break_minutes`, `total_hours`, `status` (submitted/approved/disputed/paid), `dispute_reason` |
+| **`pay_rates`** | Configurable pay and charge rates per role/school | `role_type` (teacher/ta), `school_id` (nullable for defaults), `pay_rate`, `charge_rate`, `effective_from` |
+| **`invoices`** | School invoices for a billing period | `school_id`, `period_start`, `period_end`, `total_pay_amount`, `total_charge_amount`, `status` (draft/sent/paid) |
+| **`invoice_line_items`** | Individual line items linking invoices to timesheets | `invoice_id`, `timesheet_id`, `hours`, `pay_rate`, `charge_rate`, `pay_amount`, `charge_amount` |
+| **`compliance_documents`** | Uploaded compliance files (DBS, right-to-work, etc.) | `teacher_id`, `document_type`, `file_name`, `file_path`, `status` (pending_verification/verified/rejected/expired), `expiry_date`, `verified_by`, `archived_at` |
+| **`teacher_subjects`** | Subject specializations per teacher (composite PK) | `teacher_id`, `subject` |
+| **`push_subscriptions`** | Web Push API subscriptions for PWA notifications | `user_id`, `user_role`, `endpoint`, `p256dh_key`, `auth_key` |
+| **`notification_preferences`** | Per-user notification channel preferences | `user_id`, `user_role`, `category` (offers/booking_confirmations/cancellations/reminders/timesheets), `push_enabled`, `in_app_enabled` |
+| **`request_templates`** | Saved cover request templates per school | `school_id`, `name`, `role_needed`, `subject`, `key_stage`, `start_time`, `end_time`, `notes` |
+| **`activity_log`** | Fire-and-forget audit trail of system actions | `actor_id`, `actor_role`, `action` (14 enum values), `entity_type`, `entity_id`, `details` (JSON) |
+
+**New indexes added in V2:**
+- `pay_rates`: `(role_type, school_id)`, `(effective_from)`
+- `invoices`: `(school_id)`, `(status)`
+- `timesheets`: unique on `(booking_id)`, `(teacher_id)`, `(status)`
+- `invoice_line_items`: `(invoice_id)`
+- `compliance_documents`: `(teacher_id)`, `(status)`, `(expiry_date)`
+- `push_subscriptions`: unique on `(user_id, user_role, endpoint)`
+- `notification_preferences`: unique on `(user_id, user_role, category)`
+- `activity_log`: `(actor_id)`, `(action)`, `(created_at)`
+
+---
+
+### A2. V2 API Routes
+
+The following API routes were added in V2, organized by feature area:
+
+```
+/api
+  /agency
+    /timesheets          GET    — List all timesheets (filterable by status)
+    /timesheets/[id]     PATCH  — Approve or dispute a timesheet
+    /pay-rates           GET    — List pay rates
+                         POST   — Create/update pay rate
+    /invoices            GET    — List invoices
+                         POST   — Generate invoice for a school/period
+    /invoices/[id]       GET    — Invoice detail with line items
+                         PATCH  — Update invoice status (send/mark paid)
+    /invoices/[id]/pdf   GET    — Render invoice as PDF
+    /compliance
+      /documents         GET    — List compliance documents (filterable)
+      /documents/[id]    PATCH  — Verify, reject, or update a document
+      /file              POST   — Upload compliance document file
+    /teachers/[id]
+      /subjects          GET    — List teacher subjects
+                         PUT    — Set teacher subject specializations
+    /settings
+      /ranking-weights   GET    — Get assignment ranking weights
+                         PUT    — Update ranking weights
+    /search              GET    — Full-text search across teachers/schools (q= param)
+
+  /teacher
+    /timesheets          GET    — List own timesheets
+                         POST   — Submit timesheet for a booking
+    /documents           GET    — List own compliance documents
+    /bookings-pending-timesheet  GET  — Bookings awaiting timesheet submission
+
+  /school
+    /templates           GET    — List school's request templates
+                         POST   — Create a request template
+    /templates/[id]      PATCH  — Update a template
+                         DELETE — Delete a template
+
+  /push
+    /subscribe           POST   — Register a push subscription
+    /unsubscribe         POST   — Remove a push subscription
+
+  /notification-preferences  GET   — Get notification preferences
+                             PUT   — Update notification preferences
+```
+
+Total: approximately 20 new endpoints across 15 route files.
+
+---
+
+### A3. V2 Feature Architecture
+
+#### Analytics (Sprint 7)
+
+Server Components query aggregated data directly from the database and pass results to Recharts-based client chart components. Six drill-down pages exist under `/agency/analytics/*` (fill-rate, response-time, utilization, satisfaction, cancellation-rate, margins). A date-range filter is applied server-side. School analytics are available at `/school/analytics`. CSV export endpoints render data as downloadable files.
+
+#### Compliance Management (Sprint 7)
+
+Teachers or agency staff upload compliance documents (DBS certificates, right-to-work proofs, qualifications, references). Files are stored on the local filesystem under a controlled uploads directory. The upload endpoint validates file types using **magic byte inspection** (not just file extension) to prevent disguised malicious files. Agency staff verify or reject documents via a review workflow. A cron task checks `expiry_date` and automatically transitions documents to `expired` status.
+
+#### Timesheets (Sprint 7)
+
+After a booking is completed, teachers submit timesheets recording arrival/departure times and break duration. Total hours are calculated server-side. Agency staff can approve or dispute timesheets. Disputed timesheets can be resubmitted by teachers. The `/api/teacher/bookings-pending-timesheet` endpoint lists bookings that still need timesheet submission.
+
+#### Financial — Pay Rates, Invoices, Margins (Sprint 7)
+
+Pay rates and charge rates are configurable per role type and optionally per school, with an effective date for rate changes. Invoice generation aggregates approved timesheets for a school within a billing period, creating line items with calculated pay and charge amounts. Margin tracking derives from the spread between charge rates and pay rates. PDF invoice rendering is available via `/api/agency/invoices/[id]/pdf`.
+
+#### PWA — Progressive Web App (Sprint 7)
+
+A service worker provides offline detection and an offline banner UI. Web Push API integration allows browser push notifications via the `push_subscriptions` table. Users can configure notification preferences per category (offers, booking confirmations, cancellations, reminders, timesheets) through the `notification_preferences` table. The app includes a `manifest.json` for installability.
+
+#### Enhanced Matching (Sprint 7)
+
+The assignment engine ranking weights are now configurable via `/api/agency/settings/ranking-weights` instead of being hardcoded. New scoring factors include **subject specialization** matching (via `teacher_subjects`) and **school affinity scoring** (weighted history of successful bookings at a school). Agency staff can tune weights through the settings UI without code changes.
+
+#### Activity Log (Sprint 7)
+
+A fire-and-forget audit trail records significant system actions to the `activity_log` table. The logging function is non-blocking -- failures are caught and logged but never propagate to the caller. Fourteen action types are tracked (offers, bookings, teacher/school CRUD, compliance updates, timesheet actions, invoice generation, settings changes). The agency activity page at `/agency/activity` displays a filterable, paginated log.
+
+#### Search — Command Palette (Sprint 8)
+
+A Cmd+K / Ctrl+K command palette provides instant search across teachers and schools from the agency portal. The search trigger is available as a button in the agency navigation. The frontend uses debounced input to query `/api/agency/search?q=` which performs server-side text matching and returns JSON results.
+
+#### Request Templates (Sprint 8)
+
+Schools can save frequently-used cover request configurations as templates. Templates store role, subject, key stage, times, and notes. When creating a new request, schools can select a saved template to pre-fill the form. CRUD operations are available via `/api/school/templates`.
+
+#### Review Submission UI (Sprint 8)
+
+Schools can submit post-booking reviews with a comment textarea, star rating, and "would rebook" toggle. Reviews are displayed in read-only mode on the agency teacher detail page under a School Reviews card. The `wouldRebook` flag feeds into the teacher's agency rating recalculation.
+
+---
+
+### A4. V2 Security Enhancements
+
+| Enhancement | Description |
+|---|---|
+| **Magic byte file validation** | Compliance document uploads are validated by inspecting the first bytes of the file (magic numbers) to verify the actual file type matches the declared content type. This prevents upload of disguised executable or script files. |
+| **Conditional UPDATE race guards** | Timesheet approval and compliance verification endpoints use conditional UPDATE statements that check the current `status` value in the WHERE clause, preventing concurrent mutations from silently overwriting each other. |
+| **`db.transaction` for multi-step writes** | Invoice generation and other multi-table mutations are wrapped in database transactions to ensure atomicity. If any step fails, all changes are rolled back. |
+| **Resolved path traversal defense** | File upload paths are resolved and validated to ensure they remain within the designated uploads directory, preventing `../` path traversal attacks that could write to arbitrary filesystem locations. |

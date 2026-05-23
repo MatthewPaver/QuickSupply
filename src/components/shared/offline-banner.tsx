@@ -5,14 +5,11 @@ import { WifiOff } from "lucide-react";
 import { toast } from "sonner";
 
 export function OfflineBanner() {
-  const [offline, setOffline] = useState(false);
+  const [offline, setOffline] = useState(() =>
+    typeof navigator === "undefined" ? false : !navigator.onLine,
+  );
 
   useEffect(() => {
-    // Set initial state
-    if (!navigator.onLine) {
-      setOffline(true);
-    }
-
     function handleOffline() {
       setOffline(true);
     }

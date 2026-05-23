@@ -6,16 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
+const todayDefault = new Date().toISOString().split("T")[0];
+const thirtyDaysAgoDefault = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
+
 export function AnalyticsDateFilter() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const today = new Date().toISOString().split("T")[0];
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
-
-  const [from, setFrom] = useState(searchParams.get("from") ?? thirtyDaysAgo);
-  const [to, setTo] = useState(searchParams.get("to") ?? today);
+  const [from, setFrom] = useState(searchParams.get("from") ?? thirtyDaysAgoDefault);
+  const [to, setTo] = useState(searchParams.get("to") ?? todayDefault);
 
   function handleApply() {
     const params = new URLSearchParams();

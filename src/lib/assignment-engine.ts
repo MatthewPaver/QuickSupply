@@ -17,27 +17,9 @@ import { haversineDistance } from "@/lib/distance";
 import { sseManager } from "@/lib/sse-manager";
 import { createNotification, notifyAllAgents } from "@/lib/notifications";
 import { logActivity } from "@/lib/activity-log";
+import { calculateScore, DEFAULT_WEIGHTS } from "@/lib/scoring";
+import type { ScoringWeights as RankingWeights } from "@/lib/scoring";
 import type { RankedTeacher } from "@/types";
-
-interface RankingWeights {
-  preferred: number;
-  rating: number;
-  review: number;
-  distance: number;
-  drive: number;
-  familiarity: number;
-  subjectMatch: number;
-}
-
-const DEFAULT_WEIGHTS: RankingWeights = {
-  preferred: 200,
-  rating: 20,
-  review: 10,
-  distance: 30,
-  drive: 25,
-  familiarity: 15,
-  subjectMatch: 30,
-};
 
 function loadRankingWeights(): RankingWeights {
   const row = db.select().from(appConfig).where(eq(appConfig.key, "ranking_weights")).get();
@@ -230,25 +212,31 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
     if (distanceMiles > teacher.maxDistanceMiles) continue;
 
     // Score using configurable weights
-    let score = 0;
     const isPreferred = request.preferredTeacherId === teacher.id;
     const schoolReviewAvg = reviewAvgMap.get(teacher.id) || null;
     const previouslyWorked = previousSet.has(teacher.id);
 
-    if (isPreferred) score += weights.preferred;
-    score += teacher.agencyRating * weights.rating;
-    if (schoolReviewAvg) score += schoolReviewAvg * weights.review;
-    score += Math.min(weights.distance, weights.distance / Math.max(distanceMiles, 0.5));
-    if (teacher.canDrive) score += weights.drive;
-    if (previouslyWorked) score += weights.familiarity;
-
     // Subject matching
+    let subjectMatch = false;
     if (request.subject && request.subject.trim() !== "") {
       const teacherSubs = teacherSubjectsMap.get(teacher.id);
       if (teacherSubs && teacherSubs.has(request.subject.toLowerCase())) {
-        score += weights.subjectMatch;
+        subjectMatch = true;
       }
     }
+
+    let score = calculateScore(
+      {
+        isPreferred,
+        agencyRating: teacher.agencyRating,
+        schoolReviewAvg,
+        distanceMiles,
+        canDrive: teacher.canDrive,
+        previouslyWorked,
+        subjectMatch,
+      },
+      weights,
+    );
 
     // School affinity from reviews
     const teacherSchoolReviews = teacherAffinityMap.get(teacher.id)?.get(request.schoolId);
