@@ -27,6 +27,7 @@ QuickSupply models the awkward part of school cover: requests arrive at short no
 - Server-Sent Events push operational changes to the right audience: agency, teacher, or school.
 - The seeded dataset is built for demos: Liverpool schools, varied teacher profiles, compliance flags, availability, and requests in different states.
 - The production notes cover the unglamorous but important bits: auth, cron, email, rate limiting, retention, and moving from SQLite to Postgres.
+- `src/lib/operations-agents.ts` adds deterministic operations reviewers for cover matching, compliance expiry, timesheet disputes, cancellation risk, and agency handoff summaries.
 
 ## Quick Start
 
