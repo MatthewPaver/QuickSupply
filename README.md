@@ -20,6 +20,20 @@ QuickSupply models the awkward part of school cover: requests arrive at short no
 | Tests | `pnpm test`, `pnpm e2e`, `pnpm e2e:routes` |
 | Stack | `Next.js` `TypeScript` `Drizzle` `SQLite` `SSE` `Playwright` |
 
+## Practical Test
+
+Can a same-day cover request move from a school to an agency to an eligible teacher without everyone chasing status in messages?
+
+The useful check is the full path:
+
+1. A school creates a cover request.
+2. The assignment engine ranks eligible teachers.
+3. One offer goes out at a time.
+4. Declines, timeouts, overrides, and cancellations update the right portal.
+5. School, agency, and teacher all see the current state.
+
+That is the point of the app: model the operational handoff, not just store cover requests.
+
 ## What To Notice
 
 - The workflow is not a simple CRUD app. It handles ranked offers, decline paths, timeouts, manual override, cancellation, and booking state.
