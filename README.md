@@ -16,7 +16,7 @@ QuickSupply models the awkward part of school cover: requests arrive at short no
 | What it is | Three-sided booking workflow for school cover |
 | Who uses it | Schools, supply teachers/TAs, and agency coordinators |
 | What to inspect | Sequential assignment engine, live status updates, seeded demo data |
-| Portfolio view | [Idea Store](https://matthewpaver.github.io/MatthewPaver/store/) |
+| Portfolio view | [Portfolio Store](https://matthewpaver.github.io/MatthewPaver/store/) |
 | Tests | `pnpm test`, `pnpm e2e`, `pnpm e2e:routes` |
 | Stack | `Next.js` `TypeScript` `Drizzle` `SQLite` `SSE` `Playwright` |
 
