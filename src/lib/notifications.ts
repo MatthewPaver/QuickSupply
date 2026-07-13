@@ -78,8 +78,6 @@ function buildTemplateEmail(
   type: NotificationType,
   recipientName: string,
   ctx: CreateNotificationOptions["emailContext"],
-  fallbackTitle: string,
-  fallbackBody: string,
 ): { subject: string; html: string } | null {
   if (!ctx) return null;
 
@@ -141,7 +139,7 @@ export function createNotification(options: CreateNotificationOptions): void {
     const email = getRecipientEmail(recipientType, recipientId);
     if (email) {
       const recipientName = getRecipientName(recipientType, recipientId);
-      const template = buildTemplateEmail(type, recipientName, emailContext, title, body);
+      const template = buildTemplateEmail(type, recipientName, emailContext);
 
       if (template) {
         sendEmail(email, template.subject, template.html).catch(() => {});

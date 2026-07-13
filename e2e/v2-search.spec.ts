@@ -16,7 +16,7 @@ test.describe("V2: Agency Search", () => {
     await expect(page.getByRole("button", { name: /search/i })).toBeVisible();
   });
 
-  test("search API returns JSON", async ({ request, context }) => {
+  test("search API returns JSON", async ({ request }) => {
     // Authenticate via cookie first
     const loginPage = await request.get("/login");
     expect(loginPage.ok()).toBeTruthy();

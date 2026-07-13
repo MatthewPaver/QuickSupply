@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { ulid } from "ulid";
 import { db } from "@/lib/db";
 import { timesheets, bookings, coverRequests, schools } from "@/lib/db/schema";

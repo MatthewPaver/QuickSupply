@@ -5,7 +5,8 @@ import path from "path";
 
 const dbPath = process.env.DATABASE_URL || path.join(process.cwd(), "quicksupply.db");
 
-const sqlite = new Database(dbPath);
+const sqlite = new Database(dbPath, { timeout: 5000 });
+sqlite.pragma("busy_timeout = 5000");
 sqlite.pragma("journal_mode = WAL");
 sqlite.pragma("foreign_keys = ON");
 

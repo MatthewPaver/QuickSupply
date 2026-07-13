@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq, isNull, desc } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { bookings, coverRequests, schools, timesheets } from "@/lib/db/schema";
 import { getSession } from "@/lib/auth";

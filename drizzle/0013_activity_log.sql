@@ -9,6 +9,8 @@ CREATE TABLE `activity_log` (
 	`created_at` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE INDEX `activity_log_actor_id_idx` ON `activity_log` (`actor_id`);--> statement-breakpoint
-CREATE INDEX `activity_log_action_idx` ON `activity_log` (`action`);--> statement-breakpoint
+CREATE INDEX `activity_log_actor_id_idx` ON `activity_log` (`actor_id`);
+--> statement-breakpoint
+CREATE INDEX `activity_log_action_idx` ON `activity_log` (`action`);
+--> statement-breakpoint
 CREATE INDEX `activity_log_created_at_idx` ON `activity_log` (`created_at`);

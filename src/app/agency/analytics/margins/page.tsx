@@ -15,7 +15,7 @@ import { requireSession } from "@/lib/auth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { AnalyticsDateFilter } from "@/components/agency/analytics-date-filter";
 import { EmptyState } from "@/components/shared/empty-state";
-import { ArrowLeft, PoundSterling, TrendingUp, Users } from "lucide-react";
+import { ArrowLeft, PoundSterling, TrendingUp } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
 interface Props {
