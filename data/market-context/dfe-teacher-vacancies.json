@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-11T04:11:09.926110+00:00",
+  "source": {
+    "title": "Teacher vacancies - school level",
+    "publisher": "Department for Education",
+    "landing_page": "https://explore-education-statistics.service.gov.uk/data-catalogue/data-set/e70db0c4-e346-413b-a238-05a81a6087a9",
+    "download_url": "https://explore-education-statistics.service.gov.uk/data-catalogue/data-set/e70db0c4-e346-413b-a238-05a81a6087a9/csv",
+    "sha256": "7269f50c7ea3d761bd5e559391b2a61b7de2d3cd4d91d3f00ae631e2d406c937",
+    "licence": "Open Government Licence v3.0"
+  },
+  "academic_year_code": "202526",
+  "scopes": {
+    "liverpool": {
+      "schools_reporting": 171,
+      "schools_with_recorded_vacancies": 8,
+      "share_with_recorded_vacancies": 0.0468,
+      "teacher_vacancies": 20.0,
+      "temporary_filled_posts": 12.0,
+      "by_establishment_type": {
+        "LA maintained nursery and primary": {
+          "schools": 101,
+          "vacancies": 0.0,
+          "temporary_filled_posts": 2.0
+        },
+        "LA maintained secondary": {
+          "schools": 10,
+          "vacancies": 0.0,
+          "temporary_filled_posts": 2.0
+        },
+        "Primary academies": {
+          "schools": 19,
+          "vacancies": 0.0,
+          "temporary_filled_posts": 0.0
+        },
+        "Secondary academies": {
+          "schools": 25,
+          "vacancies": 20.0,
+          "temporary_filled_posts": 4.0
+        },
+        "State-funded special or PRU": {
+          "schools": 16,
+          "vacancies": 0.0,
+          "temporary_filled_posts": 4.0
+        }
+      }
+    },
+    "north_west": {
+      "schools_reporting": 3188,
+      "schools_with_recorded_vacancies": 126,
+      "share_with_recorded_vacancies": 0.0395,
+      "teacher_vacancies": 195.0,
+      "temporary_filled_posts": 278.0,
+      "by_establishment_type": {
+        "LA maintained nursery and primary": {
+          "schools": 1717,
+          "vacancies": 23.0,
+          "temporary_filled_posts": 62.0
+        },
+        "LA maintained secondary": {
+          "schools": 120,
+          "vacancies": 16.0,
+          "temporary_filled_posts": 36.0
+        },
+        "Primary academies": {
+          "schools": 783,
+          "vacancies": 23.0,
+          "temporary_filled_posts": 31.0
+        },
+        "Secondary academies": {
+          "schools": 352,
+          "vacancies": 110.0,
+          "temporary_filled_posts": 97.0
+        },
+        "State-funded special or PRU": {
+          "schools": 216,
+          "vacancies": 23.0,
+          "temporary_filled_posts": 52.0
+        }
+      }
+    },
+    "england": {
+      "schools_reporting": 21944,
+      "schools_with_recorded_vacancies": 1174,
+      "share_with_recorded_vacancies": 0.0535,
+      "teacher_vacancies": 1615.0,
+      "temporary_filled_posts": 1796.0,
+      "by_establishment_type": {
+        "LA maintained nursery and primary": {
+          "schools": 8978,
+          "vacancies": 201.0,
+          "temporary_filled_posts": 396.0
+        },
+        "LA maintained secondary": {
+          "schools": 559,
+          "vacancies": 85.0,
+          "temporary_filled_posts": 158.0
+        },
+        "Primary academies": {
+          "schools": 8111,
+          "vacancies": 307.0,
+          "temporary_filled_posts": 330.0
+        },
+        "Secondary academies": {
+          "schools": 2901,
+          "vacancies": 814.0,
+          "temporary_filled_posts": 601.0
+        },
+        "State-funded special or PRU": {
+          "schools": 1395,
+          "vacancies": 208.0,
+          "temporary_filled_posts": 311.0
+        }
+      }
+    }
+  },
+  "use_boundary": "Regional market context only. These aggregates are not features in teacher eligibility or ranking.",
+  "limitations": [
+    "A recorded vacancy is not the same as a daily supply-cover request.",
+    "The dataset is an annual school-workforce snapshot and does not measure live demand.",
+    "School-level identities are deliberately excluded from the committed aggregate."
+  ]
+}

@@ -19,6 +19,7 @@
     "db:clear-requests": "tsx scripts/clear-requests.ts",
     "db:seed-demo": "tsx scripts/seed-demo-previous-teacher.ts",
     "db:seed-v2": "tsx scripts/seed-v2.ts",
+    "data:dfe": "python3 scripts/fetch-dfe-market-context.py",
     "db:studio": "drizzle-kit studio",
     "setup": "pnpm db:migrate && pnpm db:seed",
     "e2e:routes": "node scripts/e2e-check-routes.mjs",

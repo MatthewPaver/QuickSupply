@@ -20,6 +20,7 @@ import { logActivity } from "@/lib/activity-log";
 import { calculateScore, DEFAULT_WEIGHTS } from "@/lib/scoring";
 import type { ScoringWeights as RankingWeights } from "@/lib/scoring";
 import type { RankedTeacher } from "@/types";
+import { isAvailableForDate, isNightBeforeContactAllowed } from "@/lib/eligibility";
 
 function loadRankingWeights(): RankingWeights {
   const row = db.select().from(appConfig).where(eq(appConfig.key, "ranking_weights")).get();
@@ -82,7 +83,6 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
     .map((b) => b.teacherId);
 
   // Get availability data
-  const dayOfWeek = new Date(request.date + "T00:00:00").getDay();
   const allAvailability = db.select().from(teacherAvailability).all();
 
   // Get school review averages per teacher (for this school)
@@ -178,32 +178,12 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
     if (request.isEmergency && !teacher.emergencyAvailable) continue;
 
     // Filter: contact night before only
-    if (teacher.contactNightBeforeOnly) {
-      const requestDate = new Date(request.date + "T00:00:00");
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      if (requestDate > tomorrow) continue;
-    }
+    if (!isNightBeforeContactAllowed(teacher.contactNightBeforeOnly, request.date)) continue;
 
     // Check availability
     const teacherAvail = allAvailability.filter((a) => a.teacherId === teacher.id);
 
-    // Check specific date first
-    const specificDate = teacherAvail.find(
-      (a) => !a.isRecurring && a.date === request.date
-    );
-    if (specificDate) {
-      if (!specificDate.isAvailable) continue;
-    } else {
-      // Check recurring pattern
-      const recurring = teacherAvail.find(
-        (a) => a.isRecurring && a.dayOfWeek === dayOfWeek
-      );
-      if (recurring && !recurring.isAvailable) continue;
-      // If no data at all, default to available
-    }
+    if (!isAvailableForDate(teacherAvail, request.date)) continue;
 
     // Calculate distance
     const distanceMiles = haversineDistance(teacher.lat, teacher.lng, school.lat, school.lng);
@@ -260,40 +240,6 @@ export function rankTeachersForRequest(requestId: string): RankedTeacher[] {
 
   // Sort by score descending
   ranked.sort((a, b) => b.score - a.score);
-
-  // If the school requested a preferred teacher and they're not in the list (e.g. filtered by
-  // availability), add them at the top so the agency can see and assign them. We only require
-  // hard filters: role, compliance, not already booked, not blacklisted, not declined/expired.
-  const rankedIds = new Set(ranked.map((r) => r.teacher.id));
-  if (request.preferredTeacherId && !rankedIds.has(request.preferredTeacherId)) {
-    const preferred = allTeachers.find((t) => t.id === request.preferredTeacherId);
-    if (preferred) {
-      const isBlacklisted = blacklisted.includes(preferred.id);
-      const roleOk =
-        (request.roleNeeded === "teacher" && (preferred.roleType === "teacher" || preferred.roleType === "both")) ||
-        (request.roleNeeded === "ta" && (preferred.roleType === "ta" || preferred.roleType === "both"));
-      if (
-        roleOk &&
-        preferred.complianceStatus === "compliant" &&
-        !existingBookings.includes(preferred.id) &&
-        !isBlacklisted &&
-        !declinedOrExpired.has(preferred.id)
-      ) {
-        const distanceMiles = haversineDistance(preferred.lat, preferred.lng, school.lat, school.lng);
-        const schoolReviewAvg = reviewAvgMap.get(preferred.id) || null;
-        const previouslyWorked = previousSet.has(preferred.id);
-        ranked.unshift({
-          teacher: preferred,
-          score: weights.preferred,
-          distanceMiles,
-          schoolReviewAvg,
-          previouslyWorkedAtSchool: previouslyWorked,
-          isPreferred: true,
-          isBlacklisted: false,
-        });
-      }
-    }
-  }
 
   return ranked;
 }
