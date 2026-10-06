@@ -1,32 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 import { WifiOff } from "lucide-react";
 import { toast } from "sonner";
 
+function subscribeOnline(onChange: () => void) {
+  function handleOnline() {
+    onChange();
+    toast.success("Back online", { duration: 2000 });
+  }
+  window.addEventListener("offline", onChange);
+  window.addEventListener("online", handleOnline);
+  return () => {
+    window.removeEventListener("offline", onChange);
+    window.removeEventListener("online", handleOnline);
+  };
+}
+
 export function OfflineBanner() {
-  const [offline, setOffline] = useState(() =>
-    typeof navigator === "undefined" ? false : !navigator.onLine,
-  );
-
-  useEffect(() => {
-    function handleOffline() {
-      setOffline(true);
-    }
-
-    function handleOnline() {
-      setOffline(false);
-      toast.success("Back online", { duration: 2000 });
-    }
-
-    window.addEventListener("offline", handleOffline);
-    window.addEventListener("online", handleOnline);
-
-    return () => {
-      window.removeEventListener("offline", handleOffline);
-      window.removeEventListener("online", handleOnline);
-    };
-  }, []);
+  // Match the server snapshot during hydration, then read browser connectivity.
+  const offline = useSyncExternalStore(subscribeOnline, () => !navigator.onLine, () => false);
 
   if (!offline) return null;
 
@@ -34,7 +27,7 @@ export function OfflineBanner() {
     <div
       role="alert"
       aria-live="polite"
-      className="fixed top-0 left-0 right-0 z-[60] bg-amber-50/80 border-b border-amber-200 px-4 py-2 text-center"
+      className="relative bg-amber-50/80 border-b border-amber-200 px-4 py-2 text-center"
     >
       <div className="mx-auto flex max-w-4xl items-center justify-center gap-2 text-sm">
         <WifiOff className="size-4 text-amber-600" />

@@ -4,11 +4,19 @@ import { ulid } from "ulid";
 import * as bcrypt from "bcryptjs";
 import * as schema from "../src/lib/db/schema";
 
-/** Default password for all seeded users (document in README). Cost 10 for production readiness. */
+/** Public fictional credentials. Never use seeded identities in a real deployment. */
 const DEFAULT_SEED_PASSWORD = "Password1!";
 const SEED_PASSWORD_HASH = bcrypt.hashSync(DEFAULT_SEED_PASSWORD, 10);
 
-const sqlite = new Database("./quicksupply.db");
+if (process.env.NODE_ENV === "production" && process.env.SEED_ALLOW_PRODUCTION !== "1") {
+  console.error(
+    "\x1b[31mERROR: Refusing to seed in production.\x1b[0m\n" +
+    "Set SEED_ALLOW_PRODUCTION=1 to override."
+  );
+  process.exit(1);
+}
+
+const sqlite = new Database(process.env.DATABASE_URL || "./quicksupply.db");
 sqlite.pragma("journal_mode = WAL");
 sqlite.pragma("foreign_keys = OFF"); // Temporarily disable for seeding order
 const db = drizzle(sqlite, { schema });
@@ -34,18 +42,18 @@ function isoDate(date: Date) {
 }
 
 async function seed() {
-  if (process.env.NODE_ENV === "production" && !process.env.SEED_ALLOW_PRODUCTION) {
-    console.error(
-      "\x1b[31mERROR: Refusing to seed in production.\x1b[0m\n" +
-      "Set SEED_ALLOW_PRODUCTION=1 to override."
-    );
-    process.exit(1);
-  }
-
   console.log("Seeding QuickSupply demo data...\n");
 
   // Clear all tables in reverse FK order
   db.delete(schema.passwordResetTokens).run();
+  db.delete(schema.invoiceLineItems).run();
+  db.delete(schema.invoices).run();
+  db.delete(schema.timesheets).run();
+  db.delete(schema.complianceDocuments).run();
+  db.delete(schema.requestTemplates).run();
+  db.delete(schema.activityLog).run();
+  db.delete(schema.pushSubscriptions).run();
+  db.delete(schema.notificationPreferences).run();
   db.delete(schema.schoolTeacherReviews).run();
   db.delete(schema.notificationLog).run();
   db.delete(schema.bookings).run();
@@ -53,6 +61,7 @@ async function seed() {
   db.delete(schema.coverRequests).run();
   db.delete(schema.teacherBlacklistedSchools).run();
   db.delete(schema.teacherAvailability).run();
+  db.delete(schema.teacherSubjects).run();
   db.delete(schema.agentTeacherAssignments).run();
   db.delete(schema.agents).run();
   db.delete(schema.teachers).run();
@@ -73,66 +82,66 @@ async function seed() {
   db.insert(schema.schools).values([
     {
       id: schoolIds.stMarys,
-      name: "St. Mary's Catholic Primary",
-      address: "10 Standish Street, Liverpool",
+      name: "Mersey View Primary (demo)",
+      address: "10 Example Street, Liverpool",
       postcode: "L3 5TF",
       lat: 53.4084,
       lng: -2.9916,
-      contactName: "Catherine Walsh",
-      contactEmail: "admin@stmarysliverpool.sch.uk",
-      contactPhone: "0151 207 1234",
+      contactName: "Demo School Contact",
+      contactEmail: "mersey-view@schools.quicksupply.example",
+      contactPhone: "01632 960101",
       passwordHash: SEED_PASSWORD_HASH,
       createdAt: daysAgo(90),
     },
     {
       id: schoolIds.kensington,
-      name: "Kensington Primary School",
-      address: "Brae Street, Liverpool",
+      name: "Calder Street Community School (demo)",
+      address: "20 Example Road, Liverpool",
       postcode: "L7 2RJ",
       lat: 53.4055,
       lng: -2.9393,
-      contactName: "David Turner",
-      contactEmail: "admin@kensingtonprimary.sch.uk",
-      contactPhone: "0151 263 5678",
+      contactName: "Demo School Contact",
+      contactEmail: "calder-street@schools.quicksupply.example",
+      contactPhone: "01632 960102",
       passwordHash: SEED_PASSWORD_HASH,
       createdAt: daysAgo(90),
     },
     {
       id: schoolIds.broadgreen,
-      name: "Broadgreen International School",
-      address: "Queens Drive, Liverpool",
+      name: "Wavertree Learning Academy (demo)",
+      address: "30 Example Avenue, Liverpool",
       postcode: "L16 8NQ",
       lat: 53.4121,
       lng: -2.8851,
-      contactName: "Linda McKenzie",
-      contactEmail: "admin@broadgreen.sch.uk",
-      contactPhone: "0151 722 1561",
+      contactName: "Demo School Contact",
+      contactEmail: "wavertree@schools.quicksupply.example",
+      contactPhone: "01632 960103",
       passwordHash: SEED_PASSWORD_HASH,
       createdAt: daysAgo(85),
     },
     {
       id: schoolIds.allSaints,
-      name: "All Saints Catholic Primary",
-      address: "Oakfield Road, Anfield, Liverpool",
+      name: "Anfield Park Primary (demo)",
+      address: "40 Example Lane, Liverpool",
       postcode: "L4 0UF",
       lat: 53.4320,
       lng: -2.9545,
-      contactName: "Patrick Brennan",
-      contactEmail: "admin@allsaintsliverpool.sch.uk",
-      contactPhone: "0151 263 2323",
+      contactName: "Demo School Contact",
+      contactEmail: "anfield-park@schools.quicksupply.example",
+      contactPhone: "01632 960104",
       passwordHash: SEED_PASSWORD_HASH,
       createdAt: daysAgo(80),
     },
     {
       id: schoolIds.mossley,
-      name: "Mossley Hill Primary",
-      address: "Elmswood Road, Liverpool",
+      name: "Moss Grove Primary (demo)",
+      address: "50 Example Close, Liverpool",
       postcode: "L18 1LQ",
       lat: 53.3850,
       lng: -2.9145,
-      contactName: "Helen Foster",
-      contactEmail: "admin@mossleyhill.sch.uk",
-      contactPhone: "0151 724 1647",
+      contactName: "Demo School Contact",
+      contactEmail: "moss-grove@schools.quicksupply.example",
+      contactPhone: "01632 960105",
       passwordHash: SEED_PASSWORD_HASH,
       createdAt: daysAgo(75),
     },
@@ -163,7 +172,7 @@ async function seed() {
       id: teacherIds.sarahJ,
       firstName: "Sarah",
       lastName: "Johnson",
-      email: "sarah.johnson@email.com",
+      email: "teacher-01@people.quicksupply.example",
       phone: "07700 900001",
       passwordHash: SEED_PASSWORD_HASH,
       postcode: "L15 6TN",
@@ -183,7 +192,7 @@ async function seed() {
       id: teacherIds.michaelC,
       firstName: "Michael",
       lastName: "Chen",
-      email: "michael.chen@email.com",
+      email: "teacher-02@people.quicksupply.example",
       phone: "07700 900002",
       passwordHash: SEED_PASSWORD_HASH,
       postcode: "L8 0SY",
@@ -203,7 +212,7 @@ async function seed() {
       id: teacherIds.amiraP,
       firstName: "Amira",
       lastName: "Patel",
-      email: "amira.patel@email.com",
+      email: "teacher-03@people.quicksupply.example",
       phone: "07700 900003",
       passwordHash: SEED_PASSWORD_HASH,
       postcode: "L17 7BD",
@@ -223,7 +232,7 @@ async function seed() {
       id: teacherIds.jamesOB,
       firstName: "James",
       lastName: "O'Brien",
-      email: "james.obrien@email.com",
+      email: "teacher-04@people.quicksupply.example",
       phone: "07700 900004",
       passwordHash: SEED_PASSWORD_HASH,
       postcode: "L6 5DR",
@@ -243,7 +252,7 @@ async function seed() {
       id: teacherIds.emmaW,
       firstName: "Emma",
       lastName: "Williams",
-      email: "emma.williams@email.com",
+      email: "teacher-05@people.quicksupply.example",
       phone: "07700 900005",
       passwordHash: SEED_PASSWORD_HASH,
       postcode: "L25 5JQ",
@@ -263,7 +272,7 @@ async function seed() {
       id: teacherIds.danL,
       firstName: "Daniel",
       lastName: "Lewis",
-      email: "daniel.lewis@email.com",
+      email: "teacher-06@people.quicksupply.example",
       phone: "07700 900006",
       passwordHash: SEED_PASSWORD_HASH,
       postcode: "L12 0BP",
@@ -283,7 +292,7 @@ async function seed() {
       id: teacherIds.fatimaH,
       firstName: "Fatima",
       lastName: "Hassan",
-      email: "fatima.hassan@email.com",
+      email: "teacher-07@people.quicksupply.example",
       phone: "07700 900007",
       passwordHash: SEED_PASSWORD_HASH,
       postcode: "L9 3BS",
@@ -304,7 +313,7 @@ async function seed() {
       id: teacherIds.tomR,
       firstName: "Thomas",
       lastName: "Roberts",
-      email: "tom.roberts@email.com",
+      email: "teacher-08@people.quicksupply.example",
       phone: "07700 900008",
       passwordHash: SEED_PASSWORD_HASH,
       postcode: "L3 8EN",
@@ -324,7 +333,7 @@ async function seed() {
       id: teacherIds.rachelK,
       firstName: "Rachel",
       lastName: "Kelly",
-      email: "rachel.kelly@email.com",
+      email: "teacher-09@people.quicksupply.example",
       phone: "07700 900009",
       passwordHash: SEED_PASSWORD_HASH,
       postcode: "L18 9TT",
@@ -344,7 +353,7 @@ async function seed() {
       id: teacherIds.benT,
       firstName: "Benjamin",
       lastName: "Thompson",
-      email: "ben.thompson@email.com",
+      email: "teacher-10@people.quicksupply.example",
       phone: "07700 900010",
       passwordHash: SEED_PASSWORD_HASH,
       postcode: "L4 4EG",
@@ -365,7 +374,7 @@ async function seed() {
       id: teacherIds.lisaM,
       firstName: "Lisa",
       lastName: "Murphy",
-      email: "lisa.murphy@email.com",
+      email: "teacher-11@people.quicksupply.example",
       phone: "07700 900011",
       passwordHash: SEED_PASSWORD_HASH,
       postcode: "L14 3NL",
@@ -385,7 +394,7 @@ async function seed() {
       id: teacherIds.carlosG,
       firstName: "Carlos",
       lastName: "Garcia",
-      email: "carlos.garcia@email.com",
+      email: "teacher-12@people.quicksupply.example",
       phone: "07700 900012",
       passwordHash: SEED_PASSWORD_HASH,
       postcode: "L1 1JQ",
@@ -403,7 +412,34 @@ async function seed() {
     },
   ]).run();
 
+  // Keep summary fields aligned with the supporting document fixtures.
+  sqlite.exec(`
+    UPDATE teachers
+    SET dbs_status = 'clear', right_to_work = 'verified'
+    WHERE compliance_status = 'compliant';
+    UPDATE teachers
+    SET dbs_status = 'pending', right_to_work = 'pending'
+    WHERE compliance_status = 'pending';
+    UPDATE teachers
+    SET dbs_status = 'expired', right_to_work = 'verified'
+    WHERE compliance_status = 'expired';
+  `);
+
   console.log("  12 teachers/TAs created");
+
+  db.insert(schema.teacherSubjects).values([
+    { teacherId: teacherIds.sarahJ, subject: "Maths" },
+    { teacherId: teacherIds.sarahJ, subject: "English" },
+    { teacherId: teacherIds.amiraP, subject: "Science" },
+    { teacherId: teacherIds.emmaW, subject: "English" },
+    { teacherId: teacherIds.danL, subject: "PE" },
+    { teacherId: teacherIds.tomR, subject: "Maths" },
+    { teacherId: teacherIds.rachelK, subject: "Science" },
+    { teacherId: teacherIds.lisaM, subject: "English" },
+    { teacherId: teacherIds.carlosG, subject: "Computing" },
+  ]).run();
+
+  console.log("  9 teacher-subject records created");
 
   // ============================================================
   // AGENTS (3)
@@ -418,7 +454,7 @@ async function seed() {
     {
       id: agentIds.sarah,
       name: "Sarah Mitchell",
-      email: "sarah.mitchell@desian.co.uk",
+      email: "agent-01@staff.quicksupply.example",
       passwordHash: SEED_PASSWORD_HASH,
       isAdmin: true,
       createdAt: daysAgo(100),
@@ -426,7 +462,7 @@ async function seed() {
     {
       id: agentIds.james,
       name: "James Powell",
-      email: "james.powell@desian.co.uk",
+      email: "agent-02@staff.quicksupply.example",
       passwordHash: SEED_PASSWORD_HASH,
       isAdmin: false,
       createdAt: daysAgo(80),
@@ -434,7 +470,7 @@ async function seed() {
     {
       id: agentIds.emma,
       name: "Emma Rodriguez",
-      email: "emma.rodriguez@desian.co.uk",
+      email: "agent-03@staff.quicksupply.example",
       passwordHash: SEED_PASSWORD_HASH,
       isAdmin: false,
       createdAt: daysAgo(60),
@@ -442,6 +478,64 @@ async function seed() {
   ]).run();
 
   console.log("  3 agents created");
+
+  const compliantTeacherIds = [
+    teacherIds.sarahJ,
+    teacherIds.michaelC,
+    teacherIds.amiraP,
+    teacherIds.jamesOB,
+    teacherIds.emmaW,
+    teacherIds.danL,
+    teacherIds.tomR,
+    teacherIds.rachelK,
+    teacherIds.lisaM,
+    teacherIds.carlosG,
+  ];
+  const complianceEntries: (typeof schema.complianceDocuments.$inferInsert)[] = [];
+  for (const teacherId of compliantTeacherIds) {
+    for (const documentType of ["dbs", "right_to_work"] as const) {
+      complianceEntries.push({
+        id: ulid(),
+        teacherId,
+        documentType,
+        fileName: `${teacherId}-${documentType}-demo.pdf`,
+        filePath: `demo://compliance/${teacherId}/${documentType}`,
+        status: "verified",
+        expiryDate: documentType === "dbs" ? isoDate(daysFromNow(180)) : null,
+        uploadedAt: daysAgo(45),
+        verifiedAt: daysAgo(43),
+        verifiedBy: agentIds.sarah,
+        createdAt: daysAgo(45),
+      });
+    }
+  }
+  complianceEntries.push(
+    {
+      id: ulid(),
+      teacherId: teacherIds.fatimaH,
+      documentType: "dbs",
+      fileName: "teacher-07-dbs-demo.pdf",
+      filePath: "demo://compliance/teacher-07/dbs",
+      status: "pending_verification",
+      uploadedAt: daysAgo(2),
+      createdAt: daysAgo(2),
+    },
+    {
+      id: ulid(),
+      teacherId: teacherIds.benT,
+      documentType: "dbs",
+      fileName: "teacher-10-dbs-demo.pdf",
+      filePath: "demo://compliance/teacher-10/dbs",
+      status: "expired",
+      expiryDate: isoDate(daysAgo(14)),
+      uploadedAt: daysAgo(400),
+      verifiedAt: daysAgo(398),
+      verifiedBy: agentIds.sarah,
+      createdAt: daysAgo(400),
+    },
+  );
+  db.insert(schema.complianceDocuments).values(complianceEntries).run();
+  console.log(`  ${complianceEntries.length} compliance document records created`);
 
   // ============================================================
   // AGENT-TEACHER ASSIGNMENTS
@@ -818,7 +912,7 @@ async function seed() {
     },
   ]).run();
 
-  console.log("  7 cover requests created");
+  console.log("  8 cover requests created");
 
   // ============================================================
   // BOOKINGS (for filled requests)
@@ -953,7 +1047,7 @@ async function seed() {
   sqlite.pragma("foreign_keys = ON");
 
   console.log("\nSeed complete!");
-  console.log("  5 schools, 12 teachers, 3 agents, 7 requests, 2 bookings");
+  console.log("  5 schools, 12 teachers, 3 agents, 8 requests, 2 bookings");
   console.log(`  Default password for all users (when not in DEMO_MODE): ${DEFAULT_SEED_PASSWORD}`);
   console.log('  Run "pnpm dev" to start the demo');
 

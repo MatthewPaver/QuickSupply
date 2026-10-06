@@ -18,7 +18,10 @@ async function signOut(page: Page) {
 
 test.describe("QuickSupply full demo flow", () => {
   test.beforeEach(async ({ context }) => {
-    await context.addCookies([{ name: "cookie_consent", value: "1", domain: "localhost", path: "/" }]);
+    await context.addCookies([
+      { name: "cookie_consent", value: "1", domain: "localhost", path: "/" },
+      { name: "cookie_consent", value: "1", domain: "127.0.0.1", path: "/" },
+    ]);
   });
 
   test("school creates request, agency assigns, teacher accepts, school sees filled", async ({ page }) => {
@@ -28,10 +31,12 @@ test.describe("QuickSupply full demo flow", () => {
     const endTime = "14:45";
 
     // School: create a new request.
-    await quickLogin(page, /St\. Mary's Catholic Primary/i);
+    await quickLogin(page, /Mersey View Primary \(demo\)/i);
+    console.log("E2E stage: school signed in");
     await expect(page).toHaveURL(/\/school\/dashboard/, { timeout: 10000 });
-    await page.getByRole("link", { name: /New Request/i }).first().click();
+    await page.getByRole("link", { name: /New Request/i }).first().click({ timeout: 10000 });
     await expect(page).toHaveURL(/\/school\/requests\/new/, { timeout: 10000 });
+    console.log("E2E stage: request form open");
 
     await page.locator("button.rdp-day_button:not([disabled])").first().click();
 
@@ -54,50 +59,49 @@ test.describe("QuickSupply full demo flow", () => {
     const created = (await response.json()) as { id: string };
     expect(created.id).toBeTruthy();
     const requestId = created.id;
+    console.log("E2E stage: request created");
 
     await expect(page).toHaveURL(/\/school\/requests/, { timeout: 10000 });
-    const schoolRow = page.locator("div", { hasText: note }).first();
+    const schoolRow = page.locator(".divide-y > div").filter({ hasText: note });
+    await expect(schoolRow).toHaveCount(1);
     await expect(schoolRow).toBeVisible({ timeout: 10000 });
     await expect(schoolRow).toContainText(/pending/i);
     await signOut(page);
 
     // Agency: open request and manually assign Sarah Johnson.
     await quickLogin(page, /Sarah Mitchell/i);
+    console.log("E2E stage: agency signed in");
     await expect(page).toHaveURL(/\/agency\/dashboard/, { timeout: 10000 });
     await page.goto(`/agency/requests/${requestId}`);
     await expect(page).toHaveURL(new RegExp(`/agency/requests/${requestId}$`), { timeout: 10000 });
     await expect(page.getByText("Request Details")).toBeVisible({ timeout: 10000 });
 
     const assignSarah = page.getByRole("button", { name: /Assign Sarah Johnson/i });
-    if (await assignSarah.count()) {
-      await assignSarah.click();
-    } else {
-      const manualAssign = await page.request.post("/api/assignments", {
-        data: { action: "manual_assign", requestId, teacherId: "teacher-1" },
-      });
-      expect(manualAssign.ok()).toBeTruthy();
-      await page.reload();
-    }
+    await expect(assignSarah).toBeVisible({ timeout: 15000 });
+    await assignSarah.click();
+    console.log("E2E stage: teacher assigned through UI");
     await expect(page.getByRole("button", { name: /Withdraw offer/i })).toBeVisible({ timeout: 10000 });
     await signOut(page);
 
     // Teacher: accept the offer.
     await quickLogin(page, /Sarah Johnson/i);
+    console.log("E2E stage: teacher signed in");
     await expect(page).toHaveURL(/\/teacher\/dashboard/, { timeout: 10000 });
     await page.getByRole("link", { name: /Jobs/i }).first().click();
     await expect(page).toHaveURL(/\/teacher\/jobs/, { timeout: 10000 });
 
     const targetOffer = page
-      .locator("div")
-      .filter({ hasText: "St. Mary's Catholic Primary" })
-      .filter({ hasText: `${startTime} - ${endTime}` })
-      .first();
+      .locator('[data-slot="card"]')
+      .filter({ hasText: "Mersey View Primary (demo)" })
+      .filter({ hasText: `${startTime} - ${endTime}` });
 
+    await expect(targetOffer).toHaveCount(1);
     await expect(targetOffer).toBeVisible({ timeout: 15000 });
     const acceptButton = targetOffer.getByRole("button", { name: /^Accept$/ }).first();
     await expect(acceptButton).toBeVisible({ timeout: 15000 });
     await acceptButton.click();
     await page.getByRole("button", { name: /Confirm Accept/i }).click();
+    console.log("E2E stage: offer accepted");
 
     // Wait for the accept action to complete (confirmation dialog closes)
     await expect(page.getByRole("button", { name: /Confirm Accept/i })).not.toBeVisible({ timeout: 10000 });
@@ -112,9 +116,10 @@ test.describe("QuickSupply full demo flow", () => {
     await signOut(page);
 
     // School: request appears filled.
-    await quickLogin(page, /St\. Mary's Catholic Primary/i);
+    await quickLogin(page, /Mersey View Primary \(demo\)/i);
     await page.goto("/school/requests");
-    const filledRow = page.locator("div", { hasText: note }).first();
+    const filledRow = page.locator(".divide-y > div").filter({ hasText: note });
+    await expect(filledRow).toHaveCount(1);
     await expect(filledRow).toBeVisible({ timeout: 15000 });
     await expect(filledRow).toContainText(/filled/i);
   });

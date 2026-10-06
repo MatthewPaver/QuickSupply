@@ -21,9 +21,9 @@ interface DemoUser {
 
 const demoUsers: DemoUser[] = [
   // Schools
-  { id: "school-1", name: "St. Mary's Catholic Primary", role: "school", subtitle: "L3 5TF" },
-  { id: "school-2", name: "Kensington Primary", role: "school", subtitle: "L7 2RJ" },
-  { id: "school-3", name: "Broadgreen International", role: "school", subtitle: "L16 8NQ" },
+  { id: "school-1", name: "Mersey View Primary (demo)", role: "school", subtitle: "L3 5TF" },
+  { id: "school-2", name: "Calder Street Community School (demo)", role: "school", subtitle: "L7 2RJ" },
+  { id: "school-3", name: "Wavertree Learning Academy (demo)", role: "school", subtitle: "L16 8NQ" },
   // Teachers
   { id: "teacher-1", name: "Sarah Johnson", role: "teacher", subtitle: "Teacher - KS2" },
   { id: "teacher-2", name: "Michael Chen", role: "teacher", subtitle: "TA - EYFS/KS1" },

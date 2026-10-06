@@ -6,13 +6,13 @@ import type { UserRole } from "@/types";
 /**
  * Server-side allowlist of demo users; session is created only for these IDs.
  * Prevents clients from forging arbitrary userId/role/name.
- * No rate limiting needed: this endpoint only accepts IDs from a fixed allowlist
- * (no credential brute-forcing possible). The real login (/api/auth/login) is rate-limited.
+ * Fictional identities are available only after explicit server-side opt-in.
+ * The public flag controls the UI; it is not sufficient authorization on its own.
  */
 const DEMO_USERS: Record<string, { role: UserRole; name: string }> = {
-  "school-1": { role: "school", name: "St. Mary's Catholic Primary" },
-  "school-2": { role: "school", name: "Kensington Primary" },
-  "school-3": { role: "school", name: "Broadgreen International" },
+  "school-1": { role: "school", name: "Mersey View Primary (demo)" },
+  "school-2": { role: "school", name: "Calder Street Community School (demo)" },
+  "school-3": { role: "school", name: "Wavertree Learning Academy (demo)" },
   "teacher-1": { role: "teacher", name: "Sarah Johnson" },
   "teacher-2": { role: "teacher", name: "Michael Chen" },
   "teacher-3": { role: "teacher", name: "Amira Patel" },
@@ -22,6 +22,9 @@ const DEMO_USERS: Record<string, { role: UserRole; name: string }> = {
 };
 
 export async function POST(request: NextRequest) {
+  if (process.env.DEMO_MODE !== "true" || process.env.NEXT_PUBLIC_DEMO_MODE !== "true") {
+    return NextResponse.json({ error: "Demo sign-in is disabled" }, { status: 403 });
+  }
   const parsed = demoLoginSchema.safeParse(await request.json().catch(() => ({})));
   if (!parsed.success) {
     return NextResponse.json({ error: "Missing userId" }, { status: 400 });

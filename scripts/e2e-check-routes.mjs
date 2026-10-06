@@ -41,7 +41,7 @@ async function main() {
   results.push({ path: "/login", status: status(loginPage), role: "public" });
 
   // --- School portal ---
-  let cookie = await login("school-1", "school", "St. Mary's Catholic Primary");
+  let cookie = await login("school-1", "school", "Mersey View Primary (demo)");
   const schoolRoutes = [
     "/school/dashboard",
     "/school/requests",
