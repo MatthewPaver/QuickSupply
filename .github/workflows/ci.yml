@@ -18,18 +18,19 @@ jobs:
     timeout-minutes: 30
     env:
       SESSION_SECRET: ci-session-secret-not-for-production
+      DATABASE_URL: /tmp/quicksupply-ci.db
+      DEMO_MODE: "true"
+      NEXT_PUBLIC_DEMO_MODE: "true"
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: pnpm
@@ -48,6 +49,9 @@ jobs:
 
       - name: Type check
         run: pnpm exec tsc --noEmit
+
+      - name: Unit tests
+        run: pnpm test
 
       - name: Build
         run: pnpm build
@@ -71,12 +75,31 @@ jobs:
           curl -fsS http://127.0.0.1:3000/ >/dev/null
           pnpm e2e:routes
 
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Full booking browser flow
+        run: |
+          PORT=3100 pnpm start > /tmp/quicksupply-e2e.log 2>&1 &
+          APP_PID=$!
+          cleanup() {
+            kill "$APP_PID" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+          for i in {1..60}; do
+            if curl -fsS http://127.0.0.1:3100/ >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          BASE_URL=http://127.0.0.1:3100 pnpm exec playwright test e2e/full-demo-flow.spec.ts e2e/offline-navigation.spec.ts
+
       - name: Upload app logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: quicksupply-start-log
-          path: /tmp/quicksupply-start.log
+          path: |
+            /tmp/quicksupply-start.log
+            /tmp/quicksupply-e2e.log
           if-no-files-found: ignore
           retention-days: 7
 

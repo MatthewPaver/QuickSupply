@@ -2,6 +2,11 @@
   "name": "quicksupply",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": "22.x",
+    "pnpm": "10.x"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -25,7 +30,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@react-pdf/renderer": "^4.3.2",
-    "@sentry/nextjs": "^10.40.0",
+    "@sentry/nextjs": "^10.73.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.3",
     "bcryptjs": "^3.0.3",
@@ -35,7 +40,7 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^0.575.0",
-    "next": "16.1.6",
+    "next": "16.2.11",
     "next-themes": "^0.4.6",
     "postgres": "^3.4.8",
     "radix-ui": "^1.4.3",
@@ -44,7 +49,7 @@
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.2",
     "recharts": "^3.8.1",
-    "resend": "^6.9.3",
+    "resend": "^6.26.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "ulid": "^3.0.2",
@@ -59,16 +64,10 @@
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.9",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.2.11",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
     "vitest": "^4.1.2"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "better-sqlite3",
-      "esbuild"
-    ]
   }
 }

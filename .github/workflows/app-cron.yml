@@ -1,8 +1,6 @@
-name: App Cron
+name: Run maintenance hook
 
 on:
-  schedule:
-    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -13,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  trigger-cron-endpoint:
+  trigger-maintenance-endpoint:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:

@@ -1,10 +1,9 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["better-sqlite3"],
   devIndicators: false,
-  output: "standalone",
   poweredByHeader: false,
 };
 

@@ -1,3 +1,14 @@
-ignoredBuiltDependencies:
-  - sharp
-  - unrs-resolver
+packages:
+  - '.'
+
+# Scoped security updates. Keep dependency-contract tests when changing these.
+overrides:
+  'next>sharp': '0.35.0'
+  'next>postcss': '8.5.28'
+
+allowBuilds:
+  '@sentry/cli': false
+  better-sqlite3: true
+  esbuild: true
+  sharp: false
+  unrs-resolver: false
