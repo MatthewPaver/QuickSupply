@@ -6,7 +6,7 @@ const require = createRequire(path.join(process.cwd(), "package.json"));
 const nextRequire = createRequire(require.resolve("next/package.json"));
 
 it("Next resolves the reviewed patched Sharp and PostCSS versions", () => {
-  expect(nextRequire("sharp").versions.sharp).toBe("0.35.0");
+  expect(nextRequire("sharp").versions.sharp).toBe("0.35.5");
   expect(nextRequire("postcss/package.json").version).toBe("8.5.28");
 });
 

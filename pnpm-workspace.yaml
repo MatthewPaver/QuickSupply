@@ -3,7 +3,7 @@ packages:
 
 # Scoped security updates. Keep dependency-contract tests when changing these.
 overrides:
-  'next>sharp': '0.35.0'
+  'next>sharp': '0.35.5'
   'next>postcss': '8.5.28'
 
 allowBuilds:

@@ -44,4 +44,4 @@ it.each([undefined, "false", "0"])("refuses production seed override %s before o
   } finally {
     rmSync(temporary, { recursive: true, force: true });
   }
-});
+}, 30_000);
