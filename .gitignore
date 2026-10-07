@@ -56,3 +56,11 @@ CLAUDE.md
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Agent tooling, planning artefacts and internal notes (kept locally, not product)
+/_bmad/
+/_bmad-output/
+/.planning/
+/{output_folder}/
+/script.md
+/docs/AUDIT_FIXES_*.md
