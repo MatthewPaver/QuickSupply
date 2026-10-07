@@ -64,3 +64,4 @@ next-env.d.ts
 /{output_folder}/
 /script.md
 /docs/AUDIT_FIXES_*.md
+/AGENTS.md
