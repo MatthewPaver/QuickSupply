@@ -170,7 +170,7 @@ The settings below describe the intended production boundary, not a completed de
 
 Run production migrations before first use, but do not run the fictional demo seed against a production database. The seed refuses `NODE_ENV=production` unless the destructive override is exactly `SEED_ALLOW_PRODUCTION=1`. SQLite is fine for the local demo; use Postgres for multi-instance or serverless production.
 
-`/api/cron` expires offers, removes expired password-reset tokens, and prunes old read notifications. The included GitHub Actions workflow (`Run maintenance hook`) is manual-only (`workflow_dispatch`) and calls it when `APP_CRON_URL` and `APP_CRON_SECRET` are set. Use the hosting platform's scheduler for recurring production runs; private-repository Actions jobs are billed per rounded-up minute.
+`/api/cron` expires offers, removes expired password-reset tokens, and prunes old read notifications. The included GitHub Actions workflow (`Run maintenance hook`) is manual-only (`workflow_dispatch`) and calls it when `APP_CRON_URL` and `APP_CRON_SECRET` are set. Use the hosting platform's scheduler for recurring production runs.
 
 ## Status
 
@@ -188,18 +188,5 @@ Shipped core workflow:
 - Password reset flow
 
 The application is maintained as a reproducible demo rather than an active product roadmap. A commercial restart should begin with fresh interviews and workflow observation at Liverpool schools, agencies, and teacher pools, not another feature sprint.
-
-## CV version
-
-> Designed and built a three-sided supply-cover workflow after identifying friction in an outdated Liverpool booking process. Modelled eligibility-based sequential offers, live school/agency/teacher status, compliance checks, exception paths, and operational audit history in Next.js, TypeScript, Drizzle, SQLite/Postgres, SSE, Vitest, and Playwright.
-
-## Branding
-
-Desian Education:
-
-- Purple `#4c0673`
-- Blue `#1863DC`
-- Accent `#c879f1`
-- Logo: `public/desian-logo.svg`
 
 Brand names and logos are illustrative product assets and are not granted under the code licence.

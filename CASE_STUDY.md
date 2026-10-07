@@ -44,9 +44,9 @@ That is a workflow and service-design problem. The prototype was built to make t
 - that the Liverpool observation generalises to a large enough commercial market;
 - that a new marketplace can overcome existing network effects.
 
-## Why the work remains useful
+## Evidence boundaries
 
-The commercial claim is intentionally modest. QuickSupply is evidence of product discovery, workflow architecture, operational state modelling, full-stack delivery, and test design. The recorded demo in the portfolio shows the product journey. The public repository lets an interviewer inspect the implementation and run it with synthetic data.
+The commercial claim is intentionally modest. The recorded walkthrough shows the product journey, and the repository can be run end to end with synthetic data.
 
 The official DfE teacher-vacancy data is included only as annual, aggregate market context. It does not validate the observed booking problem and it never enters individual eligibility or ranking. Preference is a scoring signal after eligibility; it cannot bypass unavailability, distance, emergency or contact-timing constraints.
 
