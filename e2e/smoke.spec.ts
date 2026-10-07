@@ -31,7 +31,7 @@ test.describe("QuickSupply smoke", () => {
   });
 
   test("school login and dashboard load", async ({ page }) => {
-    await quickLogin(page, /St\. Mary's Catholic Primary/i);
+    await quickLogin(page, /Mersey View Primary \(demo\)/i);
     await expect(page).toHaveURL(/\/school\/dashboard/, { timeout: 10000 });
     await expect(page.getByRole("main")).toBeVisible({ timeout: 10000 });
   });

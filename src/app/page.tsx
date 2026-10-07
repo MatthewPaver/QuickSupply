@@ -96,6 +96,7 @@ export default function HomePage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* ── Hero ─────────────────────────────────────────────────── */}
+      <main className="flex flex-1 flex-col">
       <section className="relative flex flex-col items-center justify-center overflow-hidden px-4 pb-20 pt-24 sm:pb-28 sm:pt-32 md:pb-32 md:pt-40">
         {/* gradient backdrop */}
         <div
@@ -279,6 +280,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      </main>
       {/* ── Footer ───────────────────────────────────────────────── */}
       <footer className="border-t border-border bg-muted/30 px-4 py-8">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 text-center sm:flex-row sm:justify-between sm:text-left">

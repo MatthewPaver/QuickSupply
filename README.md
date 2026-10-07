@@ -74,7 +74,7 @@ Use the pinned pnpm 10 release through Corepack. An older global pnpm can reject
 
 Copy `.env.example` to `.env.local` if you want to override local defaults.
 
-For browser verification, install Chromium with `corepack pnpm exec playwright install chromium`. Against the running demo, use `CI=1 BASE_URL=http://localhost:3000 corepack pnpm exec playwright test e2e/full-demo-flow.spec.ts e2e/offline-navigation.spec.ts --workers=1 --retries=0`. This completes the school, agency and teacher journey through visible controls and checks that the offline warning cannot block sign-out. It creates a fictional booking, so use the separate demo database above.
+For browser verification, install Chromium with `corepack pnpm exec playwright install chromium`. Against the running demo, use `CI=1 BASE_URL=http://localhost:3000 corepack pnpm exec playwright test e2e/full-demo-flow.spec.ts e2e/offline-navigation.spec.ts --workers=1 --retries=0`. This completes the school, agency and teacher journey through visible controls and checks that the offline warning cannot block sign-out. It creates a fictional booking, so use the separate demo database above. Without `BASE_URL`, `corepack pnpm e2e` builds the app and starts it on port 3200 against a throwaway seeded database (`/tmp/quicksupply-e2e.db`) with demo mode on, and runs the full suite; your own `.env.local` database is not touched.
 
 ## Demo Login
 

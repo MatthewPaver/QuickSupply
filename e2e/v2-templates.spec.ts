@@ -4,7 +4,7 @@ test.describe("V2: School Request Templates", () => {
   test.beforeEach(async ({ context, page }) => {
     await context.addCookies([{ name: "cookie_consent", value: "1", domain: "localhost", path: "/" }]);
     await page.goto("/login");
-    const button = page.getByRole("button", { name: /St\. Mary's Catholic Primary/i }).first();
+    const button = page.getByRole("button", { name: /Mersey View Primary \(demo\)/i }).first();
     await expect(button).toBeVisible({ timeout: 10000 });
     await button.click();
     await expect(page).toHaveURL(/\/school\/dashboard/, { timeout: 10000 });
