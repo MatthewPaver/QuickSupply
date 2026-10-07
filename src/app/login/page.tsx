@@ -249,7 +249,7 @@ function LoginContent() {
                   <Button
                     key={user.id}
                     variant="outline"
-                    className="h-auto min-h-[44px] justify-start px-3 py-2.5 text-left sm:min-h-0"
+                    className="h-auto min-h-[44px] justify-start whitespace-normal px-3 py-2.5 text-left sm:min-h-0"
                     disabled={loading !== null}
                     onClick={() => handleQuickLogin(user)}
                   >
@@ -260,7 +260,7 @@ function LoginContent() {
                         {user.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                       </div>
                     )}
-                    <div className="flex flex-col">
+                    <div className="flex min-w-0 flex-col">
                       <span className="text-sm font-medium">{user.name}</span>
                       <span className="text-xs text-muted-foreground">{user.subtitle}</span>
                     </div>
