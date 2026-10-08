@@ -98,7 +98,7 @@ export function DocumentUploadForm() {
         throw new Error(err.error || "Upload failed");
       }
 
-      toast.success("Document uploaded successfully.");
+      toast.success("Document uploaded");
       setDocumentType("");
       if (fileInputRef.current) fileInputRef.current.value = "";
       await loadDocuments();
@@ -156,7 +156,7 @@ export function DocumentUploadForm() {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>File (PDF, JPG, or PNG &mdash; max 10MB)</Label>
+            <Label>File (PDF, JPG or PNG, up to 10 MB)</Label>
             <Input
               ref={fileInputRef}
               type="file"
@@ -188,7 +188,7 @@ export function DocumentUploadForm() {
             </div>
           ) : documents.length === 0 ? (
             <p className="text-sm text-muted-foreground py-4">
-              No documents uploaded yet. Upload your DBS certificate and right to work document to get started.
+              No documents uploaded yet. The agency needs your DBS certificate and right-to-work document before it can mark you as compliant.
             </p>
           ) : (
             <div className="space-y-2">

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { roleLabel } from "@/lib/utils";
 
 interface Request {
   id: string;
@@ -112,7 +113,7 @@ export function RequestsFilter({ requests, schoolMap, offerMap }: Props) {
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          <span className="capitalize">{req.roleNeeded}</span>
+                          <span>{roleLabel(req.roleNeeded)}</span>
                           {req.subject && <span> - {req.subject}</span>}
                           {req.keyStage && <span> ({req.keyStage})</span>}
                           {" "}&middot; {format(new Date(req.date), "EEE d MMM yyyy")} &middot; {req.startTime} - {req.endTime}

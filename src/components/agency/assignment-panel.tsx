@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import type { RankedTeacher } from "@/types";
 import { CallModal } from "@/components/agency/call-modal";
+import { roleLabel } from "@/lib/utils";
 
 /** Parse JSON from fetch response text; returns undefined on parse error. */
 function parseJsonResponse<T>(text: string): T | undefined {
@@ -252,7 +253,9 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
         {confirmOffering && (
           <div className="mb-4 rounded-lg border-2 border-primary/30 bg-primary/5 p-4">
             <p className="text-sm font-medium">
-              Start offering to teachers sequentially? The first teacher in the ranked list will receive an SMS/notification.
+              Offer this request to {ranked[0]?.teacher.firstName} {ranked[0]?.teacher.lastName} first? They get an in-app
+              notification and a set time to reply. If they decline or the time runs out, the offer moves to the next
+              teacher on the list.
             </p>
             <div className="mt-3 flex gap-2">
               <Button
@@ -275,7 +278,8 @@ export function AssignmentPanel({ requestId, requestStatus, bookingId, hasActive
           </div>
         ) : ranked.length === 0 ? (
           <p className="py-8 text-center text-muted-foreground">
-            No eligible teachers found for this request.
+            No teacher passes every eligibility check for this request. Common reasons are compliance status, another
+            booking that day, marked unavailability and travel distance.
           </p>
         ) : (
           <div className="space-y-2.5">
@@ -380,11 +384,12 @@ function CancelBookingDialog({
         <DialogHeader>
           <DialogTitle>Cancel Booking</DialogTitle>
           <DialogDescription>
-            The school will NOT be notified. You should call the teacher to inform them.
+            The school and the teacher both get an in-app notification, and the request goes back to pending so you
+            can offer it again. If the cover is today, phone the teacher as well.
           </DialogDescription>
         </DialogHeader>
         <Textarea
-          placeholder="Reason for cancellation..."
+          placeholder="Reason for cancelling"
           value={cancelReason}
           onChange={(e) => setCancelReason(e.target.value)}
         />
@@ -466,7 +471,7 @@ function RankedTeacherItem({
                 <Car className="h-3 w-3" /> Drives
               </span>
             )}
-            <span className="capitalize">{r.teacher.roleType}</span>
+            <span>{roleLabel(r.teacher.roleType)}</span>
             {r.teacher.complianceStatus === "compliant" ? (
               <Shield className="h-3 w-3 text-emerald-500" aria-label="Compliant" />
             ) : (

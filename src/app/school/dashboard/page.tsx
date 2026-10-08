@@ -10,6 +10,7 @@ import Link from "next/link";
 import { format, startOfWeek, endOfWeek } from "date-fns";
 import { EmptyState } from "@/components/shared/empty-state";
 import { SchoolLiveRefresh } from "@/components/school/school-live-refresh";
+import { roleLabel } from "@/lib/utils";
 
 export default async function SchoolDashboard() {
   const session = await requireSession("school");
@@ -80,7 +81,7 @@ export default async function SchoolDashboard() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-primary/80">School Portal</p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight">{session.name}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Create requests and track live agency progress.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Log a cover request and follow it until a teacher accepts.</p>
         </div>
         <Link href="/school/requests/new">
           <Button className="gap-2">
@@ -155,7 +156,7 @@ export default async function SchoolDashboard() {
             <EmptyState
               icon="file-text"
               title="No active requests"
-              description="Create a cover request and the agency will start finding a teacher or TA for you."
+              description="When you log a cover request, the agency offers it to eligible teachers or TAs one at a time."
               actionLabel="New Cover Request"
               actionHref="/school/requests/new"
             />
@@ -168,7 +169,7 @@ export default async function SchoolDashboard() {
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold capitalize">{req.roleNeeded}</span>
+                      <span className="text-sm font-semibold">{roleLabel(req.roleNeeded)}</span>
                       {req.subject && (
                         <span className="text-sm text-muted-foreground">- {req.subject}</span>
                       )}
@@ -184,7 +185,7 @@ export default async function SchoolDashboard() {
                     </div>
                     {req.status === "offering" && offeringToMap.get(req.id) && (
                       <div className="text-sm text-primary font-medium">
-                        Offering to: {offeringToMap.get(req.id)}
+                        Offered to {offeringToMap.get(req.id)}, waiting for a reply
                       </div>
                     )}
                   </div>
@@ -206,7 +207,7 @@ export default async function SchoolDashboard() {
         </CardHeader>
         <CardContent>
           {requests.filter((r) => r.status === "filled" || r.status === "cancelled").length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">No past requests yet.</p>
+            <p className="py-6 text-center text-sm text-muted-foreground">Filled and cancelled requests will show here.</p>
           ) : (
             <div className="space-y-2">
               {requests
@@ -218,12 +219,12 @@ export default async function SchoolDashboard() {
                     className="flex items-center justify-between rounded border px-4 py-3"
                   >
                     <div className="text-sm">
-                      <span className="font-medium capitalize">{req.roleNeeded}</span>
+                      <span className="font-medium">{roleLabel(req.roleNeeded)}</span>
                       {req.subject && <span> - {req.subject}</span>}
                       <span className="text-muted-foreground"> &middot; {format(new Date(req.date + "T00:00:00"), "d MMM")}</span>
                       {req.status === "filled" && coveredByMap.get(req.id) && (
                         <span className="block text-xs text-muted-foreground mt-0.5">
-                          Covered by: {coveredByMap.get(req.id)}
+                          Covered by {coveredByMap.get(req.id)}
                         </span>
                       )}
                     </div>

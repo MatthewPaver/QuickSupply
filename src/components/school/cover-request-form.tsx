@@ -19,6 +19,7 @@ import { Loader2, AlertTriangle, User } from "lucide-react";
 import { toast } from "sonner";
 import { format, isToday, isBefore, startOfDay } from "date-fns";
 import { TemplateSelector } from "@/components/school/template-selector";
+import { roleLabel } from "@/lib/utils";
 
 interface PreviousTeacher {
   id: string;
@@ -149,7 +150,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
         toast.error(data?.error || "Failed to submit cover request. Please try again.");
       }
     } catch {
-      toast.error("Network error. Check your connection and try again.");
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -223,13 +224,13 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
                 htmlFor="emergency"
                 className="text-sm font-medium leading-none cursor-pointer"
               >
-                Emergency request (shorter response window)
+                Emergency request
               </label>
             </div>
             {isEmergency && (
               <div className="mt-3 flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
-                Same-day or urgent — shorter response window applies
+                For same-day or urgent cover. Each teacher gets less time to reply, so the agency moves down the list faster.
               </div>
             )}
           </CardContent>
@@ -306,7 +307,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
           </CardHeader>
           <CardContent className="space-y-2">
             <p className="text-xs text-muted-foreground mb-3">
-              Optionally select a teacher who has previously worked at your school (only those who match the role above are shown). The agency can try to offer them first.
+              Optional. Pick a teacher who has worked at your school before. They get extra ranking points, so the agency usually offers them the day first. The list only shows teachers who match the role above.
             </p>
             {checkingAvailability && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
@@ -357,7 +358,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
                         <div className="text-sm font-medium">
                           {t.firstName} {t.lastName}
                         </div>
-                        <div className="text-xs text-muted-foreground capitalize">{t.roleType}</div>
+                        <div className="text-xs text-muted-foreground">{roleLabel(t.roleType)}</div>
                         {unavailable && (
                           <div className="mt-1 text-xs text-amber-600">Unavailable on this date</div>
                         )}
@@ -377,7 +378,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
           </CardHeader>
           <CardContent>
             <Textarea
-              placeholder="Any special requirements or information..."
+              placeholder="For example: Year 4 class, PE after lunch, sign in at the main office"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
@@ -410,7 +411,7 @@ export function CoverRequestForm({ schoolId, previousTeachers }: Props) {
             </Button>
           </div>
           {showRequiredHint && !canSubmit && (
-            <p className="mt-2 text-xs text-destructive">Please select both a date and role before submitting.</p>
+            <p className="mt-2 text-xs text-destructive">Choose a date and a role first.</p>
           )}
         </div>
       </div>

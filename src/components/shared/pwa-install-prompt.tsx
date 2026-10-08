@@ -66,7 +66,7 @@ export function PwaInstallPrompt() {
         <div className="flex items-center gap-2">
           <Download className="size-5 text-primary" />
           <p className="text-sm">
-            Install QuickSupply for a better experience
+            Install QuickSupply as an app on this device
           </p>
         </div>
         <div className="flex items-center gap-2">

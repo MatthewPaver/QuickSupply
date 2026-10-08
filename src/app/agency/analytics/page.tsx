@@ -226,12 +226,12 @@ export default async function AgencyAnalyticsPage({ searchParams }: Props) {
           </Card>
         </Link>
 
-        {/* Teacher Utilization */}
+        {/* Teacher Utilisation */}
         <Link href={`/agency/analytics/utilization?from=${fromDate}&to=${toDate}`}>
           <Card className="qs-pop transition-colors hover:border-primary/30">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Teacher Utilization
+                Teacher Utilisation
               </CardTitle>
               <Users className="h-4 w-4 text-primary" />
             </CardHeader>

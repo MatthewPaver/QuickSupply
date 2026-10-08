@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | QuickSupply",
-  description: "QuickSupply privacy policy and data handling",
+  description: "What data QuickSupply stores and how it uses it",
 };
 
 export default function PrivacyPage() {
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
         <div className="prose prose-sm mt-8 max-w-none dark:prose-invert">
           <h2 className="text-lg font-semibold mt-6">1. Who we are</h2>
           <p>
-            QuickSupply is a supply teaching workforce scheduling application operated by Desian Education. This policy describes how we collect, use, and protect your data when you use the service.
+            QuickSupply is a demo app for booking supply cover, shown under the illustrative Desian Education name. This page explains what data the app stores, why, and how long it keeps it.
           </p>
 
           <h2 className="text-lg font-semibold mt-6">2. Data we collect</h2>
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
 
           <h2 className="text-lg font-semibold mt-6">3. How we use it</h2>
           <p>
-            Data is used to match schools with supply teachers, manage offers and assignments, send in-app and (when configured) email notifications, and improve the service. We use essential cookies for authentication and session management.
+            The app uses this data to match schools with supply teachers, send and track offers, and send in-app and (when configured) email notifications. We use essential cookies for authentication and session management.
           </p>
 
           <h2 className="text-lg font-semibold mt-6">4. Retention</h2>

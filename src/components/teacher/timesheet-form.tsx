@@ -77,7 +77,7 @@ export function TimesheetForm({ bookingId, date, schoolName, startTime, endTime 
       const data = await res.json();
 
       if (data.success) {
-        toast.success("Timesheet submitted successfully.");
+        toast.success("Timesheet submitted");
         setSubmitted(data.timesheet);
       } else {
         toast.error(data.error || "Failed to submit timesheet.");

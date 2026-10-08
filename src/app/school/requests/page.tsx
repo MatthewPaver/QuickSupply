@@ -9,6 +9,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { EmptyState } from "@/components/shared/empty-state";
+import { roleLabel } from "@/lib/utils";
 
 export default async function SchoolRequestsPage() {
   const session = await requireSession("school");
@@ -73,7 +74,7 @@ export default async function SchoolRequestsPage() {
                   <div key={req.id} className="flex items-center justify-between px-6 py-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium capitalize">{req.roleNeeded}</span>
+                        <span className="font-medium">{roleLabel(req.roleNeeded)}</span>
                         {req.subject && (
                           <span className="text-muted-foreground">- {req.subject}</span>
                         )}

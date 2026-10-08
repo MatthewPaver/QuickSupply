@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { FileText, CheckCircle, Clock, Star, BarChart3 } from "lucide-react";
 import { format, startOfMonth } from "date-fns";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { roleLabel } from "@/lib/utils";
 
 export default async function SchoolAnalytics() {
   const session = await requireSession("school");
@@ -204,7 +205,7 @@ export default async function SchoolAnalytics() {
                     <tr key={b.bookingId} className="transition-colors hover:bg-muted/30">
                       <td className="py-2.5 pr-4">{format(new Date(b.date + "T00:00:00"), "d MMM yyyy")}</td>
                       <td className="py-2.5 pr-4">{b.firstName} {b.lastName}</td>
-                      <td className="py-2.5 pr-4 capitalize">{b.roleNeeded}</td>
+                      <td className="py-2.5 pr-4">{roleLabel(b.roleNeeded)}</td>
                       <td className="py-2.5">
                         {b.cancelledAt ? (
                           <StatusBadge status="cancelled" />

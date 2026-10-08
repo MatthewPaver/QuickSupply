@@ -14,7 +14,8 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   title: "QuickSupply | Desian Education",
-  description: "Supply teaching workforce scheduling by Desian Education",
+  description:
+    "A demo of same-day supply cover booking for schools, supply agencies and supply teachers. All data is fictional.",
 };
 
 export default function RootLayout({

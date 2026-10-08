@@ -9,6 +9,7 @@ import { Calendar, Briefcase, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { EmptyState } from "@/components/shared/empty-state";
+import { roleLabel } from "@/lib/utils";
 
 export default async function TeacherDashboard() {
   const session = await requireSession("teacher");
@@ -65,7 +66,9 @@ export default async function TeacherDashboard() {
       <div>
         <h1 className="text-2xl font-bold">Welcome, {session.name.split(" ")[0]}</h1>
         <p className="text-muted-foreground">
-          {teacher?.emergencyAvailable ? "Emergency available" : "Standard availability"}
+          {teacher?.emergencyAvailable
+            ? "You can get emergency offers."
+            : "You won't get emergency offers. Change this in Profile."}
         </p>
       </div>
 
@@ -89,7 +92,7 @@ export default async function TeacherDashboard() {
                         {format(new Date(offer.date + "T00:00:00"), "EEE d MMM")} &middot; {offer.startTime} - {offer.endTime}
                       </div>
                       <div className="text-sm">
-                        <span className="capitalize">{offer.roleNeeded}</span>
+                        <span>{roleLabel(offer.roleNeeded)}</span>
                         {offer.subject && <span> - {offer.subject}</span>}
                         {offer.keyStage && <span> ({offer.keyStage})</span>}
                       </div>
@@ -124,12 +127,12 @@ export default async function TeacherDashboard() {
               <div className="font-medium text-emerald-800 dark:text-emerald-200">{todayBooking.schoolName}</div>
               <div className="text-sm text-emerald-700 dark:text-emerald-300">
                 {todayBooking.startTime} - {todayBooking.endTime} &middot;{" "}
-                <span className="capitalize">{todayBooking.roleNeeded}</span>
+                <span>{roleLabel(todayBooking.roleNeeded)}</span>
                 {todayBooking.subject && <span> - {todayBooking.subject}</span>}
               </div>
             </div>
           ) : (
-            <p className="py-2 text-sm text-muted-foreground">No assignment today.</p>
+            <p className="py-2 text-sm text-muted-foreground">No booking today.</p>
           )}
         </CardContent>
       </Card>
@@ -150,7 +153,7 @@ export default async function TeacherDashboard() {
             <EmptyState
               icon="briefcase"
               title="No upcoming bookings"
-              description="When you accept an offer, it will appear here."
+              description="Offers you accept show here."
               actionLabel="View Job Offers"
               actionHref="/teacher/jobs"
             />
@@ -164,7 +167,7 @@ export default async function TeacherDashboard() {
                     <div>
                       <div className="text-sm font-medium">{b.schoolName}</div>
                       <div className="text-xs text-muted-foreground">
-                        <span className="capitalize">{b.roleNeeded}</span>
+                        <span>{roleLabel(b.roleNeeded)}</span>
                         {b.subject && <span> - {b.subject}</span>}
                       </div>
                     </div>

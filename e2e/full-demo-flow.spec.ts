@@ -48,7 +48,7 @@ test.describe("QuickSupply full demo flow", () => {
 
     await page.locator('input[type="time"]').nth(0).fill(startTime);
     await page.locator('input[type="time"]').nth(1).fill(endTime);
-    await page.getByPlaceholder("Any special requirements or information...").fill(note);
+    await page.getByPlaceholder(/^For example: Year 4 class/).fill(note);
 
     const createRequestResponse = page.waitForResponse(
       (res) => res.url().includes("/api/requests") && res.request().method() === "POST"

@@ -28,60 +28,60 @@ import { Badge } from "@/components/ui/badge";
 
 const features = [
   {
-    title: "For Schools",
+    title: "Schools",
     description:
-      "Submit cover requests in seconds. Track status in real-time. Review teachers after every booking.",
+      "Log a cover request with the date, times, role and year group. See which teacher is being asked, who accepted, and rate them afterwards.",
     icon: School,
   },
   {
-    title: "For Teachers",
+    title: "Teachers and TAs",
     description:
-      "Accept or decline offers instantly. Manage your availability. Submit timesheets digitally.",
+      "Get one offer at a time with a reply deadline and accept or decline it. Set the days you can work and submit a timesheet after each booking.",
     icon: Users,
   },
   {
-    title: "For Agencies",
+    title: "Agency staff",
     description:
-      "Sequential assignment engine. Compliance tracking. Analytics dashboard. Invoice generation.",
+      "Work each request from a ranked list of eligible teachers. Check DBS and right-to-work documents, approve timesheets and raise invoices.",
     icon: BarChart3,
   },
 ] as const;
 
 const steps = [
-  { number: 1, text: "School submits a cover request" },
-  { number: 2, text: "Agency ranks eligible teachers automatically" },
-  { number: 3, text: "Teachers receive time-limited offers to accept/decline" },
-  { number: 4, text: "Booking confirmed — everyone notified instantly" },
+  { number: 1, text: "The school logs a cover request." },
+  { number: 2, text: "Teachers who fail an eligibility check drop out. The rest are ranked." },
+  { number: 3, text: "The top teacher gets an offer with a deadline. A decline or no reply moves it to the next." },
+  { number: 4, text: "A teacher accepts and the school, agency and teacher all see the booking." },
 ] as const;
 
 const stats = [
-  { label: "Real-time SSE notifications", icon: Radio },
-  { label: "Sequential offer engine", icon: ListOrdered },
-  { label: "Compliance management", icon: ShieldCheck },
-  { label: "Financial tracking", icon: PoundSterling },
+  { label: "Status updates pushed to each portal as they happen", icon: Radio },
+  { label: "Role, compliance, availability and distance checks before each offer", icon: ListOrdered },
+  { label: "DBS and right-to-work documents with expiry dates", icon: ShieldCheck },
+  { label: "Timesheets, pay rates and invoices", icon: PoundSterling },
 ] as const;
 
 const portals = [
   {
-    title: "School Portal",
+    title: "School portal",
     description:
-      "Submit cover requests, track bookings in real-time, and review teachers after every placement.",
+      "Log cover requests, see who has been offered the day, and review the teacher after a booking.",
     icon: School,
     href: "/login?portal=school",
     accent: "bg-primary",
   },
   {
-    title: "Teacher Portal",
+    title: "Teacher portal",
     description:
-      "Manage your availability, receive and respond to offers, and submit timesheets digitally.",
+      "Reply to offers, set the days you can work and submit timesheets.",
     icon: GraduationCap,
     href: "/login?portal=teacher",
     accent: "bg-desian-blue",
   },
   {
-    title: "Agency Dashboard",
+    title: "Agency portal",
     description:
-      "Oversee all requests, run the assignment engine, manage compliance, and generate invoices.",
+      "Send offers for each request, keep teacher and school records, and raise invoices.",
     icon: LayoutDashboard,
     href: "/login?portal=agent",
     accent: "bg-primary",
@@ -110,30 +110,31 @@ export default function HomePage() {
 
         <div className="qs-enter relative z-10 flex max-w-3xl flex-col items-center text-center">
           <Badge variant="secondary" className="mb-6">
-            Built for UK primary education
+            Case study with fictional data
           </Badge>
 
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl">
-            Supply Teaching,{" "}
-            <span className="text-primary">Simplified</span>
+            Book supply cover{" "}
+            <span className="text-primary">for a school day</span>
           </h1>
 
           <p className="mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg md:text-xl">
-            QuickSupply connects schools, teachers, and agencies in real-time.
-            Fill cover requests faster, manage compliance effortlessly, and
-            track everything in one place.
+            A school logs an absence. The agency offers the day to one eligible
+            teacher at a time, and the school, agency and teacher all see the
+            same status until someone accepts. Every school and person in this
+            demo is made up.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4">
             <Button asChild size="lg" className="text-base">
               <Link href="/login">
-                Get Started
+                Try the demo
                 <ArrowRight className="ml-1 size-4" />
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="text-base">
-              <a href="#features">
-                Learn More
+              <a href="#how-it-works">
+                How it works
                 <ChevronDown className="ml-1 size-4" />
               </a>
             </Button>
@@ -149,10 +150,10 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center">
             <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              One platform, three portals
+              Who uses it
             </h2>
             <p className="mt-3 text-muted-foreground">
-              Purpose-built tools for every role in the supply chain.
+              Each role signs in to its own view of the same requests.
             </p>
           </div>
 
@@ -180,14 +181,14 @@ export default function HomePage() {
       </section>
 
       {/* ── How It Works ─────────────────────────────────────────── */}
-      <section className="px-4 py-16 sm:py-20 md:py-24">
+      <section id="how-it-works" className="scroll-mt-16 px-4 py-16 sm:py-20 md:py-24">
         <div className="mx-auto max-w-4xl">
           <div className="mb-12 text-center">
             <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              How it works
+              How a request gets filled
             </h2>
             <p className="mt-3 text-muted-foreground">
-              From request to confirmation in four steps.
+              What happens after a school logs an absence.
             </p>
           </div>
 
@@ -216,7 +217,7 @@ export default function HomePage() {
       <section className="bg-primary px-4 py-14 sm:py-16">
         <div className="mx-auto max-w-5xl">
           <h2 className="mb-10 text-center text-xl font-semibold text-primary-foreground sm:text-2xl">
-            Built for UK primary education
+            What the demo covers
           </h2>
 
           <div className="grid grid-cols-2 gap-6 sm:gap-8 lg:grid-cols-4">
@@ -239,10 +240,10 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl">
           <div className="mb-12 text-center">
             <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              Choose your portal
+              Pick a role
             </h2>
             <p className="mt-3 text-muted-foreground">
-              Sign in to the dashboard built for your role.
+              Each card opens the sign-in page for that role.
             </p>
           </div>
 
@@ -269,7 +270,7 @@ export default function HomePage() {
                       {portal.description}
                     </CardDescription>
                     <span className="inline-flex items-center gap-1 text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
-                      Enter Portal
+                      Sign in
                       <ArrowRight className="size-4" />
                     </span>
                   </CardContent>
@@ -302,12 +303,12 @@ export default function HomePage() {
               href="/login"
               className="transition-colors hover:text-foreground"
             >
-              Login
+              Sign in
             </Link>
           </nav>
 
           <p className="text-xs text-muted-foreground">
-            &copy; 2026 Desian Education. All rights reserved.
+            Demo only. All schools and people are fictional.
           </p>
         </div>
       </footer>

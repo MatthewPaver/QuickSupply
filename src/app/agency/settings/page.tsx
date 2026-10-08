@@ -47,7 +47,7 @@ export default function AgencySettingsPage() {
         toast.error(data?.error || "Failed to save settings.");
       }
     } catch {
-      toast.error("Network error. Please try again.");
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setLoading(false);
     }

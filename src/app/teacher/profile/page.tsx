@@ -100,7 +100,7 @@ export default function TeacherProfilePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Profile & Preferences</h1>
-        <p className="text-muted-foreground">Manage your work preferences</p>
+        <p className="text-muted-foreground">The agency checks these before sending you an offer.</p>
       </div>
 
       <Card>
@@ -212,7 +212,7 @@ export default function TeacherProfilePage() {
             <ToggleOption
               icon={<Moon className="h-5 w-5 text-secondary" />}
               label="Contact night before only"
-              description="Only contact you the evening before, not earlier"
+              description="Only send me offers for today or tomorrow"
               checked={profile.contactNightBeforeOnly}
               onChange={(v) => setProfile({ ...profile, contactNightBeforeOnly: v })}
             />

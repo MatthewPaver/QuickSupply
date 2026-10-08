@@ -94,7 +94,7 @@ export function PayRateForm({ schools }: PayRateFormProps) {
       resetForm();
       router.refresh();
     } catch {
-      toast.error("Network error");
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setSubmitting(false);
     }

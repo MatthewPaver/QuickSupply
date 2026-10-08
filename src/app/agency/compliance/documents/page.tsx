@@ -52,7 +52,7 @@ export default async function AgencyComplianceDocumentsPage() {
         <EmptyState
           icon="file-text"
           title="No documents to review"
-          description="All uploaded compliance documents have been processed. Check back later."
+          description="Every uploaded document has been verified or rejected."
         />
       ) : (
         <Card>

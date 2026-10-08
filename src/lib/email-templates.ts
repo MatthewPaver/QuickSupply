@@ -87,7 +87,7 @@ export function bookingConfirmedEmail(
   Hi ${schoolName},
 </p>
 <p style="margin:0 0 16px;color:#333;font-size:15px;line-height:1.5;">
-  Great news! Your cover request has been filled.
+  Your cover request has been filled.
 </p>
 <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0faf2;border-radius:6px;padding:0;margin:0 0 24px;">
   <tr><td style="padding:16px;">

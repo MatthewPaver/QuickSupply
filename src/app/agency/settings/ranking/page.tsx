@@ -23,10 +23,10 @@ const WEIGHT_DESCRIPTIONS: Record<keyof RankingWeights, string> = {
   preferred: "Bonus points when a school requests a specific teacher",
   rating: "Multiplied by the teacher's agency rating (0-5)",
   review: "Multiplied by the school's average review score for this teacher (0-5)",
-  distance: "Max points for proximity — closer teachers score higher",
+  distance: "Most points for distance. Closer teachers score higher",
   drive: "Bonus points if the teacher can drive to the school",
   familiarity: "Bonus if the teacher has previously worked at this school",
-  subjectMatch: "Bonus if the teacher's subject specializations match the request",
+  subjectMatch: "Bonus if the teacher's subject specialisms match the request",
 };
 
 const WEIGHT_LABELS: Record<keyof RankingWeights, string> = {
@@ -81,7 +81,7 @@ export default function RankingWeightsPage() {
         toast.error(data?.error || "Failed to save ranking weights");
       }
     } catch {
-      toast.error("Network error. Please try again.");
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setLoading(false);
     }

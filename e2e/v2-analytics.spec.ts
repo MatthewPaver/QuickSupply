@@ -15,7 +15,7 @@ test.describe("V2: Agency Analytics", () => {
     await expect(page.getByRole("heading", { name: /Analytics/i })).toBeVisible({ timeout: 5000 });
     await expect(page.getByText("Fill Rate")).toBeVisible();
     await expect(page.getByText("Avg Response Time")).toBeVisible();
-    await expect(page.getByText("Teacher Utilization")).toBeVisible();
+    await expect(page.getByText("Teacher Utilisation")).toBeVisible();
     await expect(page.getByText("School Satisfaction")).toBeVisible();
     await expect(page.getByText("Cancellation Rate")).toBeVisible();
     await expect(page.getByText("Gross Margin")).toBeVisible();
@@ -33,7 +33,7 @@ test.describe("V2: Agency Analytics", () => {
 
   test("utilization drill-down loads", async ({ page }) => {
     await page.goto("/agency/analytics/utilization");
-    await expect(page.getByRole("heading", { name: /Utilization/i })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("heading", { name: /Utilisation/i })).toBeVisible({ timeout: 5000 });
   });
 
   test("satisfaction drill-down loads", async ({ page }) => {

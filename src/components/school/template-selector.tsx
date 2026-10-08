@@ -107,7 +107,7 @@ export function TemplateSelector({ onSelect, currentValues }: TemplateSelectorPr
         toast.error(data?.error || "Failed to save template.");
       }
     } catch {
-      toast.error("Network error. Check your connection and try again.");
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -126,7 +126,7 @@ export function TemplateSelector({ onSelect, currentValues }: TemplateSelectorPr
         toast.error("Failed to delete template.");
       }
     } catch {
-      toast.error("Network error.");
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     }
   }
 

@@ -1,7 +1,7 @@
 {
   "name": "QuickSupply",
   "short_name": "QS",
-  "description": "Supply teaching workforce scheduling by Desian Education",
+  "description": "Demo of same-day supply cover booking for schools, agencies and supply teachers",
   "display": "standalone",
   "theme_color": "#4c0673",
   "background_color": "#ffffff",

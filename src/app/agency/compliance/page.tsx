@@ -168,7 +168,7 @@ export default async function ComplianceDashboard() {
             <EmptyState
               icon="file-text"
               title="No documents expiring soon"
-              description="All verified documents are valid for more than 30 days. You will be notified automatically when documents approach their expiry date."
+              description="Every verified document is valid for at least another 30 days. Agency staff get a notification when a document comes within 30 days of expiry."
             />
           ) : (
             <div className="space-y-3">

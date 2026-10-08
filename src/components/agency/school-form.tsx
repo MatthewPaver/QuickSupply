@@ -121,7 +121,7 @@ export function SchoolForm({ mode, initialData, schoolId }: Props) {
         router.push(`/agency/schools/${schoolId}`);
       }
     } catch {
-      toast.error("Network error — please try again");
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -172,7 +172,7 @@ export function SchoolForm({ mode, initialData, schoolId }: Props) {
                 placeholder="e.g. SW1A 1AA"
               />
               <p className="text-xs text-muted-foreground">
-                UK postcode — used for distance calculations
+                UK postcode, used to work out travel distance
               </p>
               {fieldError("postcode") && (
                 <p className="text-xs text-destructive">{fieldError("postcode")}</p>

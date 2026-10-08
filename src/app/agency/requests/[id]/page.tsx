@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { notFound } from "next/navigation";
 import { AssignmentPanel } from "@/components/agency/assignment-panel";
 import { AgencyLiveRefresh } from "@/components/agency/agency-live-refresh";
+import { roleLabel } from "@/lib/utils";
 
 export default async function AgencyRequestDetailPage({
   params,
@@ -82,7 +83,7 @@ export default async function AgencyRequestDetailPage({
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Role</span>
-                <span className="font-medium capitalize">{request.roleNeeded}</span>
+                <span className="font-medium">{roleLabel(request.roleNeeded)}</span>
               </div>
               {request.subject && (
                 <div className="flex justify-between">
@@ -116,7 +117,7 @@ export default async function AgencyRequestDetailPage({
             </CardHeader>
             <CardContent>
               {offers.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-4">No offers made yet. Use the panel to the right to start offering or assign a teacher.</p>
+                <p className="text-sm text-muted-foreground py-4">No offers sent yet. Start offers from the ranked list, or assign a teacher directly.</p>
               ) : (
                 <div className="space-y-3">
                   {offers.map((offer) => (

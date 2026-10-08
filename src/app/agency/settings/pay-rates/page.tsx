@@ -93,7 +93,7 @@ export default async function PayRatesPage() {
         <EmptyState
           icon="file-text"
           title="No pay rates"
-          description="Add your first pay rate to get started with invoicing."
+          description="Invoices use a pay rate and a charge rate for each role. Add one before raising an invoice."
         />
       ) : (
         <Card>

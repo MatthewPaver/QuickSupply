@@ -61,7 +61,7 @@ export default async function TeacherUtilizationPage({ searchParams }: Props) {
         <EmptyState
           icon="inbox"
           title="No active teachers"
-          description="There are no active teachers in the system to calculate utilization."
+          description="There are no active teachers in the system to calculate utilisation."
         />
       </div>
     );
@@ -214,7 +214,7 @@ export default async function TeacherUtilizationPage({ searchParams }: Props) {
         <Card className="qs-pop">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Avg Utilization
+              Avg Utilisation
             </CardTitle>
             <Percent className="h-4 w-4 text-emerald-600" />
           </CardHeader>
@@ -289,7 +289,7 @@ export default async function TeacherUtilizationPage({ searchParams }: Props) {
         <EmptyState
           icon="inbox"
           title="No booking data"
-          description="There are no bookings in the selected period to calculate utilization."
+          description="There are no bookings in the selected period to calculate utilisation."
         />
       )}
     </div>
@@ -312,7 +312,7 @@ function Header({
           Analytics
         </p>
         <h1 className="mt-1 text-3xl font-bold tracking-tight">
-          Teacher Utilization
+          Teacher Utilisation
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Booking rates per teacher for {fromDate} to {toDate}

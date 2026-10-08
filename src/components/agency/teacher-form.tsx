@@ -164,7 +164,7 @@ export function TeacherForm({ mode, initialData, teacherId, initialSubjects }: P
         router.push(`/agency/teachers/${teacherId}`);
       }
     } catch {
-      toast.error("Network error — please try again");
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -244,7 +244,7 @@ export function TeacherForm({ mode, initialData, teacherId, initialSubjects }: P
                 placeholder="e.g. SW1A 1AA"
               />
               <p className="text-xs text-muted-foreground">
-                UK postcode — used for distance calculations
+                UK postcode, used to work out travel distance
               </p>
               {fieldError("postcode") && (
                 <p className="text-xs text-destructive">{fieldError("postcode")}</p>
@@ -297,7 +297,7 @@ export function TeacherForm({ mode, initialData, teacherId, initialSubjects }: P
 
           {/* Subject Specializations */}
           <div className="space-y-2">
-            <Label>Subject Specializations</Label>
+            <Label>Subject Specialisms</Label>
             <div className="flex flex-wrap gap-2">
               {SUBJECT_OPTIONS.map((subject) => {
                 const isSelected = values.subjects.includes(subject);

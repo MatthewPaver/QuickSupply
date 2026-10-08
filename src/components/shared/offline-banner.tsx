@@ -32,7 +32,7 @@ export function OfflineBanner() {
       <div className="mx-auto flex max-w-4xl items-center justify-center gap-2 text-sm">
         <WifiOff className="size-4 text-amber-600" />
         <span className="text-amber-800">
-          You are offline — some features may be unavailable
+          You are offline. Nothing you send or save will go through until you reconnect.
         </span>
       </div>
     </div>

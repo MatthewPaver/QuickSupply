@@ -75,7 +75,7 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
           <div>
             <h1 className="text-2xl font-bold">Invoice</h1>
             <p className="text-muted-foreground">
-              {invoice.schoolName} &mdash;{" "}
+              {invoice.schoolName} &middot;{" "}
               {format(new Date(invoice.periodStart), "d MMM")} &ndash;{" "}
               {format(new Date(invoice.periodEnd), "d MMM yyyy")}
             </p>

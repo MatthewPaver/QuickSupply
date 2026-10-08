@@ -147,11 +147,11 @@ function ResubmitForm({
         return;
       }
 
-      toast.success("Timesheet resubmitted successfully");
+      toast.success("Timesheet resubmitted");
       onSuccess();
       router.refresh();
     } catch {
-      toast.error("Network error. Please try again.");
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setSubmitting(false);
     }

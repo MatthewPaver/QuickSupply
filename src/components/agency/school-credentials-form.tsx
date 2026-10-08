@@ -46,7 +46,7 @@ export function SchoolCredentialsForm({ schoolId, currentEmail }: Props) {
         return;
       }
 
-      toast.success("Credentials updated — school contact can now sign in");
+      toast.success("Login details saved. The school contact can now sign in.");
       setTemporaryPassword("");
       setConfirmPassword("");
       router.refresh();

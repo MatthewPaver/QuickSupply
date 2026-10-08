@@ -27,7 +27,7 @@ export default async function NewRequestPage() {
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold">New Cover Request</h1>
-        <p className="text-muted-foreground">Submit a request for supply cover</p>
+        <p className="text-muted-foreground">Tell the agency the day, role and times you need covered.</p>
       </div>
       <Suspense>
         <CoverRequestForm

@@ -10,6 +10,7 @@ import { ReviewForm } from "@/components/school/review-form";
 import { RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { roleLabel } from "@/lib/utils";
 
 export default async function SchoolHistoryPage() {
   const session = await requireSession("school");
@@ -48,7 +49,7 @@ export default async function SchoolHistoryPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Request History</h1>
-        <p className="text-muted-foreground">Past cover requests and outcomes</p>
+        <p className="text-muted-foreground">Filled and cancelled requests, newest first</p>
       </div>
 
       <Card>
@@ -72,7 +73,7 @@ export default async function SchoolHistoryPage() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium capitalize">{req.roleNeeded}</span>
+                          <span className="font-medium">{roleLabel(req.roleNeeded)}</span>
                           {req.subject && <span className="text-muted-foreground">- {req.subject}</span>}
                           {req.keyStage && (
                             <span className="text-xs rounded bg-muted px-2 py-0.5">{req.keyStage}</span>

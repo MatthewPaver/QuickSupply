@@ -5,6 +5,7 @@ import { requireSession } from "@/lib/auth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { roleLabel } from "@/lib/utils";
 
 export default async function AgencyBookingsPage() {
   await requireSession("agent");
@@ -50,7 +51,7 @@ export default async function AgencyBookingsPage() {
                     <span className="font-medium">{b.teacherFirstName} {b.teacherLastName}</span>
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    <span className="capitalize">{b.roleNeeded}</span>
+                    <span>{roleLabel(b.roleNeeded)}</span>
                     {b.subject && <span> - {b.subject}</span>}
                     {b.keyStage && <span> ({b.keyStage})</span>}
                     {" "}&middot; {format(new Date(b.date), "EEE d MMM")} &middot; {b.startTime}

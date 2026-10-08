@@ -41,7 +41,7 @@ function CustomTooltip({
   return (
     <div className="rounded-md border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md">
       <p className="font-semibold">{label}</p>
-      <p>Utilization: {payload[0].value}%</p>
+      <p>Utilisation: {payload[0].value}%</p>
     </div>
   );
 }
@@ -53,7 +53,7 @@ export function UtilizationChart({ data }: Props) {
     <Card className="qs-pop">
       <CardHeader>
         <CardTitle className="text-sm font-semibold">
-          Top 10 Teachers by Utilization
+          Top 10 Teachers by Utilisation
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -80,7 +80,7 @@ export function UtilizationChart({ data }: Props) {
                 tickFormatter={(v: number) => `${v}%`}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="utilization" radius={[4, 4, 0, 0]} name="Utilization">
+              <Bar dataKey="utilization" radius={[4, 4, 0, 0]} name="Utilisation">
                 {top10.map((entry, index) => (
                   <Cell key={index} fill={getBarColor(entry.utilization)} />
                 ))}

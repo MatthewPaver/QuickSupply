@@ -45,7 +45,7 @@ export function TimesheetActions({ timesheetId, teacherName }: TimesheetActionsP
       setApproveOpen(false);
       router.refresh();
     } catch {
-      toast.error("Network error");
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setApproving(false);
     }
@@ -73,7 +73,7 @@ export function TimesheetActions({ timesheetId, teacherName }: TimesheetActionsP
       setReason("");
       router.refresh();
     } catch {
-      toast.error("Network error");
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setDisputing(false);
     }

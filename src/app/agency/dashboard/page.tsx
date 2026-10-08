@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { EmptyState } from "@/components/shared/empty-state";
 import { AgencyLiveRefresh } from "@/components/agency/agency-live-refresh";
 import { SmsLogDrawer } from "@/components/agency/sms-log-drawer";
+import { roleLabel } from "@/lib/utils";
 
 export default async function AgencyDashboard() {
   await requireSession("agent");
@@ -53,7 +54,7 @@ export default async function AgencyDashboard() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-primary/80">Agency Command Centre</p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight">Agency Dashboard</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Live overview of requests, offers, and capacity.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Requests that still need a teacher, offers waiting for a reply, and bookings filled today.</p>
         </div>
         <SmsLogDrawer />
       </div>
@@ -111,7 +112,7 @@ export default async function AgencyDashboard() {
             <EmptyState
               icon="file-text"
               title="No active requests"
-              description="When schools submit cover requests, they will appear here. You can assign teachers from the Requests page."
+              description="New cover requests from schools show here until a teacher accepts."
               actionLabel="View All Requests"
               actionHref="/agency/requests"
             />
@@ -131,7 +132,7 @@ export default async function AgencyDashboard() {
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          <span className="capitalize">{req.roleNeeded}</span>
+                          <span>{roleLabel(req.roleNeeded)}</span>
                           {req.subject && <span> - {req.subject}</span>}
                           {req.keyStage && <span> ({req.keyStage})</span>}
                           {" "}&middot; {format(new Date(req.date + "T00:00:00"), "EEE d MMM")} &middot; {req.startTime}

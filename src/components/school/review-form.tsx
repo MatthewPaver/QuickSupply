@@ -63,7 +63,7 @@ export function ReviewForm({ bookingId, teacherName, existingRating, existingCom
         toast.error("Failed to submit review. Please try again.");
       }
     } catch {
-      toast.error("Network error. Please try again.");
+      toast.error("Couldn't reach the server. Check your connection and try again.");
     } finally {
       setLoading(false);
     }

@@ -13,6 +13,7 @@ import Link from "next/link";
 import { TeacherComplianceForm } from "@/components/agency/teacher-compliance-form";
 import { TeacherCredentialsForm } from "@/components/agency/teacher-credentials-form";
 import { TeacherStatusToggle } from "@/components/agency/teacher-status-toggle";
+import { roleLabel } from "@/lib/utils";
 
 const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -140,7 +141,7 @@ export default async function AgencyTeacherDetailPage({
         <div className="flex-1">
           <h1 className="text-2xl font-bold">{teacher.firstName} {teacher.lastName}</h1>
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            <span className="capitalize">{teacher.roleType}</span>
+            <span>{roleLabel(teacher.roleType)}</span>
             <StatusBadge status={teacher.complianceStatus === "compliant" ? "compliant" : teacher.complianceStatus === "pending" ? "pending-compliance" : "expired-compliance"} />
             {assignedAgent && <span>Agent: {assignedAgent.agentName}</span>}
           </div>

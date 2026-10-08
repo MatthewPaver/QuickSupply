@@ -56,8 +56,8 @@ const roleRedirect: Record<Role, string> = {
 };
 
 const roleSubtitle: Record<Role, string> = {
-  school: "Sign in as a school",
-  teacher: "Sign in as a teacher or TA",
+  school: "Sign in as the school office",
+  teacher: "Sign in as a supply teacher or TA",
   agent: "Sign in as agency staff",
 };
 
@@ -214,7 +214,7 @@ function LoginContent() {
         />
         <h1 className="text-xl font-bold text-primary sm:text-2xl">QuickSupply Demo</h1>
         <p className="text-center text-xs text-muted-foreground sm:text-sm">
-          {isFiltered ? roleSubtitle[portalParam as Role] : "Click any user below to sign in instantly"}
+          Pick an account to sign in as. All of them are fictional.
         </p>
       </div>
 
@@ -225,7 +225,7 @@ function LoginContent() {
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Back to portals
+            Back to home page
           </Link>
         </div>
       )}
@@ -241,7 +241,7 @@ function LoginContent() {
                   <CardTitle className="text-base">{roleLabel[role]}</CardTitle>
                 </div>
                 <CardDescription className="text-xs">
-                  Click to sign in as this user
+                  {roleSubtitle[role]}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-2">

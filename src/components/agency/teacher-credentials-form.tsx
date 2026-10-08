@@ -47,7 +47,7 @@ export function TeacherCredentialsForm({ teacherId, currentEmail }: Props) {
         return;
       }
 
-      setSuccessMessage("Credentials updated — teacher can now sign in");
+      setSuccessMessage("Login details saved. The teacher can now sign in.");
       setTemporaryPassword("");
       setConfirmPassword("");
       router.refresh();

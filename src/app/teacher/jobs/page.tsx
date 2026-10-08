@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { TimesheetForm } from "@/components/teacher/timesheet-form";
 import { useSSE } from "@/hooks/use-sse";
 import type { SSEEvent } from "@/types";
+import { roleLabel } from "@/lib/utils";
 
 interface PendingTimesheetBooking {
   bookingId: string;
@@ -214,7 +215,7 @@ export default function TeacherJobsPage() {
         <EmptyState
           icon="inbox"
           title="No active offers"
-          description="No active offers right now. If the agency has just sent you an offer, refresh the page."
+          description="New offers show here with a reply deadline. If the agency has just told you about one, refresh the page."
         />
       )}
 
@@ -252,7 +253,7 @@ export default function TeacherJobsPage() {
                     <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                       <div>
                         <span className="text-muted-foreground">Role: </span>
-                        <span className="capitalize font-medium">{offer.roleNeeded}</span>
+                        <span className="font-medium">{roleLabel(offer.roleNeeded)}</span>
                       </div>
                       {offer.subject && (
                         <div>
@@ -361,7 +362,7 @@ export default function TeacherJobsPage() {
             <EmptyState
               icon="inbox"
               title="No offer history"
-              description="When you accept or decline offers, they will appear here."
+              description="Offers you accept or decline will show here."
             />
           ) : (
             <div className="space-y-2">
@@ -371,7 +372,7 @@ export default function TeacherJobsPage() {
                     <div className="text-sm font-semibold">{offer.schoolName}</div>
                     <div className="text-xs text-muted-foreground">
                       {format(new Date(offer.date + "T00:00:00"), "d MMM")} &middot;{" "}
-                      <span className="capitalize">{offer.roleNeeded}</span>
+                      <span>{roleLabel(offer.roleNeeded)}</span>
                       {offer.subject && <span> - {offer.subject}</span>}
                     </div>
                   </div>
