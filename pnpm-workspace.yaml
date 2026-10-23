@@ -5,6 +5,7 @@ packages:
 overrides:
   'next>sharp': '0.35.5'
   'next>postcss': '8.5.28'
+  'esbuild@<0.25.0': '0.25.12'
 
 allowBuilds:
   '@sentry/cli': false
