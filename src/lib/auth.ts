@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import type { Session, UserRole } from "@/types";
 
 const SESSION_COOKIE = "qs_session";
+const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24;
 
 /** Secret for signing session cookies; must be set in production. */
 function getSessionSecret(): string | null {
@@ -43,7 +44,7 @@ function verifySignedCookie(value: string): string | null {
 }
 
 export async function createSession(userId: string, role: UserRole, name: string) {
-  const session: Session = { userId, role, name };
+  const session = { userId, role, name, expiresAt: Date.now() + SESSION_MAX_AGE_SECONDS * 1000 };
   const payload = Buffer.from(JSON.stringify(session)).toString("base64");
   const signature = sign(payload);
   const value = `${payload}.${signature}`;
@@ -52,7 +53,7 @@ export async function createSession(userId: string, role: UserRole, name: string
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 60 * 60 * 24, // 24 hours
+    maxAge: SESSION_MAX_AGE_SECONDS, // 24 hours
     sameSite: "lax",
   });
 }
@@ -65,7 +66,9 @@ export async function getSession(): Promise<Session | null> {
     const payload = verifySignedCookie(cookie.value);
     if (!payload) return null;
     const decoded = Buffer.from(payload, "base64").toString("utf-8");
-    const session = JSON.parse(decoded) as Session;
+    const session = JSON.parse(decoded) as Session & { expiresAt?: number };
+    // Client cookie lifetime does not prevent replay; enforce the signed deadline here.
+    if (!Number.isSafeInteger(session?.expiresAt) || (session.expiresAt ?? 0) <= Date.now()) return null;
     // Basic shape check so we don't trust arbitrary payloads
     if (typeof session?.userId !== "string" || typeof session?.role !== "string" || typeof session?.name !== "string")
       return null;
