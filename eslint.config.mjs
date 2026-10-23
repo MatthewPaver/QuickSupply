@@ -10,6 +10,7 @@ const eslintConfig = defineConfig([
     // fetch-on-mount and URL/localStorage sync effects that call setState.
     // These are intentional here; keep them visible as warnings until each
     // effect is refactored and covered by a browser test.
+    files: ["**/*.{js,jsx,ts,tsx,mjs,mts}"],
     rules: {
       "react-hooks/set-state-in-effect": "warn",
     },

@@ -3,8 +3,10 @@ packages:
 
 # Scoped security updates. Keep dependency-contract tests when changing these.
 overrides:
+  '@next/eslint-plugin-next>fast-glob': 'file:vendor/next-lint-glob'
   'next>sharp': '0.35.5'
   'next>postcss': '8.5.28'
+  'esbuild@<0.25.0': '0.25.12'
 
 allowBuilds:
   '@sentry/cli': false
