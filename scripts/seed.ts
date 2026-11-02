@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import { ulid } from "ulid";
 import * as bcrypt from "bcryptjs";
 import * as schema from "../src/lib/db/schema";
+import { coverSeedDate } from "../src/lib/seed-dates";
 
 /** Public fictional credentials. Never use seeded identities in a real deployment. */
 const DEFAULT_SEED_PASSWORD = "Password1!";
@@ -803,7 +804,7 @@ async function seed() {
     {
       id: requestIds.filled1,
       schoolId: schoolIds.stMarys,
-      date: isoDate(daysAgo(5)),
+      date: coverSeedDate(-5),
       roleNeeded: "teacher",
       subject: "Maths",
       keyStage: "Year 4",
@@ -816,7 +817,7 @@ async function seed() {
     {
       id: requestIds.filled2,
       schoolId: schoolIds.kensington,
-      date: isoDate(daysAgo(3)),
+      date: coverSeedDate(-3),
       roleNeeded: "ta",
       keyStage: "EYFS",
       startTime: "08:45",
@@ -829,7 +830,7 @@ async function seed() {
     {
       id: requestIds.offering,
       schoolId: schoolIds.broadgreen,
-      date: isoDate(daysFromNow(1)),
+      date: coverSeedDate(1),
       roleNeeded: "teacher",
       subject: "English",
       keyStage: "Year 6",
@@ -844,7 +845,7 @@ async function seed() {
     {
       id: requestIds.offeringSarah,
       schoolId: schoolIds.stMarys,
-      date: isoDate(daysFromNow(1)),
+      date: coverSeedDate(1),
       roleNeeded: "teacher",
       subject: "Maths",
       keyStage: "Year 5",
@@ -859,7 +860,7 @@ async function seed() {
     {
       id: requestIds.pending1,
       schoolId: schoolIds.allSaints,
-      date: isoDate(daysFromNow(0)),
+      date: coverSeedDate(0),
       roleNeeded: "ta",
       keyStage: "Year 1",
       startTime: "08:30",
@@ -872,7 +873,7 @@ async function seed() {
     {
       id: requestIds.pending2,
       schoolId: schoolIds.mossley,
-      date: isoDate(daysFromNow(2)),
+      date: coverSeedDate(2),
       roleNeeded: "teacher",
       subject: "Science",
       keyStage: "Year 4",
@@ -886,7 +887,7 @@ async function seed() {
     {
       id: requestIds.pending3,
       schoolId: schoolIds.stMarys,
-      date: isoDate(daysFromNow(1)),
+      date: coverSeedDate(1),
       roleNeeded: "ta",
       keyStage: "Year 2",
       startTime: "08:30",
@@ -900,7 +901,7 @@ async function seed() {
     {
       id: requestIds.cancelled,
       schoolId: schoolIds.kensington,
-      date: isoDate(daysAgo(1)),
+      date: coverSeedDate(-1),
       roleNeeded: "teacher",
       subject: "PE",
       keyStage: "Year 3",
